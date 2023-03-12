@@ -14,53 +14,53 @@ program
     ;
 
 importDeclaration
-    : 'import' ID ('.' ID)* ';'
+    : 'import' name=ID ('.' ID)* ';'
     ;
 
 classDeclaration
-    : 'class' ID ('extends' ID)? '{' ( varDeclaration )* ( methodDeclaration )* '}'
+    : 'class' name=ID ('extends' ID)? '{' ( varDeclaration )* ( methodDeclaration )* '}'
     ;
 
 varDeclaration
-    : type ID ';'
+    : type var=ID ';'
     ;
 
 type
-    : 'int' '[' ']'
-    | 'boolean'
-    | 'int'
-    | 'String'
-    | ID
+    : 'int' '[' ']' #IntArray
+    | 'boolean' #Boolean
+    | 'int' #Int
+    | 'String' #String
+    | name=ID #CustomType
     ;
 
 methodDeclaration
-    : ('public')? type ID '(' ( type ID (',' type ID)*)? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}'
-    | ('public')? 'static' 'void' 'main' '(' 'String' '[' ']' ID ')' '{' (varDeclaration)* (statement)* '}'
+    : ('public')? type name=ID '(' ( type ID (',' type ID)*)? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}' #Method
+    | ('public')? 'static' 'void' 'main' '(' 'String' '[' ']' ID ')' '{' (varDeclaration)* (statement)* '}' #Main
     ;
 statement
-    : '{' (statement)* '}'
-    | 'if' '(' expression ')' statement 'else' statement
-    | 'while' '(' expression ')' statement
-    | expression ';'
-    | ID '=' expression ';'
-    | ID '[' expression ']' '=' expression ';'
+    : '{' (statement)* '}' #CodeBlock
+    | 'if' '(' expression ')' statement 'else' statement #Conditional
+    | 'while' '(' expression ')' statement #While
+    | expression ';' #ExprStmt
+    | var=ID '=' expression ';' #Assignment
+    | var=ID '[' expression ']' '=' expression ';' #ArrayAssignment
     ;
 
 expression
-    : '!' expression
-    | expression '[' expression ']'
-    | expression '.' 'length'
-    | expression '.' ID '(' (expression(',' expression)*)?')'
-    | 'new' 'int' '[' expression ']'
-    | 'new' ID '(' ')'
-    | '(' expression ')'
-    | expression op=('*' | '/') expression
-    | expression op=('+' | '-') expression
-    | expression op=('<' | '>') expression
-    | expression op=('&&' | '||') expression
-    | value=INTEGER
-    | 'true'
-    | 'false'
-    | value=ID
-    | 'this'
+    : '!' expression #Negation
+    | expression '[' expression ']' #ArrayAccess
+    | expression '.' 'length' #ArrayLength
+    | expression '.' method=ID '(' (expression(',' expression)*)?')' #MethodInvocation
+    | 'new' 'int' '[' expression ']' #ArrayInstantiation
+    | 'new' objectType=ID '(' ')' #CustomInstantiation
+    | '(' expression ')' #Parenthesis
+    | expression op=('*' | '/') expression #BinaryOp
+    | expression op=('+' | '-') expression #BinaryOp
+    | expression op=('<' | '>') expression #BinaryOp
+    | expression op=('&&' | '||') expression #BinaryOp
+    | value=INTEGER #Integer
+    | 'true' #True
+    | 'false' #False
+    | value=ID #Identifier
+    | 'this' #CurrentObject
     ;

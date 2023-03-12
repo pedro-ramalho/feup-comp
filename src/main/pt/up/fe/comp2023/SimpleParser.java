@@ -42,20 +42,29 @@ public class SimpleParser implements JmmParser {
             // Convert code string into a character stream
             var input = new ANTLRInputStream(jmmCode);
             // Transform characters into tokens using the lexer
-            var lex = new JavammLexer(input);
+            var lex = new pt.up.fe.comp2023.JavammLexer(input);
             // Wrap lexer around a token stream
             var tokens = new CommonTokenStream(lex);
             // Transforms tokens into a parse tree
-            var parser = new JavammParser(tokens);
+            var parser = new pt.up.fe.comp2023.JavammParser(tokens);
 
             // Convert ANTLR CST to JmmNode AST
-            return AntlrParser.parse(lex, parser, startingRule)
+            JmmParserResult parserResult = AntlrParser.parse(lex, parser, startingRule)
                     // If there were no errors and a root node was generated, create a JmmParserResult with the node
                     .map(root -> new JmmParserResult(root, Collections.emptyList(), config))
                     // If there were errors, create an error JmmParserResult without root node
                     .orElseGet(() -> JmmParserResult.newError(new Report(ReportType.WARNING, Stage.SYNTATIC, -1,
                             "There were syntax errors during parsing, terminating")));
 
+            // check for parsing errors
+            int syntaxErrors = parser.getNumberOfSyntaxErrors();
+
+            // if a parsing error occurs, compilation should stop, and an exception should be thrown
+            if (syntaxErrors > 0) {
+                throw new Exception("An error occurred during the parsing phase, with a total of " + syntaxErrors + " syntax " + (syntaxErrors == 1 ? "error." : "errors."));
+            }
+
+            return parserResult;
         } catch (Exception e) {
             // There was an uncaught exception during parsing, create an error JmmParserResult without root node
             return JmmParserResult.newError(Report.newError(Stage.SYNTATIC, -1, -1, "Exception during parsing", e));
