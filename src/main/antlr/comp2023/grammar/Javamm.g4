@@ -14,11 +14,11 @@ program
     ;
 
 importDeclaration
-    : 'import' name=ID ('.' ID)* ';'
+    : 'import' pack+=ID ('.' pack+=ID)* ';'
     ;
 
 classDeclaration
-    : 'class' name=ID ('extends' ID)? '{' ( varDeclaration )* ( methodDeclaration )* '}'
+    : 'class' name=ID ('extends' pack=ID)? '{' ( varDeclaration )* ( methodDeclaration )* '}'
     ;
 
 varDeclaration
@@ -34,7 +34,7 @@ type
     ;
 
 methodDeclaration
-    : ('public')? type name=ID '(' ( type ID (',' type ID)*)? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}' #Method
+    : ('public')? type name=ID '(' ( type parameter+=ID (',' type parameter+=ID)*)? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}' #Method
     | ('public')? 'static' 'void' 'main' '(' 'String' '[' ']' ID ')' '{' (varDeclaration)* (statement)* '}' #Main
     ;
 statement
