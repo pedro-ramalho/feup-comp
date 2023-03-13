@@ -10,17 +10,57 @@ ID : [a-zA-Z_][a-zA-Z_0-9]* ;
 WS : [ \t\n\r\f]+ -> skip ;
 
 program
-    : statement+ EOF
+    : (importDeclaration)* classDeclaration EOF
     ;
 
+importDeclaration
+    : 'import' name=ID ('.' ID)* ';'
+    ;
+
+classDeclaration
+    : 'class' name=ID ('extends' ID)? '{' ( varDeclaration )* ( methodDeclaration )* '}'
+    ;
+
+varDeclaration
+    : type var=ID ';'
+    ;
+
+type
+    : 'int' '[' ']' #IntArray
+    | 'boolean' #Boolean
+    | 'int' #Int
+    | 'String' #String
+    | name=ID #CustomType
+    ;
+
+methodDeclaration
+    : ('public')? type name=ID '(' ( type ID (',' type ID)*)? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}' #Method
+    | ('public')? 'static' 'void' 'main' '(' 'String' '[' ']' ID ')' '{' (varDeclaration)* (statement)* '}' #Main
+    ;
 statement
-    : expression ';'
-    | ID '=' INTEGER ';'
+    : '{' (statement)* '}' #CodeBlock
+    | 'if' '(' expression ')' statement 'else' statement #Conditional
+    | 'while' '(' expression ')' statement #While
+    | expression ';' #ExprStmt
+    | var=ID '=' expression ';' #Assignment
+    | var=ID '[' expression ']' '=' expression ';' #ArrayAssignment
     ;
 
 expression
-    : expression op=('*' | '/') expression #BinaryOp
+    : '!' expression #Negation
+    | expression '[' expression ']' #ArrayAccess
+    | expression '.' 'length' #ArrayLength
+    | expression '.' method=ID '(' (expression(',' expression)*)?')' #MethodInvocation
+    | 'new' 'int' '[' expression ']' #ArrayInstantiation
+    | 'new' objectType=ID '(' ')' #CustomInstantiation
+    | '(' expression ')' #Parenthesis
+    | expression op=('*' | '/') expression #BinaryOp
     | expression op=('+' | '-') expression #BinaryOp
+    | expression op=('<' | '>') expression #BinaryOp
+    | expression op=('&&' | '||') expression #BinaryOp
     | value=INTEGER #Integer
+    | 'true' #True
+    | 'false' #False
     | value=ID #Identifier
+    | 'this' #CurrentObject
     ;

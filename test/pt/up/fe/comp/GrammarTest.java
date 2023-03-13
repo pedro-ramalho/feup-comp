@@ -18,9 +18,9 @@ import org.junit.Test;
 public class GrammarTest {
 
 
-    private static final String IMPORT = "";
-    private static final String MAIN_METHOD = "";
-    private static final String INSTANCE_METHOD = "";
+    private static final String IMPORT = "importDeclaration";
+    private static final String MAIN_METHOD = "methodDeclaration";
+    private static final String INSTANCE_METHOD = "type";
     private static final String STATEMENT = "statement";
     private static final String EXPRESSION = "expression";
 
@@ -44,10 +44,10 @@ public class GrammarTest {
         TestUtils.parseVerbose("class Foo {int a; int[] b; int c; boolean d; Bar e;}");
     }
 
-   /*@Test
+    @Test
     public void testVarDeclString() {
-        TestUtils.parseVerbose("String aString;", "VarDecl");
-    }*/
+        TestUtils.parseVerbose("String aString;", "varDeclaration");
+    }
 
     @Test
     public void testMainMethodEmpty() {
