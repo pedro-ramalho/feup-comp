@@ -110,5 +110,25 @@ public class MySymbolTable implements SymbolTable {
         return true;
     }
 
-
+    public void printSymbolTable() {
+        System.out.println("Class: " + this.getClassName());
+        System.out.println("Imports: " + this.getImports());
+        System.out.println("Fields:");
+        for (Symbol field : this.getFields()) {
+            System.out.println("\t" + field.toString());
+        }
+        System.out.println("Methods:");
+        for (MethodInfo method : this.methods.values()) {
+            System.out.println("\t" + method.getName());
+            System.out.println("\t\tReturn Type: " + method.getReturnType());
+            System.out.println("\t\tParameters:");
+            for (Symbol parameter : method.getParameters()) {
+                System.out.println("\t\t\t" + parameter.toString());
+            }
+            System.out.println("\t\tLocal Variables:");
+            for (Symbol localVariable : method.getLocalVariables()) {
+                System.out.println("\t\t\t" + localVariable.toString());
+            }
+        }
+    }
 }

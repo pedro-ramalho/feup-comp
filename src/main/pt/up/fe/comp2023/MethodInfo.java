@@ -17,6 +17,8 @@ public class MethodInfo {
         this.returnType = returnType;
     }
 
+    public String getName() {return this.name;}
+
     public Type getReturnType() {
         return returnType;
     }
