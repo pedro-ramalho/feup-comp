@@ -1,16 +1,72 @@
 import io;
 
 class Fac {
-    public int computeFac(int num, int all){
+    public int computeFac(Blah arg1, String arg2, String arg3) {
         int num_aux;
-        if (num < 1)
+        if (true)
             num_aux = 1;
+
         else
-            num_aux = num * (this.computeFac(num - 1));
+            num_aux = num * 2;
+
         return num_aux;
     }
-    public static void main(String[] args){
-        io.println(new Fac().computeFac(10));
+    public int computeFac2() {
+        int num_aux;
+        if (true)
+            num_aux = 1;
+        else
+            num_aux = num * 2;
+        return num_aux;
+    }
+    public int computeFac3() {
+        int num_aux;
+        if (true)
+            num_aux = 1;
+        else
+            num_aux = num * 2;
+        return num_aux;
+    }
+    public int computeFac4() {
+        int num_aux;
+        int x;
+        if (true) {
+            num_aux = 1;
+            num_aux = 3;
+            num_aux = 5;
+            if (true)
+                num_aux = 10;
+            else
+                num_aux = 5;
+        }
+        else {
+            num_aux = num * 2;
+            num_aux = num + 1;
+            num_aux = num - 1;
+            if (true)
+                num_aux = 1;
+            else
+                num_aux = 2;
 
+            if (false) {
+                num_aux = 2;
+            }
+            else {
+                num_aux = 3;
+            }
+        }
+        return num_aux;
+    }
+    public static void main(String[] args) {
+        int num;
+        num = 1;
+        io.println(new Fac().computeFac());
+        while (true) {
+            num_aux = 1;
+            if (true)
+                num_aux = 2;
+            else
+                num_aux = 3;
+        }
     }
 }
