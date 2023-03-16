@@ -96,17 +96,48 @@ public class MySymbolTable implements SymbolTable {
         return true;
     }
 
+    public boolean addReturnType(String methodName, Type returnType) {
+        // if the method doesn't exist, add an entry on the hashtable
+        if (this.methods.get(methodName) == null)
+            addMethod(methodName, new Type("", false));
+
+        // create a new method instance and add the return type
+        MethodInfo method = this.methods.get(methodName);
+        method.setReturnType(returnType);
+
+        // update the current hashmap
+        methods.put(methodName, method);
+
+        return true;
+    }
+
     public boolean addParameter(String methodName, Symbol parameter) {
-        if (this.methods.get(methodName) == null) return false;
+        // if the method doesn't exist, add an entry on the hashtable
+        if (this.methods.get(methodName) == null)
+            addMethod(methodName, new Type("", false));
+
+        // create a new method instance and add the parameter
         MethodInfo method = this.methods.get(methodName);
         method.addParameter(parameter);
+
+        // update the current hashmap
+        methods.put(methodName, method);
+
         return true;
     }
 
     public boolean addLocalVariable(String methodName, Symbol localVariable) {
-        if (this.methods.get(methodName) == null) return false;
+        // if the method doesn't exist, add an entry on the hashtable
+        if (this.methods.get(methodName) == null)
+            addMethod(methodName, new Type("", false));
+
+        // create a new method instance and add the local variable
         MethodInfo method = this.methods.get(methodName);
         method.addLocalVariable(localVariable);
+
+        // update the current hashmap
+        methods.put(methodName, method);
+
         return true;
     }
 

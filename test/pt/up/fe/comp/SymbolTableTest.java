@@ -67,47 +67,48 @@ public class SymbolTableTest {
     }
     
     @Test
-    public void Methods() {		
-    	var semantics = test("symboltable/MethodsAndFields.jmm",false);
-    	var st = semantics.getSymbolTable();
-    	var methods = st.getMethods();
-    	assertEquals(5, methods.size());
-    	var checkInt = 0;
-    	var checkBool = 0;
-    	var checkObj = 0;
-    	var checkAll = 0;
-    	System.out.println("METHODS: "+methods);
-    	for(var m :methods){
-    		var ret = st.getReturnType(m);
-    		var numParameters = st.getParameters(m).size();
-    		switch(ret.getName()) {
-	    		case "MethodsAndFields": 
-	    			checkObj++; 
-	    			assertEquals("Method "+m+" parameters",0,numParameters);
-	    			break;
-	    		case "boolean": 
-	    			checkBool++; 
-	    			assertEquals("Method "+m+" parameters",0,numParameters);
-	    			break;
-	    		case "int": 
-	    			if(ret.isArray()){
-	    				checkAll++;
-	    				assertEquals("Method "+m+" parameters",3,numParameters);
-	    			}else {
-	    				checkInt++;
-	    				assertEquals("Method "+m+" parameters",0,numParameters);
-	    			}
-	    			break;
-	    			
-    		}
-    	};
-    	assertEquals("Method with return type int", 1, checkInt);
-    	assertEquals("Method with return type boolean", 1, checkBool);
-    	assertEquals("Method with return type object", 1, checkObj);
-    	assertEquals("Method with three arguments", 1, checkAll);
+	public void Methods() {
+		var semantics = test("symboltable/MethodsAndFields.jmm",false);
+		var st = semantics.getSymbolTable();
+		var methods = st.getMethods();
+		assertEquals(5, methods.size());
+		var checkInt = 0;
+		var checkBool = 0;
+		var checkObj = 0;
+		var checkAll = 0;
+		System.out.println("METHODS: "+methods);
+		for(var m :methods){
+			var ret = st.getReturnType(m);
+			var numParameters = st.getParameters(m).size();
+			switch(ret.getName()) {
+				case "MethodsAndFields":
+					checkObj++;
+					assertEquals("Method "+m+" parameters",0,numParameters);
+					break;
+				case "boolean":
+					checkBool++;
+					assertEquals("Method "+m+" parameters",0,numParameters);
+					break;
+				case "int":
+					if(ret.isArray()){
+						checkAll++;
+						assertEquals("Method "+m+" parameters",3,numParameters);
+					}else {
+						checkInt++;
+						assertEquals("Method "+m+" parameters",0,numParameters);
+					}
+					break;
 
+			}
+		};
+		System.out.println("checkAll = " + checkAll);
 
-    }
+		assertEquals("Method with return type int", 1, checkInt);
+		assertEquals("Method with return type boolean", 1, checkBool);
+		assertEquals("Method with return type object", 1, checkObj);
+		assertEquals("Method with three arguments", 1, checkAll);
+	}
+
     
     @Test
     public void Parameters() {		

@@ -1,18 +1,27 @@
-import io.println;
 
-class Fac {
-    public int computeFac4(int arg1, String arg2) {
-        int num_aux;
-        if (true) {
-            num_aux = 1;
-        }
-        else {
-            num_aux = 1;
-        }
-        return num_aux;
-    }
-
-    public static void main(String[] args) {
-        io.println(new Fac().computeFac(arg1, arg2, arg3));
-    }
+class MethodsAndFields{
+	int field1;
+	boolean field2;
+	MethodsAndFields field3;
+	
+	public int getField1(){
+		return field1;
+	}
+	
+	public boolean getField2(){
+		return field2;
+	}
+	
+	public MethodsAndFields getField3(){
+		return field3;
+	}
+	
+	public int[] all(int a, boolean b, MethodsAndFields maf){
+		int[] c;
+		return c;
+	}
+	
+	public static void main(String[] args){
+		
+	}
 }

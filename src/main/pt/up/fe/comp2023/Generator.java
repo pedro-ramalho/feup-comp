@@ -1,5 +1,7 @@
 package pt.up.fe.comp2023;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
@@ -9,7 +11,7 @@ import java.util.List;
 
 public class Generator extends AJmmVisitor<String, String> {
 
-    private MySymbolTable symbolTable;
+    private MySymbolTable symbolTable = new MySymbolTable();
 
 
     @Override
@@ -19,6 +21,9 @@ public class Generator extends AJmmVisitor<String, String> {
 
         /* import rule */
         addVisit("ImportDeclaration", this::dealWithImportDeclaration);
+
+        /* classField rule */
+        addVisit("ClassField", this::dealWithClassField);
 
         /* class rule */
         addVisit("ClassDeclaration", this::dealWithClassDeclaration);
@@ -81,8 +86,12 @@ public class Generator extends AJmmVisitor<String, String> {
         addVisit("CurrentObject",this::dealWithCurrentObject);
     }
 
-    private String dealWithVoid(JmmNode jmmNode, String s) {
+    private String dealWithClassField(JmmNode jmmNode, String s) {
         return null;
+    }
+
+    private String dealWithVoid(JmmNode jmmNode, String s) {
+        return s + "void";
     }
 
     private String dealWithCondition(JmmNode jmmNode, String s) {
@@ -98,7 +107,7 @@ public class Generator extends AJmmVisitor<String, String> {
     }
 
     private String dealWithArgument(JmmNode jmmNode, String s) {
-        return null;
+        return s + visit(jmmNode.getChildren().get(0), "");
     }
 
     private String dealWithReturnStatement(JmmNode jmmNode, String s) {
@@ -110,7 +119,7 @@ public class Generator extends AJmmVisitor<String, String> {
     }
 
     private String dealWithStringArray(JmmNode jmmNode, String s) {
-        return null;
+        return s+"String[]";
     }
 
     private Boolean isType(String kind) {
@@ -207,84 +216,79 @@ public class Generator extends AJmmVisitor<String, String> {
     }
 
     private String dealWithMain(JmmNode jmmNode, String s) {
-        String s2 = s + "\t";
-        String ret = s + "public static void main(String[] args) {\n";
+        // fetch the method name
+        String methodName = "main";
 
         for (JmmNode child : jmmNode.getChildren()) {
-            ret += visit(child, s2);
-            ret += '\n';
+            // fetch the methods arguments
+            if (child.getKind().equals("Argument")) {
+                // fetch the parameter name and type
+                String argumentName = child.get("parameter");
+                Type type = new Type("String", true);
+
+                // update the symbol table
+                symbolTable.addParameter(methodName, new Symbol(type, argumentName));
+            }
+
+            // fetch the methods local variables
+            if (child.getKind().equals("VarDeclaration")) {
+                // fetch the variable name and type
+                String varName = child.get("var");
+                String varType = visit(child.getChildren().get(0), "");
+
+                Boolean isArray = varType.equals("int[]") || varType.equals("String[]");
+
+                varType = isArray ? varType.substring(0, varType.length() - 2) : varType;
+
+                Type type = new Type(varType, isArray);
+
+                // update the symbol table
+                symbolTable.addLocalVariable(methodName, new Symbol(type, varName));
+            }
         }
 
-        ret += s + "}\n";
-
-        return ret;
+        return "";
     }
 
     private String dealWithMethod(JmmNode jmmNode, String s) {
-        String s2 = s + '\t';
+        // fetch the method name
+        String methodName = jmmNode.get("name");
 
-        // fetch the return type of the method, it's always the first child
-        String returnType = visit(jmmNode.getChildren().get(0), "");
+        for (JmmNode child : jmmNode.getChildren()) {
+            // fetch the methods arguments
+            if (child.getKind().equals("Argument")) {
+                // fetch the parameter name and type
+                String argumentName = child.get("parameter");
+                String argumentType = visit(child, "");
 
-        String ret = s + "public " + returnType + " " + jmmNode.get("name") + "(";
+                Boolean isArray = argumentType.equals("int[]") || argumentType.equals("String[]");
 
-        // fetch the list of the methods parameters and convert them into clean strings
-        String paramList = jmmNode.get("parameter").substring(1, jmmNode.get("parameter").length() - 1);
-        List<String> argNameList = Arrays.asList(paramList.split(", "));
-        List<String> argTypeList = new ArrayList<>();
+                argumentType = isArray ? argumentType.substring(0, argumentType.length() - 2) : argumentType;
 
-        int lastArgIdx = 1;
+                Type type = new Type(argumentType, isArray);
 
-        // if the method has no parameters we can skip the following for-loops
-        if (paramList.isEmpty()) {
-            ret += ") {\n";
-        }
-        else {
-            // fetch the types of the argument
-            for (int idx = 1; idx < jmmNode.getChildren().size(); idx++) {
-                JmmNode child = jmmNode.getChildren().get(idx);
-
-                // if it's a node of kind 'type' we are dealing with an argument
-                if (isType(child.getKind())) {
-                    argTypeList.add(visit(child, ""));
-                } else {
-                    lastArgIdx = idx;
-                    break;
-                }
+                // update the symbol table
+                symbolTable.addParameter(methodName, new Symbol(type, argumentName));
             }
 
-            // build the parameter string
-            for (int idx = 0; idx < argTypeList.size(); idx++) {
-                String currType = argTypeList.get(idx);
-                String currName = argNameList.get(idx);
-                String param = "";
+            // fetch the methods local variables
+            if (child.getKind().equals("VarDeclaration")) {
+                // fetch the variable name and type
+                String varName = child.get("var");
+                String varType = visit(child.getChildren().get(0), "");
 
-                if (idx != argTypeList.size() - 1) {
-                    param = currType + " " + currName + ", ";
-                } else {
-                    param = currType + " " + currName + ")";
-                }
+                Boolean isArray = varType.equals("int[]") || varType.equals("String[]");
 
-                ret += param;
-            }
+                varType = isArray ? varType.substring(0, varType.length() - 2) : varType;
 
-            ret += " {\n";
-        }
+                Type type = new Type(varType, isArray);
 
-        // now we must iterate through the other child nodes and deal with them individually, starting at the first node that isn't of kind 'type'
-        for (int i = lastArgIdx; i < jmmNode.getChildren().size(); i++) {
-            if (i == jmmNode.getChildren().size()-1) {
-                ret += s2 + "return " + visit(jmmNode.getChildren().get(i), "") + ";\n";
-            }
-            else {
-                ret += visit(jmmNode.getChildren().get(i), s2);
-                ret += '\n';
+                // update the symbol table
+                symbolTable.addLocalVariable(methodName, new Symbol(type, varName));
             }
         }
 
-        ret += s + "}\n";
-
-        return ret;
+        return "";
     }
 
     private String dealWithIntArray(JmmNode jmmNode, String s) {
@@ -303,23 +307,80 @@ public class Generator extends AJmmVisitor<String, String> {
     }
 
     private String dealWithClassDeclaration(JmmNode jmmNode, String s) {
-        System.out.println("im in class declaration");
-        String ret = s + "public class " + jmmNode.get("name") + " {\n";
+        // fetch the class name
+        String className = jmmNode.get("name");
 
+        String classExtension = "";
+        // fetch the class extension
+        if (jmmNode.hasAttribute("extension"))
+            classExtension = jmmNode.get("extension");
+
+        // add the information to the symbol table
+        symbolTable.setName(className);
+        symbolTable.setExtension(classExtension);
+
+        // fetch the class fields
         for (JmmNode child : jmmNode.getChildren()) {
-            ret += visit(child, "\t");
-            ret += '\n';
+            if (child.getKind().equals("ClassField")) {
+                // this node corresponds to the "varDeclaration" node
+                JmmNode varNode = child.getChildren().get(0);
+
+                // fetch the variable name and type
+                String varName = varNode.get("var");
+                String varType = visit(varNode.getChildren().get(0), "");
+
+                Boolean isArray = varType.equals("int[]") || varType.equals("String[]");
+
+                varType = isArray ? varType.substring(0, varType.length() - 2) : varType;
+
+                Type type = new Type(varType, isArray);
+
+                // update the symbol table
+                symbolTable.addField(new Symbol(type, varName));
+            }
+            else if (child.getKind().equals("Method")) {
+                // fetch the method's name
+                String methodName = child.get("name");
+
+                // fetch the return node
+                JmmNode returnNode = child.getChildren().get(0);
+                String returnType = visit(returnNode.getChildren().get(0), "");
+
+                Boolean isArray = returnType.equals("int[]") || returnType.equals("String[]");
+
+                returnType = isArray ? returnType.substring(0, returnType.length() - 2) : returnType;
+
+                Type type = new Type(returnType, isArray);
+
+                // update the symbol table with the new method
+                symbolTable.addMethod(methodName, type);
+
+                // after adding the new method to the table, we must fetch the method's parameters and local variables
+                visit(child, "");
+            }
+            else if (child.getKind().equals("Main")) {
+                symbolTable.addMethod("main", new Type("void", false));
+
+                visit(child, "");
+            }
         }
 
-        ret += s + "}\n";
-
-        return ret;
+        return s;
     }
 
     private String dealWithImportDeclaration(JmmNode jmmNode, String s) {
-        String grammarPack = jmmNode.get("pack");
-        String pack = grammarPack.substring(1, grammarPack.length() - 1);
-        return s + "import " + pack + ";\n\n";
+        // fetch the import name
+        String importName = jmmNode.get("name");
+
+        String importPack = "";
+        // fetch the package that was imported
+        if (jmmNode.hasAttribute("pack"))
+            importPack = jmmNode.get("pack");
+
+        // add the information to the symbol table
+        this.symbolTable.addImport(importName + '.' + importPack);
+
+        return s;
     }
 
     private String dealWithProgram(JmmNode jmmNode, String s) {
@@ -412,6 +473,6 @@ public class Generator extends AJmmVisitor<String, String> {
     }
 
     public MySymbolTable getSymbolTable() {
-        return symbolTable;
+        return this.symbolTable;
     }
 }

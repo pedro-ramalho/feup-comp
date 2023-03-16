@@ -20,8 +20,12 @@ importDeclaration
     ;
 
 
+classField
+    : varDeclaration
+    ;
+
 classDeclaration
-    : 'class' name=ID ('extends' extension=ID)? '{' ( varDeclaration )* ( methodDeclaration )* '}'
+    : 'class' name=ID ('extends' extension=ID)? '{' ( classField )* ( methodDeclaration )* '}'
     ;
 
 

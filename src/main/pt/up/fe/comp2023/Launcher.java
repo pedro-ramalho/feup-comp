@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.sun.source.util.SourcePositions;
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
@@ -50,9 +51,18 @@ public class Launcher {
         // Generator gen = new Generator();
         // String generatedCode = gen.visit(parserResult.getRootNode(), "");
         // System.out.println(generatedCode);
-        MySymbolTable symbolTable = new MySymbolTable();
 
+        Generator gen = new Generator();
+        gen.visit(parserResult.getRootNode(), "");
+
+        MySymbolTable symbolTable = gen.getSymbolTable();
+
+        for (String m : symbolTable.getMethods())
+            System.out.println(symbolTable.getParameters(m).size());
+
+        System.out.println("Printing Symbol Table...");
         symbolTable.printSymbolTable();
+
         // ... add remaining stages
     }
 
