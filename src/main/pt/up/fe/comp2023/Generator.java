@@ -205,7 +205,7 @@ public class Generator extends AJmmVisitor<String, String> {
         // now we must iterate through the other child nodes and deal with them individually, starting at the first node that isn't of kind 'type'
         for (int i = lastArgIdx; i < jmmNode.getChildren().size(); i++) {
             if (i == jmmNode.getChildren().size()-1) {
-                ret += s2 + "\t" + "return " + visit(jmmNode.getChildren().get(i), "") + ";\n";
+                ret += s2 + "return " + visit(jmmNode.getChildren().get(i), "") + ";\n";
             }
             else {
                 ret += visit(jmmNode.getChildren().get(i), s2);
