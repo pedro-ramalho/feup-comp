@@ -9,12 +9,63 @@ import java.util.List;
 
 public class Generator extends AJmmVisitor<String, String> {
 
+    private MySymbolTable symbolTable;
+
+
     @Override
     protected void buildVisitor() {
+        /* program rule */
+        addVisit("Program", this::dealWithProgram);
+
+        /* import rule */
+        addVisit("ImportDeclaration", this::dealWithImportDeclaration);
+
+        /* class rule */
+        addVisit("ClassDeclaration", this::dealWithClassDeclaration);
+
+        /* var rule */
+        addVisit("VarDeclaration", this::dealWithVarDeclaration);
+
+        /* type rule */
         addVisit("Boolean",this::dealWithBoolean);
         addVisit("Int",this::dealWithInt);
         addVisit("String",this::dealWithString);
         addVisit("CustomType",this::dealWithCustomType);
+        addVisit("StringArray", this::dealWithStringArray);
+        addVisit("IntArray", this::dealWithIntArray);
+        addVisit("Void", this::dealWithVoid);
+
+        /* returnType rule */
+        addVisit("ReturnType", this::dealWithReturnType);
+
+        /* returnStatement rule */
+        addVisit("ReturnStatement", this::dealWithReturnStatement);
+
+        /* argument rule */
+        addVisit("Argument", this::dealWithArgument);
+
+        /* methodDeclaration rule */
+        addVisit("Method", this::dealWithMethod);
+        addVisit("Main", this::dealWithMain);
+
+        /* ifStatement rule */
+        addVisit("IfStatement", this::dealWithIfStatement);
+
+        /* elseStatement rule */
+        addVisit("ElseStatement", this::dealWithElseStatement);
+
+        /* condition rule */
+        addVisit("Condition", this::dealWithCondition);
+
+        /* statement rule */
+        addVisit("CodeBlock", this::dealWithCodeBlock);
+        addVisit("Conditional", this::dealWithConditional);
+        addVisit("While", this::dealWithWhile);
+        addVisit("ExprStmt", this::dealWithExprStmt);
+        addVisit("Assignment", this::dealWithAssignment);
+        addVisit("ArrayAssignment", this::dealWithArrayAssignment);
+
+        /* expression rule */
         addVisit("Negation",this::dealWithNegation);
         addVisit("ArrayAccess",this::dealWithArrayAccess);
         addVisit("ArrayLength",this::dealWithArrayLength);
@@ -28,20 +79,38 @@ public class Generator extends AJmmVisitor<String, String> {
         addVisit("False",this::dealWithFalse);
         addVisit("Identifier",this::dealWithIdentifier);
         addVisit("CurrentObject",this::dealWithCurrentObject);
+    }
 
-        addVisit("Program", this::dealWithProgram);
-        addVisit("Assignment", this::dealWithAssignment);
-        addVisit("ImportDeclaration", this::dealWithImportDeclaration);
-        addVisit("ClassDeclaration", this::dealWithClassDeclaration);
-        addVisit("VarDeclaration", this::dealWithVarDeclaration);
-        addVisit("IntArray", this::dealWithIntArray);
-        addVisit("Method", this::dealWithMethod);
-        addVisit("Main", this::dealWithMain);
-        addVisit("CodeBlock", this::dealWithCodeBlock);
-        addVisit("Conditional", this::dealWithConditional);
-        addVisit("While", this::dealWithWhile);
-        addVisit("ExprStmt", this::dealWithExprStmt);
-        addVisit("ArrayAssignment", this::dealWithArrayAssignment);
+    private String dealWithVoid(JmmNode jmmNode, String s) {
+        return null;
+    }
+
+    private String dealWithCondition(JmmNode jmmNode, String s) {
+        return null;
+    }
+
+    private String dealWithElseStatement(JmmNode jmmNode, String s) {
+        return null;
+    }
+
+    private String dealWithIfStatement(JmmNode jmmNode, String s) {
+        return null;
+    }
+
+    private String dealWithArgument(JmmNode jmmNode, String s) {
+        return null;
+    }
+
+    private String dealWithReturnStatement(JmmNode jmmNode, String s) {
+        return null;
+    }
+
+    private String dealWithReturnType(JmmNode jmmNode, String s) {
+        return null;
+    }
+
+    private String dealWithStringArray(JmmNode jmmNode, String s) {
+        return null;
     }
 
     private Boolean isType(String kind) {
@@ -250,7 +319,6 @@ public class Generator extends AJmmVisitor<String, String> {
     private String dealWithImportDeclaration(JmmNode jmmNode, String s) {
         String grammarPack = jmmNode.get("pack");
         String pack = grammarPack.substring(1, grammarPack.length() - 1);
-
         return s + "import " + pack + ";\n\n";
     }
 
@@ -341,5 +409,9 @@ public class Generator extends AJmmVisitor<String, String> {
 
     private String dealWithBoolean(JmmNode jmmNode, String s) {
         return s+"boolean";
+    }
+
+    public MySymbolTable getSymbolTable() {
+        return symbolTable;
     }
 }

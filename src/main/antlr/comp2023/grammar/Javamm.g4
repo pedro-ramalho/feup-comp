@@ -9,42 +9,83 @@ ID : [a-zA-Z_][a-zA-Z_0-9]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
+
 program
     : (importDeclaration)* classDeclaration EOF
     ;
 
+
 importDeclaration
-    : 'import' pack+=ID ('.' pack+=ID)* ';'
+    : 'import' name=ID ('.' pack=ID)* ';'
     ;
 
+
 classDeclaration
-    : 'class' name=ID ('extends' pack=ID)? '{' ( varDeclaration )* ( methodDeclaration )* '}'
+    : 'class' name=ID ('extends' extension=ID)? '{' ( varDeclaration )* ( methodDeclaration )* '}'
     ;
+
 
 varDeclaration
     : type var=ID ';'
     ;
 
+
 type
     : 'int' '[' ']' #IntArray
+    | 'String' '[' ']' #StringArray
     | 'boolean' #Boolean
     | 'int' #Int
     | 'String' #String
+    | 'void' #Void
     | name=ID #CustomType
     ;
 
-methodDeclaration
-    : ('public')? type name=ID '(' ( type parameter+=ID (',' type parameter+=ID)*)? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}' #Method
-    | ('public')? 'static' 'void' 'main' '(' 'String' '[' ']' ID ')' '{' (varDeclaration)* (statement)* '}' #Main
+
+returnType
+    : type
     ;
+
+
+returnStatement
+    : expression
+    ;
+
+
+argument
+    : type parameter=ID
+    ;
+
+
+methodDeclaration
+    : ('public')? returnType name=ID '(' ( argument (',' argument)*)? ')' '{' (varDeclaration)* (statement)* 'return' returnStatement ';' '}' #Method
+    | ('public')? 'static' returnType 'main' '(' argument ')' '{' (varDeclaration)* (statement)* '}' #Main
+    ;
+
+
+ifStatement
+    : statement
+    ;
+
+
+elseStatement
+    : statement
+    ;
+
+
+condition
+    : expression
+    ;
+
+
 statement
     : '{' (statement)* '}' #CodeBlock
-    | 'if' '(' expression ')' statement 'else' statement #Conditional
-    | 'while' '(' expression ')' statement #While
+    | 'if' '(' condition ')' ifStatement 'else' elseStatement #Conditional
+    | 'while' '(' condition ')' statement #While
     | expression ';' #ExprStmt
     | var=ID '=' expression ';' #Assignment
     | var=ID '[' expression ']' '=' expression ';' #ArrayAssignment
     ;
+
 
 expression
     : '!' expression #Negation

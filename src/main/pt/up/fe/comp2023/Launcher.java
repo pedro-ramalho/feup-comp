@@ -12,6 +12,8 @@ import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;
 
+
+
 public class Launcher {
 
     public static void main(String[] args) {
@@ -44,11 +46,13 @@ public class Launcher {
         // Print the resulting AST
         System.out.println(parserResult.getRootNode().toTree());
 
-        // Testing the generated  code
-        Generator gen = new Generator();
-        String generatedCode = gen.visit(parserResult.getRootNode(), "");
-        System.out.println(generatedCode);
+        // Testing the generated code
+        // Generator gen = new Generator();
+        // String generatedCode = gen.visit(parserResult.getRootNode(), "");
+        // System.out.println(generatedCode);
+        MySymbolTable symbolTable = new MySymbolTable();
 
+        symbolTable.printSymbolTable();
         // ... add remaining stages
     }
 
