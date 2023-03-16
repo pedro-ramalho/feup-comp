@@ -20,7 +20,11 @@ class MethodsAndFields{
 		int[] c;
 		return c;
 	}
-	
+
+	// this is a single line comment
+	/* yea
+	    this is a multi line comment
+	bruh */
 	public static void main(String[] args){
 		
 	}
