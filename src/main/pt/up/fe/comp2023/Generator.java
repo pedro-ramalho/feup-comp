@@ -296,7 +296,7 @@ public class Generator extends AJmmVisitor<String, String> {
     }
 
     private String dealWithCustomInstantiation(JmmNode jmmNode, String s) {
-        return s + "new" + jmmNode.get("objectType") + "()";
+        return s + "new " + jmmNode.get("objectType") + "()";
     }
 
     private String dealWithArrayInstantiation(JmmNode jmmNode, String s) {
@@ -306,8 +306,10 @@ public class Generator extends AJmmVisitor<String, String> {
 
     private String dealWithMethodInvocation(JmmNode jmmNode, String s) {
         String ret = s + visit(jmmNode.getChildren().get(0),"") + "." + jmmNode.get("method") + "(";
-        for(JmmNode child: jmmNode.getChildren()){
-            ret += visit(child,""); //TODO arranjar forma de pôr virgula e começar loop no index 1
+        for(int idx = 1; idx < jmmNode.getChildren().size(); idx++) {
+            ret += visit(jmmNode.getChildren().get(idx),"");
+            if (idx != jmmNode.getChildren().size() - 1)
+                ret += ", "; 
         }
         ret += ")";
         return ret;
