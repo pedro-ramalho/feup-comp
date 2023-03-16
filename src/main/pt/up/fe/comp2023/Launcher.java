@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sun.source.util.SourcePositions;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.specs.util.SpecsIo;
@@ -35,13 +36,18 @@ public class Launcher {
         SimpleParser parser = new SimpleParser();
 
         // Parse stage
-        JmmParserResult parserResult = parser.parse(code, config);
+        JmmParserResult parserResult = parser.parse(code, parser.getDefaultRule(), config);
 
         // Check if there are parsing errors
         TestUtils.noErrors(parserResult.getReports());
 
         // Print the resulting AST
         System.out.println(parserResult.getRootNode().toTree());
+
+        // Testing the generated  code
+        Generator gen = new Generator();
+        String generatedCode = gen.visit(parserResult.getRootNode(), "");
+        System.out.println(generatedCode);
 
         // ... add remaining stages
     }
