@@ -57,9 +57,6 @@ public class Launcher {
 
         MySymbolTable symbolTable = gen.getSymbolTable();
 
-        for (String m : symbolTable.getMethods())
-            System.out.println(symbolTable.getParameters(m).size());
-
         System.out.println("Printing Symbol Table...");
         symbolTable.printSymbolTable();
 
