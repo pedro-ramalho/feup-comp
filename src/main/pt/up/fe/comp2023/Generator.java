@@ -5,53 +5,48 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class Generator extends AJmmVisitor<String, String> {
 
     private MySymbolTable symbolTable = new MySymbolTable();
 
+    private boolean isArray(String literal) {
+        return literal.contains("[]");
+    }
+
+    private String parseType(String type) {
+        return isArray(type) ? type.substring(0, type.length() - 2) : type;
+    }
 
     @Override
     protected void buildVisitor() {
+        /*
+         * NOTE: the method calls with a 'checkpoint 01' comment next to them correspond to the node visits which are necessary to
+         * populate the Symbol Table for this checkpoint. Remaining visitors will have to implemented for future deliveries, but for this
+         * checkpoint, these suffice.
+        */
+
         /* program rule */
-        addVisit("Program", this::dealWithProgram);
+        addVisit("Program", this::dealWithProgram); // checkpoint 01
 
         /* import rule */
-        addVisit("ImportDeclaration", this::dealWithImportDeclaration);
-
-        /* classField rule */
-        addVisit("ClassField", this::dealWithClassField);
+        addVisit("ImportDeclaration", this::dealWithImportDeclaration); // checkpoint 01
 
         /* class rule */
-        addVisit("ClassDeclaration", this::dealWithClassDeclaration);
+        addVisit("ClassDeclaration", this::dealWithClassDeclaration); // checkpoint 01
 
         /* var rule */
-        addVisit("VarDeclaration", this::dealWithVarDeclaration);
+        addVisit("VarDeclaration", this::dealWithVarDeclaration); // checkpoint 01
 
         /* type rule */
-        addVisit("Boolean",this::dealWithBoolean);
-        addVisit("Int",this::dealWithInt);
-        addVisit("String",this::dealWithString);
-        addVisit("CustomType",this::dealWithCustomType);
-        addVisit("StringArray", this::dealWithStringArray);
-        addVisit("IntArray", this::dealWithIntArray);
-        addVisit("Void", this::dealWithVoid);
-
-        /* returnType rule */
-        addVisit("ReturnType", this::dealWithReturnType);
-
-        /* returnStatement rule */
-        addVisit("ReturnStatement", this::dealWithReturnStatement);
+        addVisit("Literal", this::dealWithLiteral);
+        addVisit("CustomType",this::dealWithCustomType); // checkpoint 01
 
         /* argument rule */
-        addVisit("Argument", this::dealWithArgument);
+        addVisit("Argument", this::dealWithArgument); // checkpoint 01
 
         /* methodDeclaration rule */
-        addVisit("Method", this::dealWithMethod);
-        addVisit("Main", this::dealWithMain);
+        addVisit("Method", this::dealWithMethod); // checkpoint 01
+        addVisit("Main", this::dealWithMain); // checkpoint 01
 
         /* ifStatement rule */
         addVisit("IfStatement", this::dealWithIfStatement);
@@ -86,12 +81,8 @@ public class Generator extends AJmmVisitor<String, String> {
         addVisit("CurrentObject",this::dealWithCurrentObject);
     }
 
-    private String dealWithClassField(JmmNode jmmNode, String s) {
-        return null;
-    }
-
-    private String dealWithVoid(JmmNode jmmNode, String s) {
-        return s + "void";
+    private String dealWithLiteral(JmmNode jmmNode, String s) {
+        return s + jmmNode.get("keyword");
     }
 
     private String dealWithCondition(JmmNode jmmNode, String s) {
@@ -108,22 +99,6 @@ public class Generator extends AJmmVisitor<String, String> {
 
     private String dealWithArgument(JmmNode jmmNode, String s) {
         return s + visit(jmmNode.getChildren().get(0), "");
-    }
-
-    private String dealWithReturnStatement(JmmNode jmmNode, String s) {
-        return null;
-    }
-
-    private String dealWithReturnType(JmmNode jmmNode, String s) {
-        return null;
-    }
-
-    private String dealWithStringArray(JmmNode jmmNode, String s) {
-        return s+"String[]";
-    }
-
-    private Boolean isType(String kind) {
-        return kind.equals("String") || kind.equals("Boolean") || kind.equals("IntArray") || kind.equals("Int") || kind.equals("CustomType");
     }
 
     private String dealWithArrayAssignment(JmmNode jmmNode, String s) {
@@ -161,7 +136,7 @@ public class Generator extends AJmmVisitor<String, String> {
 
         whileStmt += s + "}";
 
-        return condition + whileStmt; // TODO
+        return condition + whileStmt;
     }
 
     private String dealWithConditional(JmmNode jmmNode, String s) {
@@ -236,11 +211,7 @@ public class Generator extends AJmmVisitor<String, String> {
                 String varName = child.get("var");
                 String varType = visit(child.getChildren().get(0), "");
 
-                Boolean isArray = varType.equals("int[]") || varType.equals("String[]");
-
-                varType = isArray ? varType.substring(0, varType.length() - 2) : varType;
-
-                Type type = new Type(varType, isArray);
+                Type type = new Type(parseType(varType), isArray(varType));
 
                 // update the symbol table
                 symbolTable.addLocalVariable(methodName, new Symbol(type, varName));
@@ -261,11 +232,7 @@ public class Generator extends AJmmVisitor<String, String> {
                 String argumentName = child.get("parameter");
                 String argumentType = visit(child, "");
 
-                Boolean isArray = argumentType.equals("int[]") || argumentType.equals("String[]");
-
-                argumentType = isArray ? argumentType.substring(0, argumentType.length() - 2) : argumentType;
-
-                Type type = new Type(argumentType, isArray);
+                Type type = new Type(parseType(argumentType), isArray(argumentType));
 
                 // update the symbol table
                 symbolTable.addParameter(methodName, new Symbol(type, argumentName));
@@ -277,11 +244,7 @@ public class Generator extends AJmmVisitor<String, String> {
                 String varName = child.get("var");
                 String varType = visit(child.getChildren().get(0), "");
 
-                Boolean isArray = varType.equals("int[]") || varType.equals("String[]");
-
-                varType = isArray ? varType.substring(0, varType.length() - 2) : varType;
-
-                Type type = new Type(varType, isArray);
+                Type type = new Type(parseType(varType), isArray(varType));
 
                 // update the symbol table
                 symbolTable.addLocalVariable(methodName, new Symbol(type, varName));
@@ -289,10 +252,6 @@ public class Generator extends AJmmVisitor<String, String> {
         }
 
         return "";
-    }
-
-    private String dealWithIntArray(JmmNode jmmNode, String s) {
-        return s + "int[]";
     }
 
     private String dealWithVarDeclaration(JmmNode jmmNode, String s) {
@@ -329,11 +288,7 @@ public class Generator extends AJmmVisitor<String, String> {
                 String varName = varNode.get("var");
                 String varType = visit(varNode.getChildren().get(0), "");
 
-                Boolean isArray = varType.equals("int[]") || varType.equals("String[]");
-
-                varType = isArray ? varType.substring(0, varType.length() - 2) : varType;
-
-                Type type = new Type(varType, isArray);
+                Type type = new Type(parseType(varType), isArray(varType));
 
                 // update the symbol table
                 symbolTable.addField(new Symbol(type, varName));
@@ -346,11 +301,7 @@ public class Generator extends AJmmVisitor<String, String> {
                 JmmNode returnNode = child.getChildren().get(0);
                 String returnType = visit(returnNode.getChildren().get(0), "");
 
-                Boolean isArray = returnType.equals("int[]") || returnType.equals("String[]");
-
-                returnType = isArray ? returnType.substring(0, returnType.length() - 2) : returnType;
-
-                Type type = new Type(returnType, isArray);
+                Type type = new Type(parseType(returnType), isArray(returnType));
 
                 // update the symbol table with the new method
                 symbolTable.addMethod(methodName, type);
@@ -458,18 +409,6 @@ public class Generator extends AJmmVisitor<String, String> {
 
     private String dealWithCustomType(JmmNode jmmNode, String s) {
         return s+jmmNode.get("name");
-    }
-
-    private String dealWithString(JmmNode jmmNode, String s) {
-        return s+"String";
-    }
-
-    private String dealWithInt(JmmNode jmmNode, String s) {
-        return s+"int";
-    }
-
-    private String dealWithBoolean(JmmNode jmmNode, String s) {
-        return s+"boolean";
     }
 
     public MySymbolTable getSymbolTable() {

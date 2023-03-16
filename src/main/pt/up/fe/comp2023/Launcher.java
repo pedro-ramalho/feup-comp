@@ -52,7 +52,7 @@ public class Launcher {
         // String generatedCode = gen.visit(parserResult.getRootNode(), "");
         // System.out.println(generatedCode);
 
-        Generator gen = new Generator();
+         Generator gen = new Generator();
         gen.visit(parserResult.getRootNode(), "");
 
         MySymbolTable symbolTable = gen.getSymbolTable();
