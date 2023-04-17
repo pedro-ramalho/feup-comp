@@ -1,14 +1,26 @@
-import io;
+import io.println.ola;
 
 class MyClass {
-    int myfield;
-    Bruh myType;
 
-    public int calc(int arg1) {
-        return arg1;
-    }
+    int[] myfield;
+    String myType;
 
-    public static void main(String[] args) {
-        io.println(new calc());
+    private boolean calc(int arg1) {
+        boolean x;
+        boolean y;
+        boolean z;
+
+        x = true;
+        y = false;
+        z = x && y;
+
+        if (x < y) {
+
+        }
+        else {
+
+        }
+
+        return false;
     }
 }

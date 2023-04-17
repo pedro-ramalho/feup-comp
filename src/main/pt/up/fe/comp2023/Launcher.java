@@ -1,14 +1,16 @@
 package pt.up.fe.comp2023;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sun.source.util.SourcePositions;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2023.visitors.ProgramVisitor;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -41,6 +43,7 @@ public class Launcher {
         // Parse stage
         JmmParserResult parserResult = parser.parse(code, parser.getDefaultRule(), config);
 
+
         // Check if there are parsing errors
         TestUtils.noErrors(parserResult.getReports());
 
@@ -52,13 +55,29 @@ public class Launcher {
         // String generatedCode = gen.visit(parserResult.getRootNode(), "");
         // System.out.println(generatedCode);
 
-         Generator gen = new Generator();
+        Visitor gen = new Visitor();
         gen.visit(parserResult.getRootNode(), "");
 
         MySymbolTable symbolTable = gen.getSymbolTable();
 
         System.out.println("Printing Symbol Table...");
         symbolTable.printSymbolTable();
+
+        ArrayList<Report> reports = new ArrayList<Report>();
+
+        ProgramVisitor visitor = new ProgramVisitor(symbolTable, reports);
+
+        visitor.visit(parserResult.getRootNode(), "");
+
+        System.out.println("Found a total of " + reports.size() + " reports.");
+
+        for (Report report : reports) {
+            System.out.println(report.toString());
+        }
+
+        // Analysis analysis = new Analysis();
+
+        // JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
         // ... add remaining stages
     }
