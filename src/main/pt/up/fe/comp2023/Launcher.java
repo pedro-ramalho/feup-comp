@@ -1,13 +1,17 @@
 package pt.up.fe.comp2023;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.sun.source.util.SourcePositions;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.jasmin.JasminResult;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
@@ -33,25 +37,26 @@ public class Launcher {
         }
 
         // Read contents of input file
-        String code = SpecsIo.read(inputFile);
+//        String code = SpecsIo.read(inputFile);
 
         // Instantiate JmmParser
-        SimpleParser parser = new SimpleParser();
+//        SimpleParser parser = new SimpleParser();
 
         // Parse stage
-        JmmParserResult parserResult = parser.parse(code, parser.getDefaultRule(), config);
+//        JmmParserResult parserResult = parser.parse(code, parser.getDefaultRule(), config);
 
         // Check if there are parsing errors
-        TestUtils.noErrors(parserResult.getReports());
+//        TestUtils.noErrors(parserResult.getReports());
 
         // Print the resulting AST
-        System.out.println(parserResult.getRootNode().toTree());
+//        System.out.println(parserResult.getRootNode().toTree());
 
         // Testing the generated code
         // Generator gen = new Generator();
         // String generatedCode = gen.visit(parserResult.getRootNode(), "");
         // System.out.println(generatedCode);
 
+/*
          Generator gen = new Generator();
         gen.visit(parserResult.getRootNode(), "");
 
@@ -59,6 +64,16 @@ public class Launcher {
 
         System.out.println("Printing Symbol Table...");
         symbolTable.printSymbolTable();
+*/
+
+        System.out.println("OLLIR -> JASMIN");
+        String ollirCode = SpecsIo.read(inputFile);
+        OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
+//        JasminResult jasminResult = TestUtils.backend(ollirResult);
+        MyJasminBackend jasminBackend = new MyJasminBackend();
+        JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
+
+        System.out.println(myJasminResult.getJasminCode());
 
         // ... add remaining stages
     }
@@ -80,5 +95,6 @@ public class Launcher {
 
         return config;
     }
+
 
 }
