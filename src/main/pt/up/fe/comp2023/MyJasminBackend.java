@@ -6,9 +6,6 @@ import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
-import java.awt.*;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,11 +26,7 @@ public class MyJasminBackend implements JasminBackend {
         jasminCode.append(generateClassStructure(ollirClass));
         jasminCode.append(generateMethodsStructure(ollirClass));
 
-
-
-
         return new JasminResult(jasminCode.toString());
-
     }
 
 
@@ -97,9 +90,8 @@ public class MyJasminBackend implements JasminBackend {
             if (method.getMethodName().equals("main")) {
                 code.append(".method public static main([Ljava/lang/String;)V\n");
                 code.append("\t.limit stack " + limit_stack + "\n");
-                code.append("\t.limit locals " + limit_locals + "\n");
-                // main method code here
-                code.append("\treturn\n");
+                code.append("\t.limit locals " + limit_locals + "\n\n");
+                code.append(generateMethodBody(method));
                 code.append(".end method\n\n");
             }
             else {
@@ -110,9 +102,8 @@ public class MyJasminBackend implements JasminBackend {
                }
                code.append(")" + convertType(method.getReturnType()) + "\n");
                code.append("\t.limit stack " + limit_stack + "\n");
-               code.append("\t.limit locals " + limit_locals + "\n");
+               code.append("\t.limit locals " + limit_locals + "\n\n");
                code.append(generateMethodBody(method));
-               code.append("\treturn\n");
                code.append(".end method\n\n");
 
             }
@@ -143,14 +134,22 @@ public class MyJasminBackend implements JasminBackend {
         StringBuilder code = new StringBuilder();
          switch (instruction.getInstType()) {
             case RETURN:
+                code.append(getReturnInstruction((ReturnInstruction) instruction, method));
                 break;
             case PUTFIELD:
+                code.append(getPutFieldInstruction((PutFieldInstruction) instruction, method));
                 break;
+            case CALL:
+                code.append(getCallInstruction((CallInstruction) instruction, method));
+                break;
+
             case GETFIELD:
+                code.append(getGetFieldInstruction((GetFieldInstruction) instruction, method));
                 break;
             case UNARYOPER:
                 break;
             case BINARYOPER:
+                code.append(getBinaryOpInstruction((BinaryOpInstruction) instruction, method));
                 break;
             case NOPER: {
                 code.append(getLoad(((SingleOpInstruction) instruction).getSingleOperand(), method));
@@ -164,6 +163,84 @@ public class MyJasminBackend implements JasminBackend {
         return code.toString();
     }
 
+    private String getCallInstruction(CallInstruction instruction, Method method) {
+        return "";
+    }
+
+    private String getPutFieldInstruction(PutFieldInstruction instruction, Method method) {
+        Element firstOp = instruction.getFirstOperand();
+        Element secondOp = instruction.getSecondOperand();
+
+        if (firstOp.isLiteral() || secondOp.isLiteral()) return "";
+
+        StringBuilder code = new StringBuilder();
+        Element newOp = instruction.getThirdOperand();
+
+        code.append(getLoad(firstOp, method)).append("\n");
+        code.append(getLoad(newOp, method)).append("\n");
+        code.append("\tputfield ");
+
+        ClassType classType = (ClassType) firstOp.getType();
+
+        code.append(classType.getName()).append("/").append(((Operand) secondOp).getName());
+        code.append(" ").append(convertType(secondOp.getType())).append("\n");
+        return code.toString();
+    }
+
+    private String getGetFieldInstruction(GetFieldInstruction instruction, Method method) {
+        Element firstOp = instruction.getFirstOperand();
+        Element secondOp = instruction.getSecondOperand();
+
+        if (firstOp.isLiteral() || secondOp.isLiteral()) return "";
+
+        StringBuilder code = new StringBuilder();
+
+        code.append(getLoad(firstOp, method)).append("\n");
+        code.append("\tgetfield ");
+
+        ClassType classType = (ClassType) firstOp.getType();
+
+        code.append(classType.getName()).append("/").append(((Operand) secondOp).getName());
+        code.append(" ").append(convertType(secondOp.getType())).append("\n");
+        return code.toString();
+    }
+
+    private String getBinaryOpInstruction(BinaryOpInstruction instruction, Method method) {
+        StringBuilder code = new StringBuilder();
+        Element leftElement = instruction.getLeftOperand();
+        Element rightElement = instruction.getRightOperand();
+        Operation operation = instruction.getOperation();
+        OperationType operationType = instruction.getOperation().getOpType();
+
+        return "";
+
+
+    }
+
+    private String getReturnInstruction(ReturnInstruction instruction, Method method) {
+        StringBuilder code = new StringBuilder();
+
+        if (instruction.hasReturnValue()) code.append(getLoad(instruction.getOperand(), method));
+
+        ElementType returnType = instruction.getReturnType().getTypeOfElement();
+
+        code.append("\t");
+        switch (returnType) {
+            case BOOLEAN, INT32, OBJECTREF, CLASS, STRING, ARRAYREF:
+
+                if (returnType == ElementType.BOOLEAN || returnType == ElementType.INT32) {
+                    code.append("ireturn\n");
+                }
+                else {
+                    code.append("areturn\n");
+                }
+                break;
+            case VOID: code.append("return\n");
+        }
+
+        return code.toString();
+    }
+
 
     private String getAssignInstruction(AssignInstruction instruction, Method method) {
         Element dest = instruction.getDest();
@@ -174,7 +251,7 @@ public class MyJasminBackend implements JasminBackend {
 
         Instruction rhs = instruction.getRhs();
 
-        return getInstructions(rhs, method) + "\n" + getStore(dest, method);
+        return getInstructions(rhs, method) + getStore(dest, method) + "\n";
 
     }
 //       }
