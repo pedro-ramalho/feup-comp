@@ -195,7 +195,11 @@ public class MyJasminBackend implements JasminBackend {
                 }
                 code.append("\tinvokespecial ");
                 if (method.isConstructMethod() && firstArg.getName().equals("this")) {
-                    code.append(this.superClass);
+                    if (method.getOllirClass().getSuperClass() == null) {
+                        code.append("java/lang/Object");
+                    }else {
+                        code.append(this.superClass);
+                    }
                 } else {
                     ClassType classType1 = (ClassType) firstArg.getType();
                     code.append(classType1.getName());
@@ -414,6 +418,7 @@ public class MyJasminBackend implements JasminBackend {
         }
     }
 
+/*
     private static String getClassFullName(ClassUnit ollirClass, String className) {
         if (ollirClass.isImportedClass(className)) {
             for (String fullImport : ollirClass.getImports()) {
@@ -429,5 +434,6 @@ public class MyJasminBackend implements JasminBackend {
 
         return className;
     }
+*/
 }
 
