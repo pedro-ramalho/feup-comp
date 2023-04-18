@@ -40,31 +40,30 @@ public class Launcher {
         String code = SpecsIo.read(inputFile);
 
         // Instantiate JmmParser
-        SimpleParser parser = new SimpleParser();
+//        SimpleParser parser = new SimpleParser();
 
         // Parse stage
-        JmmParserResult parserResult = parser.parse(code, parser.getDefaultRule(), config);
+//        JmmParserResult parserResult = parser.parse(code, parser.getDefaultRule(), config);
 
         // Check if there are parsing errors
-        TestUtils.noErrors(parserResult.getReports());
+//        TestUtils.noErrors(parserResult.getReports());
 
         // Print the resulting AST
-        System.out.println(parserResult.getRootNode().toTree());
+//        System.out.println(parserResult.GEtRootNode().toTree());
 
         // Testing the generated code
-         Generator gen = new Generator();
-         String generatedCode = gen.visit(parserResult.getRootNode(), "");
-         System.out.println(generatedCode);
+//         Generator gen = new Generator();
+//         String generatedCode = gen.visit(parserResult.getRootNode(), "");
+//         System.out.println(generatedCode);
 
-        gen.visit(parserResult.getRootNode(), "");
+//        gen.visit(parserResult.getRootNode(), "");
 
-        MySymbolTable symbolTable = gen.getSymbolTable();
+//        MySymbolTable symbolTable = gen.getSymbolTable();
 
-        System.out.println("Printing Symbol Table...");
-        symbolTable.printSymbolTable();
+//        System.out.println("Printing Symbol Table...");
+//        symbolTable.printSymbolTable();
 
         // TESTING OLLIR TO JASIMIN
-/*
         System.out.println("OLLIR -> JASMIN");
         String ollirCode = SpecsIo.read(inputFile);
         OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
@@ -72,7 +71,6 @@ public class Launcher {
         JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
 
         System.out.println(myJasminResult.getJasminCode());
-*/
 
         // ... add remaining stages
     }

@@ -35,7 +35,7 @@ public class MyJasminBackend implements JasminBackend {
         this.className = ollirClass.getClassName();
         this.accessLevel = ollirClass.getClassAccessModifier();
         this.superClass = ollirClass.getSuperClass();
-        if (this.superClass == null) this.superClass = "java/lang/object";
+        if (this.superClass == null) this.superClass = "java/lang/Object";
 
         code.append(".class public ");
         if (ollirClass.isStaticClass())
@@ -79,6 +79,7 @@ public class MyJasminBackend implements JasminBackend {
             if (method.isConstructMethod()) {
                 code.append("\n.method public <init>()V\n");
                 code.append(generateMethodBody(method));
+                code.append("\treturn\n");
                 code.append(".end method\n\n");
             }
 
@@ -112,6 +113,7 @@ public class MyJasminBackend implements JasminBackend {
 
         List<Instruction> instructions = method.getInstructions();
 
+/*
         for (Instruction instruction: instructions) {
             for (Map.Entry<String, Instruction> label : method.getLabels().entrySet()) {
                 if (label.getValue().equals(instruction)) {
@@ -119,6 +121,7 @@ public class MyJasminBackend implements JasminBackend {
                 }
             }
         }
+*/
 
         for (Instruction instruction: instructions) {
             code.append(getInstructions(instruction, method));
