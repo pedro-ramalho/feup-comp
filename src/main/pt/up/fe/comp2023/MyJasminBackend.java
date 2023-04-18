@@ -166,79 +166,63 @@ public class MyJasminBackend implements JasminBackend {
         LiteralElement secondArg = (LiteralElement) instruction.getSecondArg();
 
         CallType callType = instruction.getInvocationType();
-
         switch (callType) {
-            case invokestatic, invokevirtual:
+            case invokestatic, invokevirtual -> {
                 if (callType == CallType.invokevirtual) {
                     code.append(getLoad(firstArg, method)).append("\n");
                 }
-
                 for (Element element : instruction.getListOfOperands()) {
                     code.append(getLoad(element, method)).append("\n");
                 }
-
                 if (callType == CallType.invokestatic) {
                     code.append("\tinvokestatic ").append(firstArg.getName());
-                }
-                else {
+                } else {
                     code.append("\tinvokevirtual ");
                 }
-
                 ClassType classType = (ClassType) firstArg.getType();
-                code.append(classType.getClass().getName()).append("/").append(secondArg.getLiteral().replace("\"", "")).append("(");
-
+                code.append(classType.getName()).append("/").append(secondArg.getLiteral().replace("\"", "")).append("(");
                 for (Element element : instruction.getListOfOperands()) {
                     code.append(convertType(element.getType()));
                 }
-
                 code.append(")").append(convertType(instruction.getReturnType())).append("\n");
-                break;
-
-            case invokespecial:
-                    if (firstArg.getName().equals("this")) {
-                        code.append(getLoad(firstArg, method)).append("\n");
-                    }
-
-                    for (Element element : instruction.getListOfOperands()) {
-                        code.append(getLoad(element, method)).append("\n");
-                    }
-
-                    code.append("\tinvokespecial ");
-                    if (method.isConstructMethod() && firstArg.getName().equals("this")) {
-                        code.append(this.superClass);
-                    } else {
-                        ClassType classType1 = (ClassType) firstArg.getType();
-                        code.append(classType1.getName());
-                    }
-
-                    code.append("/").append(secondArg.getLiteral().replace("\"", "")).append("(");
-
-                    for (Element element : instruction.getListOfOperands()) {
-                        code.append(convertType(element.getType()));
-                    }
-
-                    code.append(")").append(convertType(instruction.getReturnType())).append("\n");
+            }
+            case invokespecial -> {
+                if (firstArg.getName().equals("this")) {
+                    code.append(getLoad(firstArg, method)).append("\n");
+                }
+                for (Element element : instruction.getListOfOperands()) {
+                    code.append(getLoad(element, method)).append("\n");
+                }
+                code.append("\tinvokespecial ");
+                if (method.isConstructMethod() && firstArg.getName().equals("this")) {
+                    code.append(this.superClass);
+                } else {
+                    ClassType classType1 = (ClassType) firstArg.getType();
+                    code.append(classType1.getName());
+                }
+                code.append("/").append(secondArg.getLiteral().replace("\"", "")).append("(");
+                for (Element element : instruction.getListOfOperands()) {
+                    code.append(convertType(element.getType()));
+                }
+                code.append(")").append(convertType(instruction.getReturnType())).append("\n");
+            }
 
 /*
                     if (!method.isConstructMethod()) {
                         code.append("\n").append(getStore(firstArg, method));
                     }
 */
-                    break;
-            case NEW:
-                    ElementType elementType = firstArg.getType().getTypeOfElement();
-                    if (elementType == ElementType.OBJECTREF || elementType == ElementType.CLASS) {
-                        code.append("\tnew ").append(firstArg.getName()).append("\n");
-                        code.append("\tdup\n");
-                    }
-                    else if (elementType == ElementType.ARRAYREF) {
-                        // TODO
-                        code.append("");
-                    }
-                    break;
-            case ldc:
-                code.append(getLoad(firstArg, method)).append("\n");
-                break;
+            case NEW -> {
+                ElementType elementType = firstArg.getType().getTypeOfElement();
+                if (elementType == ElementType.OBJECTREF || elementType == ElementType.CLASS) {
+                    code.append("\tnew ").append(firstArg.getName()).append("\n");
+                    code.append("\tdup\n");
+                } else if (elementType == ElementType.ARRAYREF) {
+                    // TODO
+                    code.append("");
+                }
+            }
+            case ldc -> code.append(getLoad(firstArg, method)).append("\n");
         }
         return code.toString();
     }
