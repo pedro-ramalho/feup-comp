@@ -6,6 +6,7 @@ import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
+import javax.swing.*;
 import java.util.List;
 import java.util.Map;
 
@@ -54,13 +55,6 @@ public class MyJasminBackend implements JasminBackend {
             code.append("\n");
         }
 
-        code.append("\n.method public <init>()V\n");
-        code.append("\taload_0\n")
-                .append("\tinvokenonvirtual ").append(this.superClass).append("/<init>()V\n")
-                .append("\treturn\n")
-                .append(".end method\n\n");
-
-
         return code.toString();
     }
 
@@ -84,10 +78,14 @@ public class MyJasminBackend implements JasminBackend {
         StringBuilder code = new StringBuilder();
 
         for (Method method: ollirClass.getMethods()) {
-            if (method.isConstructMethod()) continue;
+            if (method.isConstructMethod()) {
+                code.append("\n.method public <init>()V\n");
+                code.append(generateMethodBody(method));
+                code.append(".end method\n\n");
+            }
 
 
-            if (method.getMethodName().equals("main")) {
+            else if (method.getMethodName().equals("main")) {
                 code.append(".method public static main([Ljava/lang/String;)V\n");
                 code.append("\t.limit stack " + limit_stack + "\n");
                 code.append("\t.limit locals " + limit_locals + "\n\n");
@@ -142,7 +140,6 @@ public class MyJasminBackend implements JasminBackend {
             case CALL:
                 code.append(getCallInstruction((CallInstruction) instruction, method));
                 break;
-
             case GETFIELD:
                 code.append(getGetFieldInstruction((GetFieldInstruction) instruction, method));
                 break;
@@ -151,20 +148,97 @@ public class MyJasminBackend implements JasminBackend {
             case BINARYOPER:
                 code.append(getBinaryOpInstruction((BinaryOpInstruction) instruction, method));
                 break;
-            case NOPER: {
+            case NOPER:
                 code.append(getLoad(((SingleOpInstruction) instruction).getSingleOperand(), method));
                 break;
-            }
-            case ASSIGN: {
+            case ASSIGN:
                 code.append(getAssignInstruction((AssignInstruction) instruction, method));
                 break;
-            }
         };
         return code.toString();
     }
 
     private String getCallInstruction(CallInstruction instruction, Method method) {
-        return "";
+        StringBuilder code = new StringBuilder();
+        Operand firstArg = (Operand) instruction.getFirstArg();
+        LiteralElement secondArg = (LiteralElement) instruction.getSecondArg();
+
+        CallType callType = instruction.getInvocationType();
+
+        switch (callType) {
+            case invokestatic, invokevirtual:
+                if (callType == CallType.invokevirtual) {
+                    code.append(getLoad(firstArg, method)).append("\n");
+                }
+
+                for (Element element : instruction.getListOfOperands()) {
+                    code.append(getLoad(element, method)).append("\n");
+                }
+
+                if (callType == CallType.invokestatic) {
+                    code.append("\tinvokestatic ").append(firstArg.getName());
+                }
+                else {
+                    code.append("\tinvokevirtual ");
+                }
+
+                ClassType classType = (ClassType) firstArg.getType();
+                code.append(classType.getClass().getName()).append("/").append(secondArg.getLiteral().replace("\"", "")).append("(");
+
+                for (Element element : instruction.getListOfOperands()) {
+                    code.append(convertType(element.getType()));
+                }
+
+                code.append(")").append(convertType(instruction.getReturnType())).append("\n");
+                break;
+
+            case invokespecial:
+                    if (firstArg.getName().equals("this")) {
+                        code.append(getLoad(firstArg, method)).append("\n");
+                    }
+
+                    for (Element element : instruction.getListOfOperands()) {
+                        code.append(getLoad(element, method)).append("\n");
+                    }
+
+                    code.append("\tinvokespecial ");
+                    if (method.isConstructMethod() && firstArg.getName().equals("this")) {
+                        code.append(this.superClass);
+                    } else {
+                        ClassType classType1 = (ClassType) firstArg.getType();
+                        code.append(classType1.getName());
+                    }
+
+                    code.append("/").append(secondArg.getLiteral().replace("\"", "")).append("(");
+
+                    for (Element element : instruction.getListOfOperands()) {
+                        code.append(convertType(element.getType()));
+                    }
+
+                    code.append(")").append(convertType(instruction.getReturnType())).append("\n");
+
+/*
+                    if (!method.isConstructMethod()) {
+                        code.append("\n").append(getStore(firstArg, method));
+                    }
+*/
+                    break;
+            case NEW:
+                    ElementType elementType = firstArg.getType().getTypeOfElement();
+                    if (elementType == ElementType.OBJECTREF || elementType == ElementType.CLASS) {
+                        code.append("\tnew ").append(firstArg.getName()).append("\n");
+                        code.append("\tdup\n");
+                    }
+                    else if (elementType == ElementType.ARRAYREF) {
+                        // TODO
+                        code.append("");
+                    }
+                    break;
+            case ldc:
+                code.append(getLoad(firstArg, method)).append("\n");
+                break;
+        }
+        return code.toString();
     }
 
     private String getPutFieldInstruction(PutFieldInstruction instruction, Method method) {
@@ -209,12 +283,48 @@ public class MyJasminBackend implements JasminBackend {
         StringBuilder code = new StringBuilder();
         Element leftElement = instruction.getLeftOperand();
         Element rightElement = instruction.getRightOperand();
-        Operation operation = instruction.getOperation();
         OperationType operationType = instruction.getOperation().getOpType();
 
-        return "";
+        code.append(getLoad(leftElement, method)).append(getLoad(rightElement, method)).append("\t");
+
+        switch (operationType) {
+            case ADD:
+                if (!leftElement.isLiteral() && rightElement.isLiteral()) {
+                    return getIinc((LiteralElement) rightElement, (Operand) leftElement, method);
+                }
+                else if (leftElement.isLiteral() && !rightElement.isLiteral()) {
+                    return getIinc((LiteralElement) leftElement, (Operand) rightElement, method);
+                }
+                else {
+                    code.append("iadd");
+                }
+                break;
+            case SUB:
+                code.append("isub");
+                break;
+            case MUL:
+                code.append("imul");
+                break;
+            case DIV:
+                code.append("idiv");
+                break;
+
+            default: code.append("error on binary operation instruction");
+        }
+        code.append("\n");
+        return code.toString();
+    }
 
 
+    private String getIinc(LiteralElement literalElement, Operand operand, Method method) {
+        StringBuilder code = new StringBuilder();
+        Descriptor operandDescriptor = method.getVarTable().get(operand.getName());
+        int literalValue = Integer.parseInt(literalElement.getLiteral());
+
+        code.append("iinc ").append(operandDescriptor.getVirtualReg()).append(" ");
+        code.append(literalValue);
+
+        return "\t" + code + "\n" + getLoad(operand, method);
     }
 
     private String getReturnInstruction(ReturnInstruction instruction, Method method) {
@@ -254,14 +364,6 @@ public class MyJasminBackend implements JasminBackend {
         return getInstructions(rhs, method) + getStore(dest, method) + "\n";
 
     }
-//       }
-
-//       code.append(getInstructions(instruction.getRhs(), method));
-//       code.append(getStore(dest, method));
-//
-//       return code.toString();
-
-//    }
 
     private String getLoad(Element element, Method method) {
         if (element.isLiteral()) {
@@ -314,29 +416,21 @@ public class MyJasminBackend implements JasminBackend {
             }
         }
     }
+
+    private static String getClassFullName(ClassUnit ollirClass, String className) {
+        if (ollirClass.isImportedClass(className)) {
+            for (String fullImport : ollirClass.getImports()) {
+                int lastSeparatorIndex = className.lastIndexOf(".");
+
+                if (lastSeparatorIndex < 0 && fullImport.equals(className)) {
+                    return className;
+                } else if (fullImport.substring(lastSeparatorIndex + 1).equals(className)) {
+                    return fullImport;
+                }
+            }
+        }
+
+        return className;
+    }
 }
 
-/*
-    ASSIGN,
-    CALL,
-    GOTO,
-    BRANCH,
-    RETURN,
-    PUTFIELD,
-    GETFIELD,
-    UNARYOPER,
-    BINARYOPER,
-    NOPER;
-
-    private Descriptor getDescriptor(Element elem) {
-        if(elem.isLiteral()) {
-            this.reports.add(new StyleReport(ReportType.ERROR, Stage.GENERATION, "Tried to get a descriptor of a literal"));
-            return null;
-        }
-
-        if(elem.getType().getTypeOfElement() == ElementType.THIS) {
-            return this.currMethod.getVarTable().get("this");
-        }
-        return this.currMethod.getVarTable().get(((Operand) elem).getName());
-    }
-*/

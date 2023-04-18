@@ -1,7 +1,5 @@
 Test {
 
-	.field intField.i32;
-
 	.construct Test().V {
 		invokespecial(this, "<init>").V;
 	}
@@ -10,12 +8,13 @@ Test {
 		ret.V;
 	}
 
+	
+	.method public foo().i32 {
+		a.i32 :=.i32 1.i32;
+		b.i32 :=.i32 2.i32;
 
-	.method public foo().V {
+		c.i32 :=.i32 a.i32 +.i32 b.i32;
 
-		putfield(this, intField.i32, 10.i32).V;
-		a.i32 :=.i32 getfield(this, intField.i32).i32;
-
-		ret.V;
+		ret.i32 c.i32;
 	}
 }
