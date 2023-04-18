@@ -6,7 +6,6 @@ import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
-import javax.swing.*;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +14,6 @@ public class MyJasminBackend implements JasminBackend {
     private String className;
     private AccessModifiers accessLevel;
     private String superClass;
-    private String method;
     private int limit_stack = 99;
     private int limit_locals = 99;
 
@@ -144,6 +142,7 @@ public class MyJasminBackend implements JasminBackend {
                 code.append(getGetFieldInstruction((GetFieldInstruction) instruction, method));
                 break;
             case UNARYOPER:
+                code.append(getUnaryOpInstruction((UnaryOpInstruction) instruction, method));
                 break;
             case BINARYOPER:
                 code.append(getBinaryOpInstruction((BinaryOpInstruction) instruction, method));
@@ -312,6 +311,17 @@ public class MyJasminBackend implements JasminBackend {
             default: code.append("error on binary operation instruction");
         }
         code.append("\n");
+        return code.toString();
+    }
+
+    private String getUnaryOpInstruction(UnaryOpInstruction instruction, Method method) {
+        StringBuilder code = new StringBuilder();
+        OperationType operationType = instruction.getOperation().getOpType();
+        Element element = instruction.getOperand();
+
+        if (operationType == OperationType.NOT || operationType == OperationType.NOTB) {
+            code.append(getLoad(element, method)).append("\n\tifeq\n");
+        }
         return code.toString();
     }
 
