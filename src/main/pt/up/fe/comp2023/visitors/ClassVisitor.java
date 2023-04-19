@@ -10,10 +10,21 @@ import java.util.ArrayList;
 public class ClassVisitor extends AJmmVisitor<String, String> {
     private JmmNode node;
     private String name;
+    private String extension;
     private MySymbolTable symbolTable;
     private ArrayList<Report> reports;
 
-    public ClassVisitor(MySymbolTable symbolTable, ArrayList<Report> reports) {
+    public ClassVisitor(JmmNode node, MySymbolTable symbolTable, ArrayList<Report> reports) {
+        this.node = node;
+        this.name = node.get("name");
+
+        if (node.hasAttribute("extension")) {
+            this.extension = node.get("extension");
+        }
+        else {
+            this.extension = null;
+        }
+
         this.symbolTable = symbolTable;
         this.reports = reports;
     }
@@ -26,7 +37,7 @@ public class ClassVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithMethod(JmmNode node, String s) {
-        MethodVisitor visitor = new MethodVisitor(node, this.symbolTable, this.reports);
+        MethodVisitor visitor = new MethodVisitor(node, this.symbolTable, this.reports, this.extension);
 
         return visitor.visit(node, "");
     }

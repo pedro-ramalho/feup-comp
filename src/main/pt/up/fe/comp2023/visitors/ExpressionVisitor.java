@@ -157,12 +157,18 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
 
     // TODO: change return type
     private String dealWithMethodInvocation(JmmNode node, String s) {
+        // fetch the method name
         String methodName = node.get("method");
 
-        for (JmmNode child : node.getChildren())
+        for (JmmNode child : node.getChildren()) {
             visit(child, "");
+        }
 
-        return this.symbolTable.getReturnType(methodName).getName();
+        if (this.symbolTable.getReturnType(methodName) != null) {
+            return this.symbolTable.getReturnType(methodName).getName();
+        }
+
+        return "importedMethod";
     }
 
     private String dealWithArrayLength(JmmNode node, String s) {

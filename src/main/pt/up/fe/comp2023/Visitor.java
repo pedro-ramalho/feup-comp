@@ -6,6 +6,7 @@ import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Visitor extends AJmmVisitor<String, String> {
 
@@ -351,12 +352,21 @@ public class Visitor extends AJmmVisitor<String, String> {
         String importName = jmmNode.get("name");
 
         String importPack = "";
+
         // fetch the package that was imported
         if (jmmNode.hasAttribute("pack"))
             importPack = jmmNode.get("pack");
 
+        String r1 = importPack.replace("[", "");
+        String r2 = r1.replace("]", "");
+        String r3 = r2.replace(" ", "");
+
+        ArrayList<String> list = new ArrayList<String>(Arrays.asList(r3.split(",")));
+
+        String result = importName + '.' + String.join(".", list);
+
         // add the information to the symbol table
-        this.symbolTable.addImport(importName + '.' + importPack);
+        this.symbolTable.addImport(result);
 
         return s;
     }

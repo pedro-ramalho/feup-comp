@@ -18,7 +18,7 @@ program
     ;
 
 importDeclaration
-    : 'import' name=ID ('.' pack=ID)* ';'
+    : 'import' name=ID ('.' pack+=ID)* ';'
     ;
 
 classField

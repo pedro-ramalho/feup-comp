@@ -27,7 +27,7 @@ public class ProgramVisitor extends AJmmVisitor<String, String> {
         JmmNode classNode = node.getJmmChild(1);
 
         ImportVisitor importVisitor = new ImportVisitor(this.symbolTable, this.reports);
-        ClassVisitor classVisitor = new ClassVisitor(this.symbolTable, this.reports);
+        ClassVisitor classVisitor = new ClassVisitor(classNode, this.symbolTable, this.reports);
 
         importVisitor.visit(importNode, "");
         classVisitor.visit(classNode, "");

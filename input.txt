@@ -1,25 +1,18 @@
-import io.println.ola;
+import A0.A1.A2.A3.A4;
 
-class MyClass {
+class MyClass extends A {
 
     int[] myfield;
     String myType;
 
     private boolean calc(int arg1) {
-        boolean x;
-        boolean y;
-        boolean z;
+        int x;
+        int y;
+        int[] z;
 
-        x = true;
-        y = false;
-        z = x && y;
+        A5 a;
 
-        if (x < y) {
-
-        }
-        else {
-
-        }
+        A0.println();
 
         return false;
     }

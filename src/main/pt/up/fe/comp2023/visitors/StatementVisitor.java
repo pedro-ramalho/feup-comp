@@ -116,14 +116,26 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
 
         if (!accessType.equals("int")) {
             this.addReport();
+
+            return null;
+        }
+
+        if (assigneeType == null) {
+            this.addReport();
+
+            return null;
         }
 
         if (!assigneeType.equals("int")) {
             this.addReport();
+
+            return null;
         }
 
         if (!exprType.equals("int")) {
             this.addReport();
+
+            return null;
         }
 
         return null;
@@ -138,21 +150,27 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         /* check if the assignment is being done over a class field */
         for (Symbol symbol : this.symbolTable.getFields()) {
             if (var.equals(symbol.getName())) {
-                assigneeType = symbol.getType().getName();
+                Type type = symbol.getType();
+
+                assigneeType = type.isArray() ? "array" : type.getName();
             }
         }
 
         /* check if the assignment is being done over a parameter */
         for (Symbol symbol : this.symbolTable.getParameters(this.method)) {
             if (var.equals(symbol.getName())) {
-                assigneeType = symbol.getType().getName();
+                Type type = symbol.getType();
+
+                assigneeType = type.isArray() ? "array" : type.getName();
             }
         }
 
         /* check if the assignment is being done over a local variable */
         for (Symbol symbol : this.symbolTable.getLocalVariables(this.method)) {
             if (var.equals(symbol.getName())) {
-                assigneeType = symbol.getType().getName();
+                Type type = symbol.getType();
+
+                assigneeType = type.isArray() ? "array" : type.getName();
             }
         }
 

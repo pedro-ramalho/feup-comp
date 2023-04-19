@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2023.MySymbolTable;
+import pt.up.fe.comp2023.visitors.handlers.VariableHandler;
 
 import java.util.ArrayList;
 
@@ -14,13 +15,15 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
     private JmmNode node;
     private String modifier;
     private String name;
+    private String extension;
     private String returnType;
     private MySymbolTable symbolTable;
     private ArrayList<Report> reports;
 
-    public MethodVisitor(JmmNode node, MySymbolTable symbolTable, ArrayList<Report> reports) {
+    public MethodVisitor(JmmNode node, MySymbolTable symbolTable, ArrayList<Report> reports, String extension) {
         this.modifier = node.get("modifier");
         this.name = node.get("name");
+        this.extension = extension;
 
         this.symbolTable = symbolTable;
         this.reports = reports;
@@ -37,7 +40,7 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
     protected void buildVisitor() {
         addVisit("Method", this::dealWithMethod);
         addVisit("ReturnType", this::dealWithReturnType);
-        addVisit("Argument", this::dealWithArgument);
+        addVisit("Argument", this::dealWithVarDeclaration);
         addVisit("VarDeclaration", this::dealWithVarDeclaration);
         addVisit("MethodStatement", this::dealWithMethodStatement);
         addVisit("ReturnStatement", this::dealWithReturnStatement);
@@ -64,10 +67,12 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithVarDeclaration(JmmNode node, String s) {
-        return null;
-    }
+        VariableHandler handler = new VariableHandler(node, this.symbolTable);
 
-    private String dealWithArgument(JmmNode node, String s) {
+        if (handler.getType() == null) {
+            this.addReport();
+        }
+
         return null;
     }
 
