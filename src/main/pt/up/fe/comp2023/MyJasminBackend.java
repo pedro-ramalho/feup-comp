@@ -175,7 +175,7 @@ public class MyJasminBackend implements JasminBackend {
                     code.append(getLoad(element, method)).append("\n");
                 }
                 if (callType == CallType.invokestatic) {
-                    code.append("\tinvokestatic ").append(firstArg.getName());
+                    code.append("\tinvokestatic ");
                 } else {
                     code.append("\tinvokevirtual ");
                 }
@@ -277,7 +277,7 @@ public class MyJasminBackend implements JasminBackend {
 
         code.append(getLoad(leftElement, method)).append(getLoad(rightElement, method)).append("\t");
         switch (operationType) {
-            case ADD:
+            case ADD ->
 /*
                 if (!leftElement.isLiteral() && rightElement.isLiteral()) {
                     return getIinc((LiteralElement) rightElement, (Operand) leftElement, method);
@@ -288,18 +288,10 @@ public class MyJasminBackend implements JasminBackend {
                 else {
 */
                     code.append("iadd");
-                break;
-            case SUB:
-                code.append("isub");
-                break;
-            case MUL:
-                code.append("imul");
-                break;
-            case DIV:
-                code.append("idiv");
-                break;
-
-            default: code.append("error on binary operation instruction");
+            case SUB -> code.append("isub");
+            case MUL -> code.append("imul");
+            case DIV -> code.append("idiv");
+            default -> code.append("error on binary operation instruction");
         }
         code.append("\n");
         return code.toString();
