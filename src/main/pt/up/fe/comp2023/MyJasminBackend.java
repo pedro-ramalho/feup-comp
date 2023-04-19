@@ -223,7 +223,7 @@ public class MyJasminBackend implements JasminBackend {
                     code.append("\tdup\n");
                 } else if (elementType == ElementType.ARRAYREF) {
                     // TODO
-                    code.append("");
+//                    code.append("");
                 }
             }
             case ldc -> code.append(getLoad(firstArg, method)).append("\n");
@@ -276,9 +276,9 @@ public class MyJasminBackend implements JasminBackend {
         OperationType operationType = instruction.getOperation().getOpType();
 
         code.append(getLoad(leftElement, method)).append(getLoad(rightElement, method)).append("\t");
-
         switch (operationType) {
             case ADD:
+/*
                 if (!leftElement.isLiteral() && rightElement.isLiteral()) {
                     return getIinc((LiteralElement) rightElement, (Operand) leftElement, method);
                 }
@@ -286,8 +286,8 @@ public class MyJasminBackend implements JasminBackend {
                     return getIinc((LiteralElement) leftElement, (Operand) rightElement, method);
                 }
                 else {
+*/
                     code.append("iadd");
-                }
                 break;
             case SUB:
                 code.append("isub");
