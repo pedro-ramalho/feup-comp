@@ -186,7 +186,7 @@ public class MyJasminBackend implements JasminBackend {
                 }
                 code.append(")").append(convertType(instruction.getReturnType())).append("\n");
 
-                if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)) {
+                if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID) && !instruction.getInstType().equals(InstructionType.ASSIGN)) {
                     code.append("\tpop\n");
                 }
                 break;
@@ -214,7 +214,7 @@ public class MyJasminBackend implements JasminBackend {
                     code.append(convertType(element.getType()));
                 }
                 code.append(")").append(convertType(instruction.getReturnType())).append("\n");
-                if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)) {
+                if(!instruction.getReturnType().getTypeOfElement().equals(ElementType.VOID) && !instruction.getInstType().equals(InstructionType.ASSIGN)) {
                     code.append("\tpop\n");
                 }
                 break;
