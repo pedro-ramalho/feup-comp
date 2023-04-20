@@ -124,6 +124,9 @@ public class MyJasminBackend implements JasminBackend {
 
         for (Instruction instruction: instructions) {
             code.append(getInstructions(instruction, method));
+            if (instruction.getInstType() == InstructionType.CALL && ((CallInstruction) (instruction)).getReturnType().getTypeOfElement() != ElementType.VOID) {
+                code.append("\t").append("pop").append("\n");
+            }
         }
         return code.toString();
     }
