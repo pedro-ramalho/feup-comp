@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.sun.source.util.SourcePositions;
 import pt.up.fe.comp.TestUtils;
@@ -69,8 +70,9 @@ public class Launcher {
         OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
         MyJasminBackend jasminBackend = new MyJasminBackend();
         JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
-
         System.out.println(myJasminResult.getJasminCode());
+        myJasminResult.compile();
+        myJasminResult.run();
 
         // ... add remaining stages
     }

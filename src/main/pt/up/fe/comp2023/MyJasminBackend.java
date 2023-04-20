@@ -175,11 +175,12 @@ public class MyJasminBackend implements JasminBackend {
                 }
                 if (callType == CallType.invokestatic) {
                     code.append("\tinvokestatic ");
+                    code.append(firstArg.getName()).append("/").append(secondArg.getLiteral().replace("\"", "")).append("(");
                 } else {
                     code.append("\tinvokevirtual ");
+                    ClassType classType = (ClassType) firstArg.getType();
+                    code.append(classType.getName()).append("/").append(secondArg.getLiteral().replace("\"", "")).append("(");
                 }
-                ClassType classType = (ClassType) firstArg.getType();
-                code.append(classType.getName()).append("/").append(secondArg.getLiteral().replace("\"", "")).append("(");
                 for (Element element : instruction.getListOfOperands()) {
                     code.append(convertType(element.getType()));
                 }
