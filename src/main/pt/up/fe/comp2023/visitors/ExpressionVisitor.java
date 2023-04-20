@@ -15,12 +15,15 @@ import java.util.ArrayList;
 public class ExpressionVisitor extends AJmmVisitor<String, String> {
     private String method;
 
+    private String extension;
+
     private MySymbolTable symbolTable;
 
     private ArrayList<Report> reports;
 
-    public ExpressionVisitor(String method, MySymbolTable symbolTable, ArrayList<Report> reports) {
+    public ExpressionVisitor(String method, String extension, MySymbolTable symbolTable, ArrayList<Report> reports) {
         this.method = method;
+        this.extension = extension;
         this.symbolTable = symbolTable;
         this.reports = reports;
     }
@@ -77,7 +80,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithIdentifier(JmmNode node, String s) {
-        IdentifierHandler handler = new IdentifierHandler(node, this.method, this.symbolTable);
+        IdentifierHandler handler = new IdentifierHandler(node, this.method, this.extension, this.symbolTable);
 
         String identifierType = handler.getType();
 
@@ -157,18 +160,26 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
 
     // TODO: change return type
     private String dealWithMethodInvocation(JmmNode node, String s) {
-        // fetch the method name
-        String methodName = node.get("method");
+        // the node which will invoke the method
+        JmmNode invoker = node.getJmmChild(0);
 
-        for (JmmNode child : node.getChildren()) {
-            visit(child, "");
-        }
+        String invokerType = visit(invoker, "");
 
-        if (this.symbolTable.getReturnType(methodName) != null) {
-            return this.symbolTable.getReturnType(methodName).getName();
-        }
+        System.out.println("invokerType: " + invokerType);
 
-        return "importedMethod";
+        return invokerType;
+
+        /*
+        it is only possible of calling a method if the invoker is of type:
+        * 1. this
+        * 2. imported
+        * 3. extension
+
+        the return of this function will be:
+        * 1. the return type of the method, if the invoker is of type "this"
+        * 2. "imported", if the invoker is of type "imported"
+        * 3. "extension", if the invoker is of type "extension"
+        * */
     }
 
     private String dealWithArrayLength(JmmNode node, String s) {

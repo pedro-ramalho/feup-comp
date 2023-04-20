@@ -8,6 +8,7 @@ import java.util.List;
 
 public class VariableHandler implements Handler {
     private JmmNode node;
+    private String extension;
 
     private MySymbolTable symbolTable;
 
@@ -16,28 +17,33 @@ public class VariableHandler implements Handler {
         this.symbolTable = symbolTable;
     }
 
+    private String parseImport(String imp) {
+        String[] splitImport = imp.split("\\.");
+
+        return splitImport[splitImport.length - 1];
+    }
+
     @Override
     public String getType() {
         JmmNode declaration = node.getJmmChild(0);
 
-        // simply return the keyword
+        /* built-in type, simply return the keyword */
         if (declaration.getKind().equals("Literal")) {
             return declaration.get("keyword");
         }
 
-        // custom type, must have been imported
+        /* custom type, must be an imported class or an extension */
         if (declaration.getKind().equals("CustomType")) {
-            System.out.println("I'm dealing with a CustomType node.");
-
             String name = declaration.get("name");
-            List<String> imports = symbolTable.getImports();
 
-            for (String imp : imports) {
-                if (imp.contains(name)) {
-                    System.out.println("The list of imports contains that name!");
+            /* check for imports */
+            for (String imp : symbolTable.getImports()) {
+                if (name.equals(this.parseImport(imp))) {
                     return name;
                 }
             }
+
+            /* check for class extension */
 
         }
 

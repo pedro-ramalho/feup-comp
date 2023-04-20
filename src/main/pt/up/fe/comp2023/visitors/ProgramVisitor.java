@@ -23,14 +23,21 @@ public class ProgramVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithProgram(JmmNode node, String s) {
-        JmmNode importNode = node.getJmmChild(0);
-        JmmNode classNode = node.getJmmChild(1);
+        for (JmmNode child : node.getChildren()) {
+            /* visit import nodes */
+            if (child.getKind().equals("ImportDeclaration")) {
+                ImportVisitor importVisitor = new ImportVisitor(this.symbolTable, this.reports);
 
-        ImportVisitor importVisitor = new ImportVisitor(this.symbolTable, this.reports);
-        ClassVisitor classVisitor = new ClassVisitor(classNode, this.symbolTable, this.reports);
+                importVisitor.visit(child, "");
+            }
 
-        importVisitor.visit(importNode, "");
-        classVisitor.visit(classNode, "");
+            /* visit class declaration nodes */
+            if (child.getKind().equals("ClassDeclaration")) {
+                ClassVisitor classVisitor = new ClassVisitor(child, this.symbolTable, this.reports);
+
+                classVisitor.visit(child, "");
+            }
+        }
 
         return null;
     }

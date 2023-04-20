@@ -75,9 +75,9 @@ public class Launcher {
             System.out.println(report.toString());
         }
 
-        // Analysis analysis = new Analysis();
+        Analysis analysis = new Analysis();
 
-        // JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
+        JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
         // ... add remaining stages
     }

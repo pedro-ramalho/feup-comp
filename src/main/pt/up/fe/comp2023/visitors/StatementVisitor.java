@@ -13,10 +13,12 @@ import java.util.ArrayList;
 
 public class StatementVisitor extends AJmmVisitor<String, String> {
     private String method;
+    private String extension;
     private MySymbolTable symbolTable;
     private ArrayList<Report> reports;
-    public StatementVisitor(String method, MySymbolTable symbolTable, ArrayList<Report> reports) {
+    public StatementVisitor(String method, String extension, MySymbolTable symbolTable, ArrayList<Report> reports) {
         this.method = method;
+        this.extension = extension;
         this.symbolTable = symbolTable;
         this.reports = reports;
     }
@@ -42,7 +44,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithReturnStatement(JmmNode node, String s) {
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
 
         String returnType = visitor.visit(node.getJmmChild(0), "");
 
@@ -76,7 +78,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         JmmNode accessExpr = node.getJmmChild(0);
         JmmNode expression = node.getJmmChild(1);
 
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
 
         String accessType = visitor.visit(accessExpr);
         String exprType = visitor.visit(expression);
@@ -174,9 +176,12 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             }
         }
 
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
 
         String assignedType = visitor.visit(expression, "");
+
+        System.out.println("assigneeType: " + assigneeType);
+        System.out.println("assignedType: " + assignedType);
 
         if (assigneeType == null) {
             this.addReport();
@@ -194,7 +199,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithExprStmt(JmmNode node, String s) {
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
 
         for (JmmNode child : node.getChildren()) {
             visitor.visit(child, "");
@@ -204,7 +209,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithWhile(JmmNode node, String s) {
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
 
         if (!visitor.visit(node.getJmmChild(0), "").equals("boolean")) {
             this.addReport();
@@ -217,11 +222,9 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         for (JmmNode child : node.getChildren()) {
             /* condition is of type 'expression' */
             if (child.getKind().equals("Condition")) {
-                ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.symbolTable, this.reports);
+                ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
 
-                if (!visitor.visit(child).equals("boolean")) {
-                    this.addReport();
-                }
+                visitor.visit(child);
             }
             else {
                visit(child, "");

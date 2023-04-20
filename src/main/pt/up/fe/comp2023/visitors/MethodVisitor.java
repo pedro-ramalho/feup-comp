@@ -55,13 +55,13 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithReturnStatement(JmmNode node, String s) {
-        StatementVisitor visitor = new StatementVisitor(this.name, this.symbolTable, this.reports);
+        StatementVisitor visitor = new StatementVisitor(this.name, this.extension, this.symbolTable, this.reports);
 
         return visitor.visit(node, "");
     }
 
     private String dealWithMethodStatement(JmmNode node, String s) {
-        StatementVisitor visitor = new StatementVisitor(this.name, this.symbolTable, this.reports);
+        StatementVisitor visitor = new StatementVisitor(this.name, this.extension, this.symbolTable, this.reports);
 
         return visitor.visit(node, "");
     }

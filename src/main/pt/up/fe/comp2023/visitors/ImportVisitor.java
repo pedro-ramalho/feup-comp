@@ -24,18 +24,6 @@ public class ImportVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithImportDeclaration(JmmNode node, String s) {
-        String importName = node.get("name");
-
-        String importPack = "";
-        // fetch the package that was imported
-        if (node.hasAttribute("pack"))
-            importPack = node.get("pack");
-
-
-
-        // add the information to the symbol table
-        this.symbolTable.addImport(importName + '.' + importPack);
-
         return null;
     }
 }
