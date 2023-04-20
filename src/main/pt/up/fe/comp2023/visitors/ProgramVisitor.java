@@ -34,8 +34,6 @@ public class ProgramVisitor extends AJmmVisitor<String, String> {
             /* visit class declaration nodes */
             if (child.getKind().equals("ClassDeclaration")) {
                 ClassVisitor classVisitor = new ClassVisitor(child, this.symbolTable, this.reports);
-
-                classVisitor.visit(child, "");
             }
         }
 

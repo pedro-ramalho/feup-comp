@@ -8,7 +8,8 @@ class MyClass extends A {
 
     private boolean calc(int arg1) {
         int x;
-
+        A a;
+        a = M.foo();
 
         return false;
     }

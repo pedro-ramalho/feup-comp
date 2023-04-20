@@ -189,6 +189,14 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
+        if (assigneeType.equals("imported") || assigneeType.equals("extension")) {
+            return null;
+        }
+
+        if (assignedType.equals("imported") || assignedType.equals("extension")) {
+            return null;
+        }
+
         if (!assigneeType.equals(assignedType)) {
             this.addReport();
 

@@ -29,6 +29,11 @@ public class ClassVisitor extends AJmmVisitor<String, String> {
 
         this.symbolTable = symbolTable;
         this.reports = reports;
+
+        /* visit its children */
+        for (JmmNode child : this.node.getChildren()) {
+            this.visit(child, "");
+        }
     }
 
     private void addReport() {

@@ -25,6 +25,8 @@ public class IdentifierHandler implements Handler {
     private String parseImport(String imp) {
         String[] splitImport = imp.split("\\.");
 
+        String ret = splitImport[splitImport.length - 1];
+
         return splitImport[splitImport.length - 1];
     }
 

@@ -170,7 +170,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
         return invokerType;
 
         /*
-        it is only possible of calling a method if the invoker is of type:
+        it is only possible to call a method if the invoker is of type:
         * 1. this
         * 2. imported
         * 3. extension
