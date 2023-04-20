@@ -298,7 +298,7 @@ public class MyJasminBackend implements JasminBackend {
                 code.append("idiv");
                 break;
             }
-            default: code.append("error on binary operation instruction");
+            default: code.append("");
         }
         code.append("\n");
         return code.toString();
