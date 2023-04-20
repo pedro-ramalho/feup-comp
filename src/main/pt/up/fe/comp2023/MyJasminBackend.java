@@ -7,7 +7,6 @@ import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 import java.util.List;
-import java.util.Map;
 
 
 public class MyJasminBackend implements JasminBackend {
@@ -185,6 +184,7 @@ public class MyJasminBackend implements JasminBackend {
                     code.append(convertType(element.getType()));
                 }
                 code.append(")").append(convertType(instruction.getReturnType())).append("\n");
+                break;
             }
             case invokespecial -> {
                 if (firstArg.getName().equals("this")) {
@@ -209,6 +209,7 @@ public class MyJasminBackend implements JasminBackend {
                     code.append(convertType(element.getType()));
                 }
                 code.append(")").append(convertType(instruction.getReturnType())).append("\n");
+                break;
             }
 
 /*
@@ -225,8 +226,12 @@ public class MyJasminBackend implements JasminBackend {
                     // TODO
 //                    code.append("");
                 }
+                break;
             }
-            case ldc -> code.append(getLoad(firstArg, method)).append("\n");
+            case ldc -> {
+                code.append(getLoad(firstArg, method)).append("\n");
+                break;
+            }
         }
         return code.toString();
     }
@@ -277,21 +282,23 @@ public class MyJasminBackend implements JasminBackend {
 
         code.append(getLoad(leftElement, method)).append(getLoad(rightElement, method)).append("\t");
         switch (operationType) {
-            case ADD ->
-/*
-                if (!leftElement.isLiteral() && rightElement.isLiteral()) {
-                    return getIinc((LiteralElement) rightElement, (Operand) leftElement, method);
-                }
-                else if (leftElement.isLiteral() && !rightElement.isLiteral()) {
-                    return getIinc((LiteralElement) leftElement, (Operand) rightElement, method);
-                }
-                else {
-*/
-                    code.append("iadd");
-            case SUB -> code.append("isub");
-            case MUL -> code.append("imul");
-            case DIV -> code.append("idiv");
-            default -> code.append("error on binary operation instruction");
+            case ADD: {
+                code.append("iadd");
+                break;
+            }
+            case SUB: {
+                code.append("isub");
+                break;
+            }
+            case MUL: {
+                code.append("imul");
+                break;
+            }
+            case DIV: {
+                code.append("idiv");
+                break;
+            }
+            default: code.append("error on binary operation instruction");
         }
         code.append("\n");
         return code.toString();
@@ -309,16 +316,6 @@ public class MyJasminBackend implements JasminBackend {
     }
 
 
-    private String getIinc(LiteralElement literalElement, Operand operand, Method method) {
-        StringBuilder code = new StringBuilder();
-        Descriptor operandDescriptor = method.getVarTable().get(operand.getName());
-        int literalValue = Integer.parseInt(literalElement.getLiteral());
-
-        code.append("iinc ").append(operandDescriptor.getVirtualReg()).append(" ");
-        code.append(literalValue);
-
-        return "\t" + code + "\n" + getLoad(operand, method);
-    }
 
     private String getReturnInstruction(ReturnInstruction instruction, Method method) {
         StringBuilder code = new StringBuilder();
@@ -410,22 +407,5 @@ public class MyJasminBackend implements JasminBackend {
         }
     }
 
-/*
-    private static String getClassFullName(ClassUnit ollirClass, String className) {
-        if (ollirClass.isImportedClass(className)) {
-            for (String fullImport : ollirClass.getImports()) {
-                int lastSeparatorIndex = className.lastIndexOf(".");
-
-                if (lastSeparatorIndex < 0 && fullImport.equals(className)) {
-                    return className;
-                } else if (fullImport.substring(lastSeparatorIndex + 1).equals(className)) {
-                    return fullImport;
-                }
-            }
-        }
-
-        return className;
-    }
-*/
 }
 
