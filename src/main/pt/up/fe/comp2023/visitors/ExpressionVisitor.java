@@ -11,6 +11,7 @@ import pt.up.fe.comp2023.visitors.handlers.IdentifierHandler;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ExpressionVisitor extends AJmmVisitor<String, String> {
     private String method;
@@ -76,7 +77,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
         return "boolean";
     }
     private String dealWithObject(JmmNode node, String s) {
-        return "object";
+        return "this";
     }
 
     private String dealWithIdentifier(JmmNode node, String s) {
@@ -160,12 +161,48 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
 
     // TODO: change return type
     private String dealWithMethodInvocation(JmmNode node, String s) {
+        String name = node.get("method");
+
         // the node which will invoke the method
         JmmNode invoker = node.getJmmChild(0);
 
         String invokerType = visit(invoker, "");
 
         System.out.println("invokerType: " + invokerType);
+
+        /* method from an imported class, no need for argument checking */
+        if (invokerType.equals("imported") || invokerType.equals("extension")) {
+            return invokerType;
+        }
+
+        /* calling a method declared in the current class, must check the arguments */
+        else {
+            /* first, check if the method exists */
+            if (!this.symbolTable.getMethods().contains(name)) {
+                this.addReport();
+
+                return null;
+            }
+
+
+            /* the method exists, now we must check its arguments */
+            int numArgs = this.symbolTable.getParameters(this.method).size();
+            int numInvokedArgs = node.getChildren().size() - 1;
+
+            /* different number of arguments, add a report */
+            if (numArgs != numInvokedArgs) {
+                this.addReport();
+
+                return null;
+            }
+
+            List<Symbol> args = this.symbolTable.getParameters(name);
+            /* check for the argument types */
+            for (int idx = 1; idx < node.getChildren().size(); idx++) {
+                String invokedArgType = visit(node.getJmmChild(idx), "");
+                System.out.println("invokedArgType: " + invokedArgType);
+            }
+        }
 
         return invokerType;
 

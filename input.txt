@@ -8,13 +8,18 @@ class MyClass extends A {
 
     private boolean calc(int arg1) {
         int x;
-        A a;
-        a = M.foo();
 
         return false;
     }
 
     private int calc2(int arg1, int arg2) {
+        int y;
+        String[] arg;
+        int[] x;
+
+        y = this.calc(2*3*4, x);
+
+        A.foo(arg1, arg2);
 
         return 1;
     }
