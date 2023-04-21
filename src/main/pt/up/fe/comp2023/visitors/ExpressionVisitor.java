@@ -1,6 +1,7 @@
 package pt.up.fe.comp2023.visitors;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -13,7 +14,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpressionVisitor extends AJmmVisitor<String, String> {
+public class ExpressionVisitor extends AJmmVisitor<String, Type> {
     private String method;
 
     private String extension;
@@ -21,6 +22,16 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
     private MySymbolTable symbolTable;
 
     private ArrayList<Report> reports;
+
+    private final Type intType = new Type("int", false);
+    private final Type boolType = new Type("boolean", false);
+    private final Type stringType = new Type("String", false);
+    private final Type intArrayType = new Type("int", true);
+    private final Type stringArrayType = new Type("String", true);
+    private final Type voidType = new Type("void", false);
+    private final Type importType = new Type("import", false);
+    private final Type extensionType = new Type("extension", false);
+    private final Type thisType = new Type("this", false);
 
     public ExpressionVisitor(String method, String extension, MySymbolTable symbolTable, ArrayList<Report> reports) {
         this.method = method;
@@ -65,25 +76,25 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
         return operation.equals("<") || operation.equals(">");
     }
 
-    private String dealWithCondition(JmmNode node, String s) {
-        String conditionType = visit(node.getJmmChild(0), "");
+    private Type dealWithCondition(JmmNode node, String s) {
+        Type conditionType = visit(node.getJmmChild(0), "");
 
-        if (!conditionType.equals("boolean")) {
+        if (!conditionType.equals(this.boolType)) {
             this.addReport();
 
             return null;
         }
 
-        return "boolean";
+        return conditionType;
     }
-    private String dealWithObject(JmmNode node, String s) {
-        return "this";
+    private Type dealWithObject(JmmNode node, String s) {
+        return new Type("this", false);
     }
 
-    private String dealWithIdentifier(JmmNode node, String s) {
+    private Type dealWithIdentifier(JmmNode node, String s) {
         IdentifierHandler handler = new IdentifierHandler(node, this.method, this.extension, this.symbolTable);
 
-        String identifierType = handler.getType();
+        Type identifierType = handler.getType();
 
         if (identifierType == null) {
             this.addReport();
@@ -94,89 +105,94 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
         return identifierType;
     }
 
-    private String dealWithBoolean(JmmNode node, String s) {
-        return "boolean";
+    private Type dealWithBoolean(JmmNode node, String s) {
+        return this.boolType;
     }
 
-    private String dealWithInteger(JmmNode node, String s) {
-        return "int";
+    private Type dealWithInteger(JmmNode node, String s) {
+        return this.intType;
     }
 
-    private String dealWithBinaryOp(JmmNode node, String s) {
+    private Type dealWithBinaryOp(JmmNode node, String s) {
         JmmNode leftOperand = node.getJmmChild(0);
         JmmNode rightOperand = node.getJmmChild(1);
 
         String operation = node.get("op");
-        String leftOperandType = visit(leftOperand, "");
-        String rightOperandType = visit(rightOperand, "");
+
+        Type leftOperandType = visit(leftOperand, "");
+        Type rightOperandType = visit(rightOperand, "");
 
         if (isArithmetic(operation)) {
-            if (!(leftOperandType.equals("int") && rightOperandType.equals("int"))) {
+            if (!(leftOperandType.equals(this.intType) && rightOperandType.equals(this.intType))) {
                 this.addReport();
             }
 
-            return "int";
+            return this.intType;
         }
 
         if (isLogical(operation)) {
-            if (!(leftOperandType.equals("boolean") && rightOperandType.equals("boolean"))) {
+            if (!(leftOperandType.equals(this.boolType) && rightOperandType.equals(this.boolType))) {
                 this.addReport();
             }
 
-            return "boolean";
+            return this.boolType;
         }
 
         if (isComparison(operation)) {
-            if (!(leftOperandType.equals("int") && rightOperandType.equals("int"))) {
+            if (!(leftOperandType.equals(this.intType) && rightOperandType.equals(this.intType))) {
                 this.addReport();
             }
 
-            return "boolean";
+            return this.boolType;
         }
 
         return null;
     }
 
-    private String dealWithParenthesis(JmmNode node, String s) {
+    private Type dealWithParenthesis(JmmNode node, String s) {
         return visit(node.getJmmChild(0), "");
     }
 
-    private String dealWithCustomInstantiation(JmmNode node, String s) {
-        return node.getJmmChild(0).get("name");
+    private Type dealWithCustomInstantiation(JmmNode node, String s) {
+        String customType = node.getJmmChild(0).get("name");
+        boolean isArray = customType.contains("[]");
+
+        String parsedType = isArray ? customType.substring(0, customType.length() - 2) : customType;
+
+        return new Type(parsedType, isArray);
     }
 
-    private String dealWithArrayInstantiation(JmmNode node, String s) {
-        JmmNode arrayLength = node.getJmmChild(0);
+    private Type dealWithArrayInstantiation(JmmNode node, String s) {
+        JmmNode arrayTypeNode = node.getJmmChild(0);
+        JmmNode arrayLengthNode = node.getJmmChild(1);
 
-        String arrayLengthType = visit(arrayLength, "");
+        Type arrayLengthType = visit(arrayLengthNode, "");
 
-        if (!arrayLengthType.equals("int")) {
+        if (!arrayLengthType.equals(this.intType)) {
             this.addReport();
 
             return null;
         }
 
-        return "array";
+        if (arrayTypeNode.hasAttribute("keyword")) {
+            return new Type(arrayTypeNode.get("keyword"), arrayTypeNode.get("keyword").contains("[]"));
+        }
+        else {
+            return new Type(arrayTypeNode.get("name"), arrayTypeNode.get("name").contains("[]"));
+        }
     }
 
     // TODO: change return type
-    private String dealWithMethodInvocation(JmmNode node, String s) {
+    private Type dealWithMethodInvocation(JmmNode node, String s) {
         String name = node.get("method");
 
-        // the node which will invoke the method
         JmmNode invoker = node.getJmmChild(0);
 
-        String invokerType = visit(invoker, "");
+        Type invokerType = visit(invoker, "");
 
-        System.out.println("invokerType: " + invokerType);
+        /* dealing with a method of our own class */
+        if (invokerType.getName().equals(this.symbolTable.getClassName()) || invokerType.equals(this.thisType)) {
 
-        /* method from an imported class, no need for argument checking */
-        if (invokerType.equals("imported") || invokerType.equals("extension")) {
-            return invokerType;
-        }
-
-        /* calling a method declared in the current class, must check the arguments */
-        else {
             /* first, check if the method exists */
             if (!this.symbolTable.getMethods().contains(name)) {
                 this.addReport();
@@ -184,75 +200,76 @@ public class ExpressionVisitor extends AJmmVisitor<String, String> {
                 return null;
             }
 
-
-            /* the method exists, now we must check its arguments */
-            int numArgs = this.symbolTable.getParameters(this.method).size();
+            /* then, check its arguments */
+            int numArgs = this.symbolTable.getParameters(name).size();
             int numInvokedArgs = node.getChildren().size() - 1;
 
-            /* different number of arguments, add a report */
+            /* the number of arguments and invoked arguments are different, must add a report */
             if (numArgs != numInvokedArgs) {
                 this.addReport();
 
                 return null;
             }
 
-            List<Symbol> args = this.symbolTable.getParameters(name);
-            /* check for the argument types */
-            for (int idx = 1; idx < node.getChildren().size(); idx++) {
-                String invokedArgType = visit(node.getJmmChild(idx), "");
-                System.out.println("invokedArgType: " + invokedArgType);
+            int idx = 1;
+
+            for (Symbol arg : this.symbolTable.getParameters(name)) {
+                Type argType = arg.getType();
+                Type invokedArgType = visit(node.getJmmChild(idx), "");
+
+                /* arguments of different types, must add a report */
+                if (!argType.equals(invokedArgType)) {
+                    this.addReport();
+
+                    return null;
+                }
+
+                idx++;
             }
+
+            return this.symbolTable.getReturnType(name);
         }
 
-        return invokerType;
-
-        /*
-        it is only possible to call a method if the invoker is of type:
-        * 1. this
-        * 2. imported
-        * 3. extension
-
-        the return of this function will be:
-        * 1. the return type of the method, if the invoker is of type "this"
-        * 2. "imported", if the invoker is of type "imported"
-        * 3. "extension", if the invoker is of type "extension"
-        * */
+        /* dealing with a method of an imported/extended class */
+        else {
+            return this.importType;
+        }
     }
 
-    private String dealWithArrayLength(JmmNode node, String s) {
+    private Type dealWithArrayLength(JmmNode node, String s) {
         JmmNode accessedExpr = node.getJmmChild(0);
 
-        String accessedType = visit(accessedExpr, "");
+        Type accessedType = visit(accessedExpr, "");
 
-        if (!accessedType.equals("array")) {
+        if (!accessedType.isArray()) {
             this.addReport();
 
             return null;
         }
 
-        return "int";
+        return this.intType;
     }
 
-    private String dealWithArrayAccess(JmmNode node, String s) {
+    private Type dealWithArrayAccess(JmmNode node, String s) {
         JmmNode accessedExpr = node.getJmmChild(0);
         JmmNode indexExpr = node.getJmmChild(1);
 
-        String accessedType = visit(accessedExpr, "");
-        String indexType = visit(indexExpr, "");
+        Type accessedType = visit(accessedExpr, "");
+        Type indexType = visit(indexExpr, "");
 
-        if (!(accessedType.equals("array") && indexType.equals("int"))) {
+        if (!(accessedType.isArray() && indexType.equals(this.intType))) {
             this.addReport();
 
             return null;
         }
 
-        return "int";
+        return this.intType;
     }
 
-    private String dealWithNegation(JmmNode node, String s) {
-        String returnType = visit(node.getJmmChild(0), "");
+    private Type dealWithNegation(JmmNode node, String s) {
+        Type returnType = visit(node.getJmmChild(0), "");
 
-        if (!returnType.equals("boolean")) {
+        if (!returnType.equals(this.boolType)) {
             this.addReport();
 
             return null;

@@ -46,9 +46,9 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     private String dealWithReturnStatement(JmmNode node, String s) {
         ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
 
-        String returnType = visitor.visit(node.getJmmChild(0), "");
+        Type returnType = visitor.visit(node.getJmmChild(0), "");
 
-        if (!returnType.equals(this.symbolTable.getReturnType(this.method).getName())) {
+        if (!returnType.equals(this.symbolTable.getReturnType(this.method))) {
             this.addReport();
         }
 
@@ -73,15 +73,16 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
 
     private String dealWithArrayAssignment(JmmNode node, String s) {
         String var = node.get("var");
-        String assigneeType = null;
+
+        Type assigneeType = null;
 
         JmmNode accessExpr = node.getJmmChild(0);
         JmmNode expression = node.getJmmChild(1);
 
         ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
 
-        String accessType = visitor.visit(accessExpr);
-        String exprType = visitor.visit(expression);
+        Type accessType = visitor.visit(accessExpr);
+        Type exprType = visitor.visit(expression);
 
         /* check if the assignment is being done over a class field */
         for (Symbol symbol : this.symbolTable.getFields()) {
@@ -89,7 +90,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
                 Type type = symbol.getType();
 
                 if (type.isArray()) {
-                    assigneeType = symbol.getType().getName();
+                    assigneeType = symbol.getType();
                 }
             }
         }
@@ -100,7 +101,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
                 Type type = symbol.getType();
 
                 if (type.isArray()) {
-                    assigneeType = symbol.getType().getName();
+                    assigneeType = symbol.getType();
                 }
             }
         }
@@ -111,12 +112,12 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
                 Type type = symbol.getType();
 
                 if (type.isArray()) {
-                    assigneeType = symbol.getType().getName();
+                    assigneeType = symbol.getType();
                 }
             }
         }
 
-        if (!accessType.equals("int")) {
+        if (!accessType.equals(new Type("int", false))) {
             this.addReport();
 
             return null;
@@ -128,13 +129,13 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
-        if (!assigneeType.equals("int")) {
+        if (!assigneeType.equals(new Type("int", true))) {
             this.addReport();
 
             return null;
         }
 
-        if (!exprType.equals("int")) {
+        if (!exprType.equals(new Type("int", false))) {
             this.addReport();
 
             return null;
@@ -145,43 +146,37 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
 
     private String dealWithAssignment(JmmNode node, String s) {
         String var = node.get("var");
-        String assigneeType = null;
+        Type assigneeType = null;
 
         JmmNode expression = node.getJmmChild(0);
 
         /* check if the assignment is being done over a class field */
         for (Symbol symbol : this.symbolTable.getFields()) {
             if (var.equals(symbol.getName())) {
-                Type type = symbol.getType();
-
-                assigneeType = type.isArray() ? "array" : type.getName();
+                assigneeType = symbol.getType();
             }
         }
 
         /* check if the assignment is being done over a parameter */
         for (Symbol symbol : this.symbolTable.getParameters(this.method)) {
             if (var.equals(symbol.getName())) {
-                Type type = symbol.getType();
-
-                assigneeType = type.isArray() ? "array" : type.getName();
+                assigneeType = symbol.getType();
             }
         }
 
         /* check if the assignment is being done over a local variable */
         for (Symbol symbol : this.symbolTable.getLocalVariables(this.method)) {
             if (var.equals(symbol.getName())) {
-                Type type = symbol.getType();
-
-                assigneeType = type.isArray() ? "array" : type.getName();
+                assigneeType = symbol.getType();
             }
         }
 
         ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
 
-        String assignedType = visitor.visit(expression, "");
+        Type assignedType = visitor.visit(expression, "");
 
-        System.out.println("assigneeType: " + assigneeType);
-        System.out.println("assignedType: " + assignedType);
+        System.out.println("assigneeType: " + assigneeType.toString());
+        System.out.println("assignedType: " + assignedType.toString());
 
         if (assigneeType == null) {
             this.addReport();
@@ -189,11 +184,11 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
-        if (assigneeType.equals("imported") || assigneeType.equals("extension")) {
+        if (assigneeType.equals(new Type("import", false)) || assigneeType.equals(new Type("extension", false))) {
             return null;
         }
 
-        if (assignedType.equals("imported") || assignedType.equals("extension")) {
+        if (assignedType.equals(new Type("import", false)) || assignedType.equals(new Type("extension", false))) {
             return null;
         }
 

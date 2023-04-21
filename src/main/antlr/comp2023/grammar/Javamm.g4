@@ -85,7 +85,7 @@ expression
     | expression '[' expression ']' #ArrayAccess
     | expression '.' 'length' #ArrayLength
     | expression '.' method=ID '(' (expression(',' expression)*)?')' #MethodInvocation
-    | 'new' '[' expression ']' #ArrayInstantiation
+    | 'new' type '[' expression ']' #ArrayInstantiation
     | 'new' type '(' ')' #CustomInstantiation
     | '(' expression ')' #Parenthesis
     | expression op=('*' | '/') expression #BinaryOp

@@ -70,6 +70,8 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
         VariableHandler handler = new VariableHandler(node, this.symbolTable);
 
         if (handler.getType() == null) {
+            System.out.println("I've found a null handler!");
+
             this.addReport();
         }
 

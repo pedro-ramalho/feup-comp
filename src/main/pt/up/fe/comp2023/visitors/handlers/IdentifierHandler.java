@@ -31,43 +31,42 @@ public class IdentifierHandler implements Handler {
     }
 
     @Override
-    public String getType() {
+    public Type getType() {
         /* check if the identifier is a class extension */
         if (this.identifier.equals(this.extension)) {
-            return "extension";
+            return new Type("extension", false);
+        }
+
+        /* check if the identifier is the class itself */
+        if (this.identifier.equals(this.symbolTable.getClassName())) {
+            return new Type("class", identifier.contains("[]"));
         }
 
         /* check if the identifier is from an import */
         for (String str : symbolTable.getImports()) {
             if (this.identifier.equals(this.parseImport(str))) {
-                return "imported";
-            }
-        }
-
-        /* check if the identifier is a class field */
-        for (Symbol symbol : symbolTable.getFields()) {
-            if (this.identifier.equals(symbol.getName())) {
-                Type type = symbol.getType();
-
-                return type.isArray() ? "array" : type.getName();
-            }
-        }
-
-        /* check if the identifier is a method parameter */
-        for (Symbol symbol : symbolTable.getParameters(this.method)) {
-            if (this.identifier.equals(symbol.getName())) {
-                Type type = symbol.getType();
-
-                return type.isArray() ? "array" : type.getName();
+                return new Type("import", false);
             }
         }
 
         /* check if the identifier is a method's local variable */
         for (Symbol symbol : symbolTable.getLocalVariables(this.method)) {
             if (this.identifier.equals(symbol.getName())) {
-                Type type = symbol.getType();
+                return symbol.getType();
+            }
+        }
 
-                return type.isArray() ? "array" : type.getName();
+        /* check if the identifier is a method parameter */
+        for (Symbol symbol : symbolTable.getParameters(this.method)) {
+            if (this.identifier.equals(symbol.getName())) {
+                return symbol.getType();
+            }
+        }
+
+        /* check if the identifier is a class field */
+        for (Symbol symbol : symbolTable.getFields()) {
+            if (this.identifier.equals(symbol.getName())) {
+                return symbol.getType();
             }
         }
 
