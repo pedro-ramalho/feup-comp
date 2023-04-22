@@ -18,6 +18,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
     private String method;
 
     private String extension;
+    private boolean isStatic;
 
     private MySymbolTable symbolTable;
 
@@ -25,17 +26,13 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
 
     private final Type intType = new Type("int", false);
     private final Type boolType = new Type("boolean", false);
-    private final Type stringType = new Type("String", false);
-    private final Type intArrayType = new Type("int", true);
-    private final Type stringArrayType = new Type("String", true);
-    private final Type voidType = new Type("void", false);
     private final Type importType = new Type("import", false);
-    private final Type extensionType = new Type("extension", false);
     private final Type thisType = new Type("this", false);
 
-    public ExpressionVisitor(String method, String extension, MySymbolTable symbolTable, ArrayList<Report> reports) {
+    public ExpressionVisitor(String method, String extension, boolean isStatic, MySymbolTable symbolTable, ArrayList<Report> reports) {
         this.method = method;
         this.extension = extension;
+        this.isStatic = isStatic;
         this.symbolTable = symbolTable;
         this.reports = reports;
     }
@@ -88,6 +85,13 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         return conditionType;
     }
     private Type dealWithObject(JmmNode node, String s) {
+        /* the 'this' keyword cannot be used on a static method, must add a report */
+        if (this.isStatic) {
+            this.addReport();
+
+            return null;
+        }
+
         return new Type("this", false);
     }
 
@@ -182,7 +186,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         }
     }
 
-    // TODO: change return type
     private Type dealWithMethodInvocation(JmmNode node, String s) {
         String name = node.get("method");
 

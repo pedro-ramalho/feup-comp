@@ -51,8 +51,8 @@ argument
     ;
 
 methodDeclaration
-    : (modifier=('static' | 'private' | 'public'))? returnType name=ID '(' ( argument (',' argument)*)? ')' '{' (varDeclaration)* (methodStatement)* 'return' returnStatement ';' '}' #Method
-    | ('public')? 'static' returnType 'main' '(' argument ')' '{' (varDeclaration)* (statement)* '}' #Main
+    : (modifier=('private' | 'public'))? (isStatic='static')? returnType name=ID '(' ( argument (',' argument)*)? ')' '{' (varDeclaration)* (methodStatement)* 'return' returnStatement ';' '}' #Method
+    | (modifier='public')? (isStatic='static')? returnType name='main' '(' argument ')' '{' (varDeclaration)* (methodStatement)* '}' #Main
     ;
 
 methodStatement

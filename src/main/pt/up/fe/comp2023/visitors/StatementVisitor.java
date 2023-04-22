@@ -14,11 +14,13 @@ import java.util.ArrayList;
 public class StatementVisitor extends AJmmVisitor<String, String> {
     private String method;
     private String extension;
+    private boolean isStatic;
     private MySymbolTable symbolTable;
     private ArrayList<Report> reports;
-    public StatementVisitor(String method, String extension, MySymbolTable symbolTable, ArrayList<Report> reports) {
+    public StatementVisitor(String method, String extension, boolean isStatic, MySymbolTable symbolTable, ArrayList<Report> reports) {
         this.method = method;
         this.extension = extension;
+        this.isStatic = isStatic;
         this.symbolTable = symbolTable;
         this.reports = reports;
     }
@@ -44,7 +46,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithReturnStatement(JmmNode node, String s) {
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
         Type returnType = visitor.visit(node.getJmmChild(0), "");
 
@@ -79,7 +81,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         JmmNode accessExpr = node.getJmmChild(0);
         JmmNode expression = node.getJmmChild(1);
 
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
         Type accessType = visitor.visit(accessExpr);
         Type exprType = visitor.visit(expression);
@@ -171,7 +173,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             }
         }
 
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
         Type assignedType = visitor.visit(expression, "");
 
@@ -182,6 +184,12 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             this.addReport();
 
             return null;
+        }
+
+        if (assigneeType.getName().equals(this.symbolTable.getClassName()) || assigneeType.getName().equals(this.extension)) {
+            if (assignedType.equals(new Type("this", false))) {
+                return null;
+            }
         }
 
         if (assigneeType.equals(new Type("import", false)) || assigneeType.equals(new Type("extension", false))) {
@@ -202,7 +210,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithExprStmt(JmmNode node, String s) {
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
         for (JmmNode child : node.getChildren()) {
             visitor.visit(child, "");
@@ -212,7 +220,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithWhile(JmmNode node, String s) {
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
+        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
         if (!visitor.visit(node.getJmmChild(0), "").equals("boolean")) {
             this.addReport();
@@ -225,7 +233,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         for (JmmNode child : node.getChildren()) {
             /* condition is of type 'expression' */
             if (child.getKind().equals("Condition")) {
-                ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.symbolTable, this.reports);
+                ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
                 visitor.visit(child);
             }

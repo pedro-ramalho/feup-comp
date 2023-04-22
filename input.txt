@@ -1,17 +1,23 @@
 import A0.A1.A2.A3.A;
 import M;
+import Custom;
 
 class MyClass extends A {
 
     int[] myfield;
     String myType;
 
-    private boolean calc(int arg1) {
-        int x;
-        int y;
+    private static boolean calc(int arg1) {
+        M n;
+        A a;
+        a = this;
 
         myfield[0] = 1;
 
-        return myfield[0];
+        return true;
+    }
+
+    public static void main(String[] args) {
+
     }
 }

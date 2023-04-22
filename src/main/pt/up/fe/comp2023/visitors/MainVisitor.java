@@ -1,6 +1,5 @@
 package pt.up.fe.comp2023.visitors;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -11,7 +10,7 @@ import pt.up.fe.comp2023.visitors.handlers.VariableHandler;
 
 import java.util.ArrayList;
 
-public class MethodVisitor extends AJmmVisitor<String, String> {
+public class MainVisitor extends AJmmVisitor<String, String> {
     private JmmNode node;
     private String modifier;
     private String name;
@@ -21,7 +20,7 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
     private MySymbolTable symbolTable;
     private ArrayList<Report> reports;
 
-    public MethodVisitor(JmmNode node, MySymbolTable symbolTable, ArrayList<Report> reports, String extension) {
+    public MainVisitor(JmmNode node, MySymbolTable symbolTable, ArrayList<Report> reports, String extension) {
         this.modifier = node.get("modifier");
         this.name = node.get("name");
         this.isStatic = node.hasAttribute("static");
@@ -40,7 +39,7 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
 
     @Override
     protected void buildVisitor() {
-        addVisit("Method", this::dealWithMethod);
+        addVisit("Main", this::dealWithMethod);
         addVisit("ReturnType", this::dealWithReturnType);
         addVisit("Argument", this::dealWithVarDeclaration);
         addVisit("VarDeclaration", this::dealWithVarDeclaration);

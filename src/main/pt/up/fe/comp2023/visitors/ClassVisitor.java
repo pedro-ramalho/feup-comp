@@ -1,5 +1,6 @@
 package pt.up.fe.comp2023.visitors;
 
+import jasmin.Main;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -53,6 +54,13 @@ public class ClassVisitor extends AJmmVisitor<String, String> {
         addVisit("ClassDeclaration", this::dealWithClassDeclaration);
         addVisit("ClassField", this::dealWithClassField);
         addVisit("Method", this::dealWithMethod);
+        addVisit("Main", this::dealWithMain);
+    }
+
+    private String dealWithMain(JmmNode node, String s) {
+        MainVisitor visitor = new MainVisitor(node, this.symbolTable, this.reports, this.extension);
+
+        return visitor.visit(node);
     }
 
     private String dealWithMethod(JmmNode node, String s) {
