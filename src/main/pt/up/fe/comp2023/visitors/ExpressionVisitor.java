@@ -8,13 +8,15 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2023.MySymbolTable;
+import pt.up.fe.comp2023.visitors.handlers.AssignmentHandler;
 import pt.up.fe.comp2023.visitors.handlers.IdentifierHandler;
+import pt.up.fe.comp2023.visitors.utils.MyType;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpressionVisitor extends AJmmVisitor<String, Type> {
+public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     private String method;
 
     private String extension;
@@ -23,11 +25,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
     private MySymbolTable symbolTable;
 
     private ArrayList<Report> reports;
-
-    private final Type intType = new Type("int", false);
-    private final Type boolType = new Type("boolean", false);
-    private final Type importType = new Type("import", false);
-    private final Type thisType = new Type("this", false);
 
     public ExpressionVisitor(String method, String extension, boolean isStatic, MySymbolTable symbolTable, ArrayList<Report> reports) {
         this.method = method;
@@ -61,22 +58,10 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         ));
     }
 
-    private boolean isArithmetic(String operation) {
-        return operation.equals("+") || operation.equals("-") || operation.equals("*") || operation.equals("/");
-    }
+    private MyType dealWithCondition(JmmNode node, String s) {
+        MyType conditionType = visit(node.getJmmChild(0), "");
 
-    private boolean isLogical(String operation) {
-        return operation.equals("&&") || operation.equals("||");
-    }
-
-    private boolean isComparison(String operation) {
-        return operation.equals("<") || operation.equals(">");
-    }
-
-    private Type dealWithCondition(JmmNode node, String s) {
-        Type conditionType = visit(node.getJmmChild(0), "");
-
-        if (!conditionType.equals(this.boolType)) {
+        if (!conditionType.isBoolean()) {
             this.addReport();
 
             return null;
@@ -84,7 +69,8 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
 
         return conditionType;
     }
-    private Type dealWithObject(JmmNode node, String s) {
+
+    private MyType dealWithObject(JmmNode node, String s) {
         /* the 'this' keyword cannot be used on a static method, must add a report */
         if (this.isStatic) {
             this.addReport();
@@ -95,7 +81,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         return new Type("this", false);
     }
 
-    private Type dealWithIdentifier(JmmNode node, String s) {
+    private MyType dealWithIdentifier(JmmNode node, String s) {
         IdentifierHandler handler = new IdentifierHandler(node, this.method, this.extension, this.symbolTable);
 
         Type identifierType = handler.getType();
@@ -109,15 +95,15 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         return identifierType;
     }
 
-    private Type dealWithBoolean(JmmNode node, String s) {
+    private MyType dealWithBoolean(JmmNode node, String s) {
         return this.boolType;
     }
 
-    private Type dealWithInteger(JmmNode node, String s) {
+    private MyType dealWithInteger(JmmNode node, String s) {
         return this.intType;
     }
 
-    private Type dealWithBinaryOp(JmmNode node, String s) {
+    private MyType dealWithBinaryOp(JmmNode node, String s) {
         JmmNode leftOperand = node.getJmmChild(0);
         JmmNode rightOperand = node.getJmmChild(1);
 
@@ -153,20 +139,19 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         return null;
     }
 
-    private Type dealWithParenthesis(JmmNode node, String s) {
+    private MyType dealWithParenthesis(JmmNode node, String s) {
         return visit(node.getJmmChild(0), "");
     }
 
-    private Type dealWithCustomInstantiation(JmmNode node, String s) {
+    private MyType dealWithCustomInstantiation(JmmNode node, String s) {
         String customType = node.getJmmChild(0).get("name");
-        boolean isArray = customType.contains("[]");
 
-        String parsedType = isArray ? customType.substring(0, customType.length() - 2) : customType;
+        AssignmentHandler handler = new AssignmentHandler(customType, this.method, this.extension, this.symbolTable);
 
-        return new Type(parsedType, isArray);
+        return handler.getType();
     }
 
-    private Type dealWithArrayInstantiation(JmmNode node, String s) {
+    private MyType dealWithArrayInstantiation(JmmNode node, String s) {
         JmmNode arrayTypeNode = node.getJmmChild(0);
         JmmNode arrayLengthNode = node.getJmmChild(1);
 
@@ -186,20 +171,27 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         }
     }
 
-    private Type dealWithMethodInvocation(JmmNode node, String s) {
+    private MyType dealWithMethodInvocation(JmmNode node, String s) {
         String name = node.get("method");
 
         JmmNode invoker = node.getJmmChild(0);
 
         Type invokerType = visit(invoker, "");
 
+        if (invokerType == null) {
+            System.out.println("Entered IF0");
+            this.addReport();
+
+            return null;
+        }
+
         /* dealing with a method of our own class */
         if (invokerType.getName().equals(this.symbolTable.getClassName()) || invokerType.equals(this.thisType)) {
-
+            System.out.println("Entered IF1");
             /* first, check if the method exists */
             if (!this.symbolTable.getMethods().contains(name)) {
                 this.addReport();
-
+                System.out.println("Entered IF2");
                 return null;
             }
 
@@ -210,7 +202,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
             /* the number of arguments and invoked arguments are different, must add a report */
             if (numArgs != numInvokedArgs) {
                 this.addReport();
-
+                System.out.println("Entered IF3");
                 return null;
             }
 
@@ -223,7 +215,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
                 /* arguments of different types, must add a report */
                 if (!argType.equals(invokedArgType)) {
                     this.addReport();
-
+                    System.out.println("Entered IF4");
                     return null;
                 }
 
@@ -239,7 +231,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         }
     }
 
-    private Type dealWithArrayLength(JmmNode node, String s) {
+    private MyType dealWithArrayLength(JmmNode node, String s) {
         JmmNode accessedExpr = node.getJmmChild(0);
 
         Type accessedType = visit(accessedExpr, "");
@@ -253,7 +245,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         return this.intType;
     }
 
-    private Type dealWithArrayAccess(JmmNode node, String s) {
+    private MyType dealWithArrayAccess(JmmNode node, String s) {
         JmmNode accessedExpr = node.getJmmChild(0);
         JmmNode indexExpr = node.getJmmChild(1);
 
@@ -269,7 +261,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, Type> {
         return this.intType;
     }
 
-    private Type dealWithNegation(JmmNode node, String s) {
+    private MyType dealWithNegation(JmmNode node, String s) {
         Type returnType = visit(node.getJmmChild(0), "");
 
         if (!returnType.equals(this.boolType)) {

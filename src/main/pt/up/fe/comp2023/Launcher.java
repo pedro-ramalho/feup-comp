@@ -69,14 +69,9 @@ public class Launcher {
 
         visitor.visit(parserResult.getRootNode(), "");
 
-        System.out.println("Found a total of " + reports.size() + " reports.");
-
-        for (Report report : reports) {
-            System.out.println(report.toString());
-        }
-
         Analysis analysis = new Analysis();
 
+        System.out.println("Found a total of " + reports.size() + " reports.");
         JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
         // ... add remaining stages

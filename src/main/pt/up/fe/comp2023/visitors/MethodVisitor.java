@@ -72,8 +72,6 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
         VariableHandler handler = new VariableHandler(node, this.symbolTable);
 
         if (handler.getType() == null) {
-            System.out.println("I've found a null handler!");
-
             this.addReport();
         }
 
@@ -83,7 +81,13 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
     private String dealWithReturnType(JmmNode node, String s) {
         JmmNode returnTypeNode = node.getJmmChild(0);
 
-        this.returnType = returnTypeNode.get("keyword");
+        if (returnTypeNode.getKind().equals("Literal")) {
+            this.returnType = returnTypeNode.get("keyword");
+        }
+
+        if (returnTypeNode.getKind().equals("CustomType")) {
+            this.returnType = returnTypeNode.get("name");
+        }
 
         return this.returnType;
     }

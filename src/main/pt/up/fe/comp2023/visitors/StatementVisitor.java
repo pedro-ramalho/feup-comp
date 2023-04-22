@@ -8,6 +8,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2023.MySymbolTable;
+import pt.up.fe.comp2023.visitors.handlers.AssignmentHandler;
 
 import java.util.ArrayList;
 
@@ -49,6 +50,16 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
         Type returnType = visitor.visit(node.getJmmChild(0), "");
+
+        if (returnType == null) {
+            this.addReport();
+
+            return null;
+        }
+
+        if (returnType.equals(new Type("import", false)) || returnType.equals(new Type("extension", false))) {
+            return null;
+        }
 
         if (!returnType.equals(this.symbolTable.getReturnType(this.method))) {
             this.addReport();
@@ -147,38 +158,15 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithAssignment(JmmNode node, String s) {
-        String var = node.get("var");
-        Type assigneeType = null;
+        AssignmentHandler handler = new AssignmentHandler(node.get("var"), this.method, this.extension, this.symbolTable);
+
+        Type assigneeType = handler.getType();
 
         JmmNode expression = node.getJmmChild(0);
-
-        /* check if the assignment is being done over a class field */
-        for (Symbol symbol : this.symbolTable.getFields()) {
-            if (var.equals(symbol.getName())) {
-                assigneeType = symbol.getType();
-            }
-        }
-
-        /* check if the assignment is being done over a parameter */
-        for (Symbol symbol : this.symbolTable.getParameters(this.method)) {
-            if (var.equals(symbol.getName())) {
-                assigneeType = symbol.getType();
-            }
-        }
-
-        /* check if the assignment is being done over a local variable */
-        for (Symbol symbol : this.symbolTable.getLocalVariables(this.method)) {
-            if (var.equals(symbol.getName())) {
-                assigneeType = symbol.getType();
-            }
-        }
 
         ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
         Type assignedType = visitor.visit(expression, "");
-
-        System.out.println("assigneeType: " + assigneeType.toString());
-        System.out.println("assignedType: " + assignedType.toString());
 
         if (assigneeType == null) {
             this.addReport();
@@ -186,17 +174,21 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
-        if (assigneeType.getName().equals(this.symbolTable.getClassName()) || assigneeType.getName().equals(this.extension)) {
-            if (assignedType.equals(new Type("this", false))) {
-                return null;
-            }
-        }
-
-        if (assigneeType.equals(new Type("import", false)) || assigneeType.equals(new Type("extension", false))) {
+        if (assigneeType.equals(new Type("extension", false)) || assigneeType.equals(new Type("import", false))) {
             return null;
         }
 
-        if (assignedType.equals(new Type("import", false)) || assignedType.equals(new Type("extension", false))) {
+        if (assigneeType.equals(new Type("this", false))) {
+            System.out.println("assigneeType: " + assigneeType);
+            System.out.println("assignedType: " + assignedType);
+            if (!assignedType.equals(new Type("this", false)) || !assignedType.equals(new Type("extension", false))) {
+                this.addReport();
+            }
+
+            return null;
+        }
+
+        if (assignedType.equals(new Type("extension", false)) || assignedType.equals(new Type("import", false))) {
             return null;
         }
 
@@ -222,7 +214,15 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     private String dealWithWhile(JmmNode node, String s) {
         ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
-        if (!visitor.visit(node.getJmmChild(0), "").equals("boolean")) {
+        Type cond = visitor.visit(node.getJmmChild(0));
+
+        if (cond == null) {
+            this.addReport();
+
+            return null;
+        }
+
+        if (!cond.equals(new Type("boolean", false))) {
             this.addReport();
         }
 

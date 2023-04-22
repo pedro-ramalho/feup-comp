@@ -1,23 +1,20 @@
-import A0.A1.A2.A3.A;
-import M;
-import Custom;
+import B;
 
-class MyClass extends A {
-
-    int[] myfield;
-    String myType;
-
-    private static boolean calc(int arg1) {
-        M n;
-        A a;
-        a = this;
-
-        myfield[0] = 1;
-
-        return true;
-    }
+class ObjectAssignmentFail {
 
     public static void main(String[] args) {
 
+    }
+
+    public ObjectAssignmentFail foo() {
+        ObjectAssignmentFail a;
+        B b;
+
+        a = new ObjectAssignmentFail();
+        b = new B();
+
+        // ObjectAssignmentFail does not extend B
+
+        return a;
     }
 }
