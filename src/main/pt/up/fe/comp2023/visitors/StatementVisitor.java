@@ -203,8 +203,6 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
 
         /* the remaining case implies that both the assignee and the assigned are of the same type */
         if (!assigneeType.equals(assignedType)) {
-            System.out.println("assigneeType: " + assigneeType);
-            System.out.println("assignedType: " + assignedType);
 
             this.addReport();
 

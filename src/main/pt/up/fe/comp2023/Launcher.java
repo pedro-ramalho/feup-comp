@@ -43,18 +43,13 @@ public class Launcher {
         // Parse stage
         JmmParserResult parserResult = parser.parse(code, parser.getDefaultRule(), config);
 
-
         // Check if there are parsing errors
         TestUtils.noErrors(parserResult.getReports());
 
         // Print the resulting AST
         System.out.println(parserResult.getRootNode().toTree());
 
-        // Testing the generated code
-        // Generator gen = new Generator();
-        // String generatedCode = gen.visit(parserResult.getRootNode(), "");
-        // System.out.println(generatedCode);
-
+        // Building the Symbol Table
         Generator gen = new Generator();
         gen.visit(parserResult.getRootNode(), "");
 
@@ -63,7 +58,7 @@ public class Launcher {
         System.out.println("Printing Symbol Table...");
         symbolTable.printSymbolTable();
 
-        ArrayList<Report> reports = new ArrayList<Report>();
+        ArrayList<Report> reports = new ArrayList<>();
 
         ProgramVisitor visitor = new ProgramVisitor(symbolTable, reports);
 
@@ -71,7 +66,6 @@ public class Launcher {
 
         Analysis analysis = new Analysis();
 
-        System.out.println("Found a total of " + reports.size() + " reports.");
         JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
         // ... add remaining stages

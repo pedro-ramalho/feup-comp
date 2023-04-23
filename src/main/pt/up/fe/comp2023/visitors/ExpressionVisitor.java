@@ -178,8 +178,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         MyType invokerType = visit(invoker, "");
 
-        System.out.println("invokerType: " + invokerType);
-
         if (invokerType == null) {
             this.addReport();
 
@@ -207,7 +205,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
             /* the number of arguments and invoked arguments are different, must add a report */
             if (numArgs != numInvokedArgs) {
-                System.out.println("Adding report 2");
                 this.addReport();
 
                 return null;
@@ -222,7 +219,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                 /* arguments of different types, must add a report */
                 if (!argType.equals(invokedArgType)) {
                     this.addReport();
-                    System.out.println("Adding report 3");
                     return null;
                 }
 
@@ -240,7 +236,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
             if (handler.getType() == null) {
                 this.addReport();
-                System.out.println("Adding report 4");
+
                 return null;
             }
 
