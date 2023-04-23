@@ -209,6 +209,10 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
                     return null;
                 }
 
+                if (cond.isExtension() || cond.isImport()) {
+                    return null;
+                }
+
                 if (!cond.isBoolean()) {
                     this.addReport();
                 }

@@ -63,7 +63,10 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
-        System.out.println("conditionType: " + conditionType.getName());
+        if (conditionType.isExtension() || conditionType.isImport()) {
+            System.out.println("Condition is of type extension!");
+            return conditionType;
+        }
 
         /* the condition is not of type 'boolean', must report an error */
         if (!conditionType.isBoolean()) {
@@ -228,14 +231,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         MyType invokerType = visit(invoker, "");
 
-        System.out.println("invokerType: " + invokerType.getName() + ", " + invokerType.isArray());
-
         if (invokerType == null) {
             System.out.println("Report 0");
             this.addReport();
 
             return null;
         }
+
+        System.out.println("invokerType: " + invokerType.getName() + ", " + invokerType.isArray());
 
         /* dealing with a method of our own class */
         if (invokerType.isThis()) {

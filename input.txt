@@ -1,19 +1,43 @@
 import B;
+import C;
 
 class ObjectAssignmentPassExtends extends B {
     int field;
 
     public static void main(String[] args) {
-
+        ObjectAssignmentPassExtends c;
     }
 
     public int calc1(int arg) {
         return 1;
     }
 
+    public boolean calc2() {
+        return true;
+    }
+
     public int calc(int arg) {
         int x;
         int y;
+
+        while (B.foo()) {
+            if (this.calc2()) {
+                while (B.bar()) {
+
+                }
+            }
+            else {
+
+            }
+        }
+
+        if (B.foo()) {
+
+        }
+        else {
+
+        }
+
 
         return 1;
     }
