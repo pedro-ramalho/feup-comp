@@ -1,6 +1,5 @@
 package pt.up.fe.comp2023;
 
-import org.junit.internal.runners.ErrorReportingRunner;
 import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 public class Analysis implements JmmAnalysis {
     @Override
     public JmmSemanticsResult semanticAnalysis(JmmParserResult jmmParserResult) {
-        Visitor gen = new Visitor();
+        Generator gen = new Generator();
 
         /* build the AST */
         gen.visit(jmmParserResult.getRootNode(), "");

@@ -8,7 +8,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Visitor extends AJmmVisitor<String, String> {
+public class Generator extends AJmmVisitor<String, String> {
 
     private MySymbolTable symbolTable = new MySymbolTable();
 
