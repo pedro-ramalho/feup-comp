@@ -4,15 +4,30 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 
 public class MyType {
     private String name;
+    private String origin;
     private boolean array;
 
-    public MyType(String name, boolean array) {
+    public MyType(String name, String origin, boolean array) {
         this.name = name;
+        this.origin = origin;
         this.array = array;
     }
 
     public String getName() {
         return this.name;
+    }
+    public String getOrigin() { return this.origin; }
+
+    public boolean isMethod() {
+        return this.origin.equals("method");
+    }
+
+    public boolean isPrimitive() {
+        return this.origin.equals("primitive");
+    }
+
+    public boolean isObject() {
+        return this.origin.equals("object");
     }
 
     public boolean isInt() {

@@ -51,17 +51,17 @@ public class IdentifierHandler implements Handler {
     public MyType getType() {
         /* check if the identifier is a class extension */
         if (this.isClassExtension(this.identifier)) {
-            return new MyType("extension", false);
+            return new MyType("extension", "method", false);
         }
 
         /* check if the identifier is the class itself */
         if (this.isClassItself(this.identifier)) {
-            return new MyType("this", false);
+            return new MyType("this", "method", false);
         }
 
         /* check if the identifier is an import */
         if (this.isImport(this.identifier)) {
-            return new MyType("import", false);
+            return new MyType("import", "method", false);
         }
 
         /* check if the identifier is a method's local variable */
@@ -72,18 +72,18 @@ public class IdentifierHandler implements Handler {
                 String typeName = type.getName();
 
                 if (this.isClassExtension(typeName)) {
-                    return new MyType("extension", false);
+                    return new MyType("extension", "object", false);
                 }
 
                 if (this.isClassItself(typeName)) {
-                    return new MyType("this", false);
+                    return new MyType("this", "object", false);
                 }
 
                 if (this.isImport(typeName)) {
-                    return new MyType("import", false);
+                    return new MyType("import", "object", false);
                 }
 
-                return new MyType(type.getName(), type.isArray());
+                return new MyType(type.getName(), "primitive", type.isArray());
             }
         }
 
@@ -95,14 +95,18 @@ public class IdentifierHandler implements Handler {
                 String typeName = type.getName();
 
                 if (this.isClassExtension(typeName)) {
-                    return new MyType("extension", false);
+                    return new MyType("extension", "object", false);
+                }
+
+                if (this.isClassItself(typeName)) {
+                    return new MyType("this", "object", false);
                 }
 
                 if (this.isImport(typeName)) {
-                    return new MyType("import", false);
+                    return new MyType("import", "object", false);
                 }
 
-                return new MyType(type.getName(), type.isArray());
+                return new MyType(type.getName(), "primitive", type.isArray());
             }
         }
 
@@ -117,14 +121,18 @@ public class IdentifierHandler implements Handler {
                 String typeName = type.getName();
 
                 if (this.isClassExtension(typeName)) {
-                    return new MyType("extension", false);
+                    return new MyType("extension", "object", false);
+                }
+
+                if (this.isClassItself(typeName)) {
+                    return new MyType("this", "object", false);
                 }
 
                 if (this.isImport(typeName)) {
-                    return new MyType("import", false);
+                    return new MyType("import", "object", false);
                 }
 
-                return new MyType(type.getName(), type.isArray());
+                return new MyType(type.getName(), "primitive", type.isArray());
             }
         }
 

@@ -71,7 +71,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
-        if (!(returnType.equals(new MyType(stReturnType.getName(), stReturnType.isArray())))) {
+        if (!(returnType.equals(new MyType(stReturnType.getName(), "", stReturnType.isArray())))) {
             this.addReport();
         }
 
@@ -144,7 +144,6 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         MyType assignedType = visitor.visit(expression, "");
 
         if (assignedType == null) {
-            System.out.println("I'm adding a report here 0");
             this.addReport();
 
             return null;
@@ -152,13 +151,15 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
 
         /* the assignee is of type 'extension', assume it's correct */
         if (assigneeType.isExtension() || assignedType.isExtension()) {
-
             return null;
         }
 
         if (assigneeType.isImport()) {
+            if (assignedType.isImport()) {
+                return null;
+            }
+
             if (assignedType.isThis()) {
-                System.out.println("I'm adding a report here 1");
                 this.addReport();
             }
 
@@ -167,7 +168,6 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
 
         if (assigneeType.isThis()) {
             if (!assignedType.isThis() && !assignedType.isExtension()) {
-                System.out.println("I'm adding a report here 2");
                 this.addReport();
             }
 
@@ -175,9 +175,6 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         }
 
         if (!assigneeType.equals(assignedType)) {
-            System.out.println("assigneeType: " + assigneeType.getName() + ", " + assigneeType.isArray());
-            System.out.println("assignedType: " + assignedType.getName() + ", " + assignedType.isArray());
-
             this.addReport();
 
             return null;

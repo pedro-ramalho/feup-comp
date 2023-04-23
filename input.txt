@@ -1,44 +1,28 @@
+import A;
 import B;
-import C;
 
-class ObjectAssignmentPassExtends extends B {
-    int field;
+class CallToMethodAssumedInExtends extends A {
 
     public static void main(String[] args) {
-        ObjectAssignmentPassExtends c;
+
     }
 
-    public int calc1(int arg) {
+    public int bar(int x, int y) {
         return 1;
     }
 
-    public boolean calc2() {
+    public boolean bruh() {
         return true;
     }
 
-    public int calc(int arg) {
+    public int foo() {
         int x;
-        int y;
+        x = A.bar() + 1;
 
-        while (B.foo()) {
-            if (this.calc2()) {
-                while (B.bar()) {
-
-                }
-            }
-            else {
-
-            }
-        }
-
-        if (B.foo()) {
-
-        }
-        else {
+        while (this.bruh()) {
 
         }
 
-
-        return 1;
+        return 0;
     }
 }

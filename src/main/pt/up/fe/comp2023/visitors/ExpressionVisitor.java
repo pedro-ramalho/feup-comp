@@ -57,21 +57,25 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     private MyType dealWithCondition(JmmNode node, String s) {
         MyType conditionType = visit(node.getJmmChild(0), "");
 
+        System.out.println("condType: " + conditionType.getName() + ", " + conditionType.getOrigin());
+
         if (conditionType == null) {
+            System.out.println("conditionType is null!");
             this.addReport();
 
             return null;
         }
 
         if (conditionType.isExtension() || conditionType.isImport()) {
-            System.out.println("Condition is of type extension!");
-            return conditionType;
+            if (conditionType.isMethod()) {
+
+                return conditionType;
+            }
         }
 
         /* the condition is not of type 'boolean', must report an error */
         if (!conditionType.isBoolean()) {
             this.addReport();
-
             return null;
         }
 
@@ -86,7 +90,8 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
-        return new MyType("this", false);
+        // TODO: see how well this behaves
+        return new MyType("this", "object", false);
     }
 
     private MyType dealWithIdentifier(JmmNode node, String s) {
@@ -104,11 +109,11 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     }
 
     private MyType dealWithBoolean(JmmNode node, String s) {
-        return new MyType("boolean", false);
+        return new MyType("boolean", "primitive", false);
     }
 
     private MyType dealWithInteger(JmmNode node, String s) {
-        return new MyType("int", false);
+        return new MyType("int", "primitive",false);
     }
 
     private MyType dealWithBinaryOp(JmmNode node, String s) {
@@ -126,56 +131,167 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
-
         if (operation.isArithmetic()) {
-            if (leftOperandType.isExtension() || rightOperandType.isExtension()) {
-                return new MyType("int", false);
+            if (leftOperandType.isMethod()) {
+                if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
+                    this.addReport();
+
+                    return null;
+                }
+
+                if (rightOperandType.isMethod()) {
+                    if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
+                        this.addReport();
+
+                        return null;
+                    }
+
+                    return new MyType("int", "primitive",false);
+                }
+
+                if (rightOperandType.isInt()) {
+                    return new MyType("int", "primitive",false);
+                }
             }
 
-            if (leftOperandType.isImport() || rightOperandType.isImport()) {
-                return new MyType("int", false);
+            if (rightOperandType.isMethod()) {
+                if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
+                    this.addReport();
+
+                    return null;
+                }
+
+                if (leftOperandType.isMethod()) {
+                    if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
+                        this.addReport();
+
+                        return null;
+                    }
+
+                    return new MyType("int", "primitive",false);
+                }
+
+                if (leftOperandType.isInt()) {
+                    return new MyType("int", "primitive",false);
+                }
             }
 
-            /* if any of the operands is not of type 'int', must report an error */
-            if (!(leftOperandType.isInt() && rightOperandType.isInt())) {
-                this.addReport();
+            if (leftOperandType.isInt() && rightOperandType.isInt()) {
+                return new MyType("int", "primitive",false);
             }
 
-            return new MyType("int", false);
+            this.addReport();
+
+            return null;
         }
 
         if (operation.isLogical()) {
-            if (leftOperandType.isExtension() || rightOperandType.isExtension()) {
-                return new MyType("boolean", false);
+            if (leftOperandType.isMethod()) {
+                if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
+                    this.addReport();
+
+                    return null;
+                }
+
+                if (rightOperandType.isMethod()) {
+                    if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
+                        this.addReport();
+
+                        return null;
+                    }
+
+                    return new MyType("boolean", "primitive",false);
+                }
+
+                if (rightOperandType.isBoolean()) {
+                    return new MyType("boolean", "primitive",false);
+                }
             }
 
-            if (leftOperandType.isImport() || rightOperandType.isImport()) {
-                return new MyType("boolean", false);
+            if (rightOperandType.isMethod()) {
+                if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
+                    this.addReport();
+
+                    return null;
+                }
+
+                if (leftOperandType.isMethod()) {
+                    if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
+                        this.addReport();
+
+                        return null;
+                    }
+
+                    return new MyType("boolean", "primitive",false);
+                }
+
+                if (leftOperandType.isBoolean()) {
+                    return new MyType("boolean", "primitive",false);
+                }
             }
 
-            /* if any of the operands is not of type 'boolean', must report an error */
-            if (!(leftOperandType.isBoolean() && rightOperandType.isBoolean())) {
-                this.addReport();
+            if (leftOperandType.isBoolean() && rightOperandType.isBoolean()) {
+                return new MyType("boolean", "primitive",false);
             }
 
-            return new MyType("boolean", false);
+            this.addReport();
+
+            return null;
         }
 
         if (operation.isComparison()) {
-            if (leftOperandType.isExtension() || rightOperandType.isExtension()) {
-                return new MyType("boolean", false);
+            if (leftOperandType.isMethod()) {
+                if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
+                    this.addReport();
+
+                    return null;
+                }
+
+                if (rightOperandType.isMethod()) {
+                    if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
+                        this.addReport();
+
+                        return null;
+                    }
+
+                    return new MyType("boolean", "primitive",false);
+                }
+
+                if (rightOperandType.isInt()) {
+                    return new MyType("boolean", "primitive",false);
+                }
             }
 
-            if (leftOperandType.isImport() || rightOperandType.isImport()) {
-                return new MyType("boolean", false);
+            if (rightOperandType.isMethod()) {
+                if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
+                    this.addReport();
+
+                    return null;
+                }
+
+                if (leftOperandType.isMethod()) {
+                    if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
+                        this.addReport();
+
+                        return null;
+                    }
+
+                    return new MyType("boolean", "primitive",false);
+                }
+
+                if (leftOperandType.isInt()) {
+                    return new MyType("boolean", "primitive",false);
+                }
             }
 
-            /* if any of the operands is not of type 'int', must report an error */
-            if (!(leftOperandType.isInt() && rightOperandType.isInt())) {
-                this.addReport();
+            if (leftOperandType.isInt() && rightOperandType.isInt()) {
+                return new MyType("boolean", "primitive",false);
             }
 
-            return new MyType("boolean", false);
+            this.addReport();
+
+            return null;
+
         }
 
         return null;
@@ -190,6 +306,8 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         IdentifierHandler handler = new IdentifierHandler(customType, this.method, this.extension, this.isStatic, this.symbolTable);
 
+        System.out.println("type: " + handler.getType().getName());
+
         return handler.getType();
     }
 
@@ -200,7 +318,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType arrayLengthType = visit(arrayLengthNode, "");
 
         if (arrayLengthType == null) {
-            System.out.println("Report0");
             this.addReport();
 
             return null;
@@ -217,7 +334,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         if (arrayTypeNode.hasAttribute("keyword")) {
             String keyword = arrayTypeNode.get("keyword");
 
-            return new MyType(keyword, true);
+            return new MyType(keyword, "primitive", true);
         }
         else {
             return visit(arrayTypeNode, "");
@@ -232,7 +349,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType invokerType = visit(invoker, "");
 
         if (invokerType == null) {
-            System.out.println("Report 0");
             this.addReport();
 
             return null;
@@ -249,7 +365,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                     return null;
                 }
                 else {
-                    System.out.println("Report 1");
                     this.addReport();
 
                     return null;
@@ -262,7 +377,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
             /* the number of arguments and invoked arguments are different, must add a report */
             if (numArgs != numInvokedArgs) {
-                System.out.println("Report 2");
                 this.addReport();
 
                 return null;
@@ -282,7 +396,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
                 /* arguments of different types, must add a report */
                 if (!(argTypeName.equals(invokedArgTypeName) && argTypeIsArray == invokedArgTypeIsArray)) {
-                    System.out.println("Report 3");
                     this.addReport();
                     return null;
                 }
@@ -291,8 +404,11 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             }
 
             Type returnType = this.symbolTable.getReturnType(name);
+            String typename = returnType.getName();
 
-            return new MyType(returnType.getName(), returnType.isArray());
+            boolean isPrimitive = typename.equals("int") || typename.equals("boolean") || typename.equals("String");
+
+            return new MyType(returnType.getName(), isPrimitive ? "primitive" : "object", returnType.isArray());
         }
 
         /* dealing with a method of an imported/extended class */
@@ -300,13 +416,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             IdentifierHandler handler = new IdentifierHandler(invoker.get("value"), this.method, this.extension, this.isStatic, this.symbolTable);
 
             if (handler.getType() == null) {
-                System.out.println("Report 4");
                 this.addReport();
 
                 return null;
             }
 
-            return handler.getType();
+            System.out.println("handlerType: " + handler.getType().getName() + ", " + handler.getType().getOrigin());
+
+            return new MyType(handler.getType().getName(), "method", handler.getType().isArray());
         }
     }
 
@@ -327,7 +444,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
-        return new MyType("int", false);
+        return new MyType("int", "primitive",false);
     }
 
     private MyType dealWithArrayAccess(JmmNode node, String s) {
@@ -349,7 +466,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
-        return new MyType("int", false);
+        return new MyType("int", "primitive",false);
     }
 
     private MyType dealWithNegation(JmmNode node, String s) {
