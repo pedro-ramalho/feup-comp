@@ -7,21 +7,11 @@ class CallToMethodAssumedInExtends extends A {
 
     }
 
-    public int bar(int x, int y) {
-        return 1;
-    }
-
-    public boolean bruh() {
-        return true;
-    }
-
     public int foo() {
+        B b;
         int x;
-        x = A.bar() + 1;
 
-        while (this.bruh()) {
-
-        }
+        x = b.car();
 
         return 0;
     }

@@ -174,6 +174,16 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
+        if (assigneeType.isPrimitive()) {
+            if (assignedType.isExtension() && assignedType.isMethod()) {
+                return null;
+            }
+
+            if (assignedType.isImport() && assignedType.isMethod()) {
+                return null;
+            }
+        }
+
         if (!assigneeType.equals(assignedType)) {
             this.addReport();
 
