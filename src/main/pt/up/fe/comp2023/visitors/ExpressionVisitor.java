@@ -228,7 +228,10 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         MyType invokerType = visit(invoker, "");
 
+        System.out.println("invokerType: " + invokerType.getName() + ", " + invokerType.isArray());
+
         if (invokerType == null) {
+            System.out.println("Report 0");
             this.addReport();
 
             return null;
@@ -243,6 +246,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                     return null;
                 }
                 else {
+                    System.out.println("Report 1");
                     this.addReport();
 
                     return null;
@@ -255,6 +259,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
             /* the number of arguments and invoked arguments are different, must add a report */
             if (numArgs != numInvokedArgs) {
+                System.out.println("Report 2");
                 this.addReport();
 
                 return null;
@@ -266,8 +271,15 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                 Type argType = arg.getType();
                 MyType invokedArgType = visit(node.getJmmChild(idx), "");
 
+                String argTypeName = argType.getName();
+                boolean argTypeIsArray = argType.isArray();
+
+                String invokedArgTypeName = invokedArgType.getName();
+                boolean invokedArgTypeIsArray = invokedArgType.isArray();
+
                 /* arguments of different types, must add a report */
-                if (!argType.equals(invokedArgType)) {
+                if (!(argTypeName.equals(invokedArgTypeName) && argTypeIsArray == invokedArgTypeIsArray)) {
+                    System.out.println("Report 3");
                     this.addReport();
                     return null;
                 }
@@ -285,6 +297,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             IdentifierHandler handler = new IdentifierHandler(invoker.get("value"), this.method, this.extension, this.isStatic, this.symbolTable);
 
             if (handler.getType() == null) {
+                System.out.println("Report 4");
                 this.addReport();
 
                 return null;

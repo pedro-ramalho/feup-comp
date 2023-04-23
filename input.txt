@@ -7,15 +7,14 @@ class ObjectAssignmentPassExtends extends B {
 
     }
 
+    public int calc1(int arg) {
+        return 1;
+    }
+
     public int calc(int arg) {
         int x;
         int y;
 
-        B b;
-
-        y = b.foo(x) + b.bar();
-        field = y;
-    
         return 1;
     }
 }
