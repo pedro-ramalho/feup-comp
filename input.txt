@@ -8,8 +8,13 @@ class ObjectAssignmentPassExtends extends B {
 
     public int calc(int arg) {
         int[] x;
+        boolean y;
 
         x = new int[5];
+
+        while (y) {
+
+        }
 
         return 1;
     }

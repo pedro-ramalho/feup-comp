@@ -63,6 +63,8 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
+        System.out.println("conditionType: " + conditionType.getName());
+
         /* the condition is not of type 'boolean', must report an error */
         if (!conditionType.isBoolean()) {
             this.addReport();

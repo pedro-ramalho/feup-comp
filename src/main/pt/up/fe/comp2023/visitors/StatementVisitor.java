@@ -197,18 +197,25 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithWhile(JmmNode node, String s) {
-        ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
+        for (JmmNode child : node.getChildren()) {
+            if (child.getKind().equals("Condition")) {
+                ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
-        MyType cond = visitor.visit(node.getJmmChild(0));
+                MyType cond = visitor.visit(node.getJmmChild(0));
 
-        if (cond == null) {
-            this.addReport();
+                if (cond == null) {
+                    this.addReport();
 
-            return null;
-        }
+                    return null;
+                }
 
-        if (!cond.isBoolean()) {
-            this.addReport();
+                if (!cond.isBoolean()) {
+                    this.addReport();
+                }
+            }
+            else {
+                visit(child, "");
+            }
         }
 
         return null;
