@@ -43,6 +43,7 @@ public class MySymbolTable implements SymbolTable {
         return this.methods.keySet().stream().toList();
     }
 
+
     @Override
     public Type getReturnType(String methodName) {
         MethodInfo method = this.methods.get(methodName);

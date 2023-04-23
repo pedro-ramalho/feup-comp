@@ -1,14 +1,15 @@
-import io;
-
-class MyClass {
-    int myfield;
-    Bruh myType;
-
-    public int calc(int arg1) {
-        return arg1;
-    }
+class CallToUndeclaredMethod {
 
     public static void main(String[] args) {
-        io.println(new calc());
+
+    }
+
+    public int foo() {
+        CallToUndeclaredMethod a;
+        a = new CallToUndeclaredMethod();
+
+        a.bar();
+
+        return 0;
     }
 }

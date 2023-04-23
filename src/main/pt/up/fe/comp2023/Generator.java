@@ -5,6 +5,9 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Generator extends AJmmVisitor<String, String> {
 
     private MySymbolTable symbolTable = new MySymbolTable();
@@ -221,7 +224,24 @@ public class Generator extends AJmmVisitor<String, String> {
         return "";
     }
 
+    private void getMethodIdentifiers(JmmNode jmmNode, ArrayList<String> identifiers) {
+        for (JmmNode child : jmmNode.getChildren()) {
+
+            if (child.getKind().equals("Assignment")) {
+                identifiers.add(child.get("var"));
+            }
+
+            else {
+                getMethodIdentifiers(child.getChildren().get(0), identifiers);
+            }
+        }
+
+    }
     private String dealWithMethod(JmmNode jmmNode, String s) {
+        ArrayList<String> identifiers = new ArrayList<>();
+
+        // this.getMethodIdentifiers(jmmNode, identifiers);
+
         // fetch the method name
         String methodName = jmmNode.get("name");
 
@@ -249,9 +269,17 @@ public class Generator extends AJmmVisitor<String, String> {
                 // update the symbol table
                 symbolTable.addLocalVariable(methodName, new Symbol(type, varName));
             }
+
+            if (child.getKind().equals("Identifier")) {
+                identifiers.add(child.get("value"));
+            }
+
+            if (child.getKind().equals("Assignment")) {
+                identifiers.add(child.get("var"));
+            }
         }
 
-        return "";
+        return s;
     }
 
     private String dealWithVarDeclaration(JmmNode jmmNode, String s) {
@@ -324,12 +352,21 @@ public class Generator extends AJmmVisitor<String, String> {
         String importName = jmmNode.get("name");
 
         String importPack = "";
+
         // fetch the package that was imported
         if (jmmNode.hasAttribute("pack"))
             importPack = jmmNode.get("pack");
 
+        String r1 = importPack.replace("[", "");
+        String r2 = r1.replace("]", "");
+        String r3 = r2.replace(" ", "");
+
+        ArrayList<String> list = new ArrayList<String>(Arrays.asList(r3.split(",")));
+
+        String result = importName + '.' + String.join(".", list);
+
         // add the information to the symbol table
-        this.symbolTable.addImport(importName + '.' + importPack);
+        this.symbolTable.addImport(result);
 
         return s;
     }
@@ -346,6 +383,7 @@ public class Generator extends AJmmVisitor<String, String> {
     }
 
     private String dealWithIdentifier(JmmNode jmmNode, String s) {
+        System.out.println("Parent node = " + jmmNode.getJmmParent());
         return s + jmmNode.get("value");
     }
 

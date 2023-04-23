@@ -2,18 +2,20 @@ package pt.up.fe.comp2023;
 
 import java.io.File;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import com.sun.source.util.SourcePositions;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2023.visitors.ProgramVisitor;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -41,28 +43,26 @@ public class Launcher {
         String code = SpecsIo.read(inputFile);
 
         // Instantiate JmmParser
-//        SimpleParser parser = new SimpleParser();
+        SimpleParser parser = new SimpleParser();
 
         // Parse stage
-//        JmmParserResult parserResult = parser.parse(code, parser.getDefaultRule(), config);
+        JmmParserResult parserResult = parser.parse(code, parser.getDefaultRule(), config);
 
         // Check if there are parsing errors
-//        TestUtils.noErrors(parserResult.getReports());
+        TestUtils.noErrors(parserResult.getReports());
 
         // Print the resulting AST
-//        System.out.println(parserResult.GEtRootNode().toTree());
+        System.out.println(parserResult.getRootNode().toTree());
 
         // Testing the generated code
-//         Generator gen = new Generator();
-//         String generatedCode = gen.visit(parserResult.getRootNode(), "");
-//         System.out.println(generatedCode);
+        Generator gen = new Generator();
+        String generatedCode = gen.visit(parserResult.getRootNode(), "");
+        System.out.println(generatedCode);
 
-//        gen.visit(parserResult.getRootNode(), "");
+        MySymbolTable symbolTable = gen.getSymbolTable();
 
-//        MySymbolTable symbolTable = gen.getSymbolTable();
-
-//        System.out.println("Printing Symbol Table...");
-//        symbolTable.printSymbolTable();
+        System.out.println("Printing Symbol Table...");
+        symbolTable.printSymbolTable();
 
         // TESTING OLLIR TO JASIMIN
         System.out.println("OLLIR -> JASMIN");
@@ -73,6 +73,16 @@ public class Launcher {
         System.out.println(myJasminResult.getJasminCode());
         myJasminResult.compile();
         myJasminResult.run();
+
+        ArrayList<Report> reports = new ArrayList<>();
+
+        ProgramVisitor visitor = new ProgramVisitor(symbolTable, reports);
+
+        visitor.visit(parserResult.getRootNode(), "");
+
+        Analysis analysis = new Analysis();
+
+        JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
         // ... add remaining stages
     }
