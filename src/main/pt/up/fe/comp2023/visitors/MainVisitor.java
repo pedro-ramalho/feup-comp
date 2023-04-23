@@ -6,7 +6,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2023.MySymbolTable;
-import pt.up.fe.comp2023.visitors.handlers.VariableHandler;
+import pt.up.fe.comp2023.visitors.handlers.IdentifierHandler;
 
 import java.util.ArrayList;
 
@@ -68,10 +68,11 @@ public class MainVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithVarDeclaration(JmmNode node, String s) {
-        VariableHandler handler = new VariableHandler(node, this.symbolTable);
+        String id = node.hasAttribute("var") ? node.get("var") : node.get("parameter");
+
+        IdentifierHandler handler = new IdentifierHandler(id, this.name, this.extension, this.symbolTable);
 
         if (handler.getType() == null) {
-            System.out.println("I've found a null handler!");
 
             this.addReport();
         }

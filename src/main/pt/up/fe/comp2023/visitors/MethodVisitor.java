@@ -1,13 +1,12 @@
 package pt.up.fe.comp2023.visitors;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2023.MySymbolTable;
-import pt.up.fe.comp2023.visitors.handlers.VariableHandler;
+import pt.up.fe.comp2023.visitors.handlers.IdentifierHandler;
 
 import java.util.ArrayList;
 
@@ -69,7 +68,9 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithVarDeclaration(JmmNode node, String s) {
-        VariableHandler handler = new VariableHandler(node, this.symbolTable);
+        String id = node.hasAttribute("var") ? node.get("var") : node.get("parameter");
+
+        IdentifierHandler handler = new IdentifierHandler(id, this.name, this.extension, this.symbolTable);
 
         if (handler.getType() == null) {
             this.addReport();
