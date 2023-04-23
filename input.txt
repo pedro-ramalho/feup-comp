@@ -1,6 +1,7 @@
 import B;
 
 class ObjectAssignmentPassExtends extends B {
+    int field;
 
     public static void main(String[] args) {
 
@@ -12,8 +13,9 @@ class ObjectAssignmentPassExtends extends B {
 
         B b;
 
-        y = b.foo(x);
-
+        y = b.foo(x) + b.bar();
+        field = y;
+    
         return 1;
     }
 }

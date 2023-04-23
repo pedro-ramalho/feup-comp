@@ -123,7 +123,15 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
+
         if (operation.isArithmetic()) {
+            if (leftOperandType.isExtension() || rightOperandType.isExtension()) {
+                return new MyType("int", false);
+            }
+
+            if (leftOperandType.isImport() || rightOperandType.isImport()) {
+                return new MyType("int", false);
+            }
 
             /* if any of the operands is not of type 'int', must report an error */
             if (!(leftOperandType.isInt() && rightOperandType.isInt())) {
@@ -134,6 +142,13 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         }
 
         if (operation.isLogical()) {
+            if (leftOperandType.isExtension() || rightOperandType.isExtension()) {
+                return new MyType("boolean", false);
+            }
+
+            if (leftOperandType.isImport() || rightOperandType.isImport()) {
+                return new MyType("boolean", false);
+            }
 
             /* if any of the operands is not of type 'boolean', must report an error */
             if (!(leftOperandType.isBoolean() && rightOperandType.isBoolean())) {
@@ -144,6 +159,13 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         }
 
         if (operation.isComparison()) {
+            if (leftOperandType.isExtension() || rightOperandType.isExtension()) {
+                return new MyType("boolean", false);
+            }
+
+            if (leftOperandType.isImport() || rightOperandType.isImport()) {
+                return new MyType("boolean", false);
+            }
 
             /* if any of the operands is not of type 'int', must report an error */
             if (!(leftOperandType.isInt() && rightOperandType.isInt())) {
