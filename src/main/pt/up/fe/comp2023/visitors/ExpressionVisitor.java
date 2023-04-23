@@ -72,6 +72,12 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     private MyType dealWithCondition(JmmNode node, String s) {
         MyType conditionType = visit(node.getJmmChild(0), "");
 
+        if (conditionType == null) {
+            this.addReport();
+
+            return null;
+        }
+
         if (!this.isBoolean(conditionType)) {
             this.addReport();
 
@@ -277,6 +283,12 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         MyType accessedType = visit(accessedExpr, "");
         MyType indexType = visit(indexExpr, "");
+
+        if (accessedType == null || indexType == null) {
+            this.addReport();
+
+            return null;
+        }
 
         if (!(accessedType.isArray() && indexType.getName().equals("int"))) {
             this.addReport();

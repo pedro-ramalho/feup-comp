@@ -65,14 +65,14 @@ public class Launcher {
         symbolTable.printSymbolTable();
 
         // TESTING OLLIR TO JASIMIN
-        System.out.println("OLLIR -> JASMIN");
-        String ollirCode = SpecsIo.read(inputFile);
-        OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
-        MyJasminBackend jasminBackend = new MyJasminBackend();
-        JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
-        System.out.println(myJasminResult.getJasminCode());
-        myJasminResult.compile();
-        myJasminResult.run();
+        //System.out.println("OLLIR -> JASMIN");
+        //String ollirCode = SpecsIo.read(inputFile);
+        //OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
+        //MyJasminBackend jasminBackend = new MyJasminBackend();
+        //JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
+        //System.out.println(myJasminResult.getJasminCode());
+        //myJasminResult.compile();
+        //myJasminResult.run();
 
         ArrayList<Report> reports = new ArrayList<>();
 
@@ -83,6 +83,8 @@ public class Launcher {
         Analysis analysis = new Analysis();
 
         JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
+
+        System.out.println("Found a total of " + reports.size() + " reports.");
 
         // ... add remaining stages
     }

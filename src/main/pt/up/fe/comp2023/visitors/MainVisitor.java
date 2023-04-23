@@ -23,7 +23,7 @@ public class MainVisitor extends AJmmVisitor<String, String> {
     public MainVisitor(JmmNode node, MySymbolTable symbolTable, ArrayList<Report> reports, String extension) {
         this.modifier = node.get("modifier");
         this.name = node.get("name");
-        this.isStatic = node.hasAttribute("static");
+        this.isStatic = node.hasAttribute("isStatic");
         this.extension = extension;
 
         this.symbolTable = symbolTable;
