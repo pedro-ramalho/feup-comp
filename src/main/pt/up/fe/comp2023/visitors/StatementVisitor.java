@@ -134,7 +134,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             }
         }
 
-        if (!accessType.isInt()) {
+        if (!accessType.getName().equals("int")) {
             this.addReport();
 
             return null;
@@ -146,13 +146,13 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
-        if (!assigneeType.isIntArray()) {
+        if (!(assigneeType.getName().equals("int") && assigneeType.isArray())) {
             this.addReport();
 
             return null;
         }
 
-        if (!exprType.isInt()) {
+        if (!exprType.getName().equals("int")) {
             this.addReport();
 
             return null;
@@ -191,7 +191,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             if (assignedType.getName().equals(this.symbolTable.getClassName())) {
                 this.addReport();
             }
-            
+
             return null;
         }
 
