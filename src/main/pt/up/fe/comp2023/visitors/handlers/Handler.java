@@ -6,5 +6,5 @@ import pt.up.fe.comp2023.MySymbolTable;
 import pt.up.fe.comp2023.visitors.utils.MyType;
 
 public interface Handler {
-    public Type getType();
+    public MyType getType();
 }

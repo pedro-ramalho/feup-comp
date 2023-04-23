@@ -19,23 +19,8 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
     private String extension;
     private boolean isStatic;
-
     private MySymbolTable symbolTable;
-
     private ArrayList<Report> reports;
-
-    private boolean isInt(MyType type) {
-        return type.getName().equals("int") && !type.isArray();
-    }
-
-    private boolean isIntArray(MyType type) {
-        return type.getName().equals("int") && type.isArray();
-    }
-
-    private boolean isBoolean(MyType type) {
-        return type.getName().equals("boolean") && !type.isArray();
-    }
-
 
     public ExpressionVisitor(String method, String extension, boolean isStatic, MySymbolTable symbolTable, ArrayList<Report> reports) {
         this.method = method;
@@ -78,7 +63,8 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
-        if (!this.isBoolean(conditionType)) {
+        /* the condition is not of type 'boolean', must report an error */
+        if (!conditionType.isBoolean()) {
             this.addReport();
 
             return null;
@@ -88,7 +74,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     }
 
     private MyType dealWithObject(JmmNode node, String s) {
-        /* the 'this' keyword cannot be used on a static method, must add a report */
+        /* the 'this' keyword cannot be used on a static method, report an error */
         if (this.isStatic) {
             this.addReport();
 
@@ -99,9 +85,9 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     }
 
     private MyType dealWithIdentifier(JmmNode node, String s) {
-        IdentifierHandler handler = new IdentifierHandler(node.get("value"), this.method, this.extension, this.symbolTable);
+        IdentifierHandler handler = new IdentifierHandler(node.get("value"), this.method, this.extension, this.isStatic, this.symbolTable);
 
-        Type identifierType = handler.getType();
+        MyType identifierType = handler.getType();
 
         if (identifierType == null) {
             this.addReport();
@@ -109,7 +95,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
-        return new MyType(identifierType.getName(), identifierType.isArray());
+        return identifierType;
     }
 
     private MyType dealWithBoolean(JmmNode node, String s) {
@@ -129,8 +115,16 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType leftOperandType = visit(leftOperand, "");
         MyType rightOperandType = visit(rightOperand, "");
 
+        if (leftOperandType == null || rightOperandType == null) {
+            this.addReport();
+
+            return null;
+        }
+
         if (operation.isArithmetic()) {
-            if (!(this.isInt(leftOperandType) && this.isInt(rightOperandType))) {
+
+            /* if any of the operands is not of type 'int', must report an error */
+            if (!(leftOperandType.isInt() && rightOperandType.isInt())) {
                 this.addReport();
             }
 
@@ -138,7 +132,9 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         }
 
         if (operation.isLogical()) {
-            if (!(this.isBoolean(leftOperandType) && this.isBoolean(rightOperandType))) {
+
+            /* if any of the operands is not of type 'boolean', must report an error */
+            if (!(leftOperandType.isBoolean() && rightOperandType.isBoolean())) {
                 this.addReport();
             }
 
@@ -146,7 +142,9 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         }
 
         if (operation.isComparison()) {
-            if (!(this.isInt(leftOperandType) && this.isInt(rightOperandType))) {
+
+            /* if any of the operands is not of type 'int', must report an error */
+            if (!(leftOperandType.isInt() && rightOperandType.isInt())) {
                 this.addReport();
             }
 
@@ -163,11 +161,9 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     private MyType dealWithCustomInstantiation(JmmNode node, String s) {
         String customType = node.getJmmChild(0).get("name");
 
-        IdentifierHandler handler = new IdentifierHandler(customType, this.method, this.extension, this.symbolTable);
+        IdentifierHandler handler = new IdentifierHandler(customType, this.method, this.extension, this.isStatic, this.symbolTable);
 
-        Type handlerType = handler.getType();
-
-        return new MyType(handlerType.getName(), handlerType.isArray());
+        return handler.getType();
     }
 
     private MyType dealWithArrayInstantiation(JmmNode node, String s) {
@@ -176,7 +172,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         MyType arrayLengthType = visit(arrayLengthNode, "");
 
-        if (!this.isInt(arrayLengthType)) {
+        if (arrayLengthType == null) {
+            this.addReport();
+
+            return null;
+        }
+
+        /* the expression used for the array length is not of type 'int', must report an error */
+        if (!arrayLengthType.isInt()) {
             this.addReport();
 
             return null;
@@ -204,7 +207,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         }
 
         /* dealing with a method of our own class */
-        if (invokerType.getName().equals("this") || invokerType.getName().equals(this.symbolTable.getClassName())) {
+        if (invokerType.isThis()) {
 
             /* first, check if the method exists */
             if (!this.symbolTable.getMethods().contains(name)) {
@@ -251,7 +254,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         /* dealing with a method of an imported/extended class */
         else {
-            IdentifierHandler handler = new IdentifierHandler(invoker.get("value"), this.method, this.extension, this.symbolTable);
+            IdentifierHandler handler = new IdentifierHandler(invoker.get("value"), this.method, this.extension, this.isStatic, this.symbolTable);
 
             if (handler.getType() == null) {
                 this.addReport();
@@ -259,7 +262,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                 return null;
             }
 
-            return new MyType(handler.getType().getName(), handler.getType().isArray());
+            return handler.getType();
         }
     }
 
@@ -267,6 +270,12 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         JmmNode accessedExpr = node.getJmmChild(0);
 
         MyType accessedType = visit(accessedExpr, "");
+
+        if (accessedType == null) {
+            this.addReport();
+
+            return null;
+        }
 
         if (!accessedType.isArray()) {
             this.addReport();
@@ -290,7 +299,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
-        if (!(accessedType.isArray() && indexType.getName().equals("int"))) {
+        if (!(accessedType.isArray() && indexType.isInt())) {
             this.addReport();
 
             return null;
@@ -302,7 +311,13 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     private MyType dealWithNegation(JmmNode node, String s) {
         MyType returnType = visit(node.getJmmChild(0), "");
 
-        if (!this.isBoolean(returnType)) {
+        if (returnType == null) {
+            this.addReport();
+
+            return null;
+        }
+
+        if (!returnType.isBoolean()) {
             this.addReport();
 
             return null;

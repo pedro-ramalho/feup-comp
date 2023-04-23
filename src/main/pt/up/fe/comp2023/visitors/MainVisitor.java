@@ -70,7 +70,7 @@ public class MainVisitor extends AJmmVisitor<String, String> {
     private String dealWithVarDeclaration(JmmNode node, String s) {
         String id = node.hasAttribute("var") ? node.get("var") : node.get("parameter");
 
-        IdentifierHandler handler = new IdentifierHandler(id, this.name, this.extension, this.symbolTable);
+        IdentifierHandler handler = new IdentifierHandler(id, this.name, this.extension, this.isStatic, this.symbolTable);
 
         if (handler.getType() == null) {
 

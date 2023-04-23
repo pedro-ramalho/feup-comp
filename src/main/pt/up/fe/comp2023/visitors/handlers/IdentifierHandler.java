@@ -13,11 +13,13 @@ public class IdentifierHandler implements Handler {
     private String identifier;
     private String method;
     private String extension;
+    private boolean isStatic;
     private MySymbolTable symbolTable;
-    public IdentifierHandler(String identifier, String method, String extension, MySymbolTable symbolTable) {
+    public IdentifierHandler(String identifier, String method, String extension, boolean isStatic, MySymbolTable symbolTable) {
         this.identifier = identifier;
         this.method = method;
         this.extension = extension;
+        this.isStatic = isStatic;
         this.symbolTable = symbolTable;
     }
 
@@ -46,83 +48,79 @@ public class IdentifierHandler implements Handler {
     }
 
     @Override
-    public Type getType() {
+    public MyType getType() {
         /* check if the identifier is a class extension */
         if (this.isClassExtension(this.identifier)) {
-            return MyType.EXTENSION;
+            return new MyType("extension", false);
         }
 
         /* check if the identifier is the class itself */
         if (this.isClassItself(this.identifier)) {
-            return MyType.THIS;
+            return new MyType("this", false);
         }
 
         /* check if the identifier is an import */
         if (this.isImport(this.identifier)) {
-            return MyType.IMPORT;
+            return new MyType("import", false);
         }
 
         /* check if the identifier is a method's local variable */
-        for (Symbol symbol : symbolTable.getLocalVariables(this.method)) {
+        for (Symbol symbol : this.symbolTable.getLocalVariables(this.method)) {
             if (this.identifier.equals(symbol.getName())) {
                 Type type = symbol.getType();
 
                 String typeName = type.getName();
 
-                /* check if it's an extension */
                 if (this.isClassExtension(typeName)) {
-                    return MyType.EXTENSION;
+                    return new MyType("extension", false);
                 }
 
-                /* check if it's an import */
+                if (this.isClassItself(typeName)) {
+                    return new MyType("this", false);
+                }
+
                 if (this.isImport(typeName)) {
-                    return MyType.IMPORT;
+                    return new MyType("import", false);
                 }
 
-                return symbol.getType();
+                return new MyType(type.getName(), type.isArray());
             }
-
         }
 
         /* check if the identifier is a method parameter */
-        for (Symbol symbol : symbolTable.getParameters(this.method)) {
+        for (Symbol symbol : this.symbolTable.getParameters(this.method)) {
             if (this.identifier.equals(symbol.getName())) {
                 Type type = symbol.getType();
 
                 String typeName = type.getName();
 
-                /* check if it's an extension */
                 if (this.isClassExtension(typeName)) {
-                    return MyType.EXTENSION;
+                    return new MyType("extension", false);
                 }
 
-                /* check if it's an import */
                 if (this.isImport(typeName)) {
-                    return MyType.IMPORT;
+                    return new MyType("import", false);
                 }
 
-                return symbol.getType();
+                return new MyType(type.getName(), type.isArray());
             }
         }
 
-        /* check if the identifier is a class field */
-        for (Symbol symbol : symbolTable.getFields()) {
+        for (Symbol symbol : this.symbolTable.getFields()) {
             if (this.identifier.equals(symbol.getName())) {
                 Type type = symbol.getType();
 
                 String typeName = type.getName();
 
-                /* check if it's an extension */
                 if (this.isClassExtension(typeName)) {
-                    return MyType.EXTENSION;
+                    return new MyType("extension", false);
                 }
 
-                /* check if it's an import */
                 if (this.isImport(typeName)) {
-                    return MyType.IMPORT;
+                    return new MyType("import", false);
                 }
 
-                return symbol.getType();
+                return new MyType(type.getName(), type.isArray());
             }
         }
 

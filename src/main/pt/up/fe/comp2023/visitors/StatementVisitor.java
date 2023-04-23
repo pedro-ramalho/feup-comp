@@ -59,14 +59,20 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
-        if (returnType.getName().equals("import") || returnType.getName().equals("extension")) {
+        if (returnType.isImport() || returnType.isExtension()) {
+            return null;
+        }
+
+        if (stReturnType.getName().equals(this.symbolTable.getClassName())) {
+            if (!returnType.isThis()) {
+                this.addReport();
+            }
 
             return null;
         }
 
-        if (!returnType.equals(new MyType(stReturnType.getName(), stReturnType.isArray()))) {
+        if (!(returnType.equals(new MyType(stReturnType.getName(), stReturnType.isArray())))) {
             this.addReport();
-
         }
 
         return null;
@@ -91,8 +97,6 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     private String dealWithArrayAssignment(JmmNode node, String s) {
         String var = node.get("var");
 
-        MyType assigneeType = null;
-
         JmmNode accessExpr = node.getJmmChild(0);
         JmmNode expression = node.getJmmChild(1);
 
@@ -101,58 +105,19 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         MyType accessType = visitor.visit(accessExpr);
         MyType exprType = visitor.visit(expression);
 
-        /* check if the assignment is being done over a class field */
-        for (Symbol symbol : this.symbolTable.getFields()) {
-            if (var.equals(symbol.getName())) {
-                Type type = symbol.getType();
-
-                if (type.isArray()) {
-                    assigneeType = new MyType(symbol.getType().getName(), symbol.getType().isArray());
-                }
-            }
-        }
-
-        /* check if the assignment is being done over a parameter */
-        for (Symbol symbol : this.symbolTable.getParameters(this.method)) {
-            if (var.equals(symbol.getName())) {
-                Type type = symbol.getType();
-
-                if (type.isArray()) {
-                    assigneeType = new MyType(symbol.getType().getName(), symbol.getType().isArray());
-                }
-            }
-        }
-
-        /* check if the assignment is being done over a local variable */
-        for (Symbol symbol : this.symbolTable.getLocalVariables(this.method)) {
-            if (var.equals(symbol.getName())) {
-                Type type = symbol.getType();
-
-                if (type.isArray()) {
-                    assigneeType = new MyType(symbol.getType().getName(), symbol.getType().isArray());
-                }
-            }
-        }
-
-        if (!accessType.getName().equals("int")) {
+        if (accessType == null || exprType == null) {
             this.addReport();
 
             return null;
         }
 
-        if (assigneeType == null) {
+        if (!accessType.isInt()) {
             this.addReport();
 
             return null;
         }
 
-        if (!(assigneeType.getName().equals("int") && assigneeType.isArray())) {
-            this.addReport();
-
-            return null;
-        }
-
-        if (!exprType.getName().equals("int")) {
+        if (!exprType.isInt()) {
             this.addReport();
 
             return null;
@@ -162,12 +127,15 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithAssignment(JmmNode node, String s) {
-        IdentifierHandler handler = new IdentifierHandler(node.get("var"), this.method, this.extension, this.symbolTable);
+        IdentifierHandler handler = new IdentifierHandler(node.get("var"), this.method, this.extension, this.isStatic, this.symbolTable);
 
-        Type handlerType = handler.getType();
-        String assigneeTypeName = handlerType.getName().equals(this.symbolTable.getClassName()) ? "this" : handlerType.getName();
+        MyType assigneeType = handler.getType();
 
-        MyType assigneeType = new MyType(assigneeTypeName, handler.getType().isArray());
+        if (assigneeType == null) {
+            this.addReport();
+
+            return null;
+        }
 
         JmmNode expression = node.getJmmChild(0);
 
@@ -176,42 +144,38 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         MyType assignedType = visitor.visit(expression, "");
 
         if (assignedType == null) {
+            System.out.println("I'm adding a report here 0");
             this.addReport();
 
             return null;
         }
 
-        /* the assignee is either an extension or an import, assume it's correct */
-        if (assigneeType.getName().equals("extension")) {
+        /* the assignee is of type 'extension', assume it's correct */
+        if (assigneeType.isExtension()) {
 
             return null;
         }
 
-        if (assigneeType.getName().equals("import")) {
-            if (assignedType.getName().equals(this.symbolTable.getClassName())) {
+        if (assigneeType.isImport()) {
+            if (assignedType.isThis()) {
+                System.out.println("I'm adding a report here 1");
                 this.addReport();
             }
 
             return null;
         }
 
-        /* the assignee is an object of the declared class */
-        if (assigneeType.getName().equals("this")) {
-            if (!assignedType.getName().equals("this") && !assignedType.getName().equals("extension")) {
+        if (assigneeType.isThis()) {
+            if (!assignedType.isThis() && !assignedType.isExtension()) {
+                System.out.println("I'm adding a report here 2");
                 this.addReport();
             }
 
             return null;
         }
 
-        /* the assigned is either an extension or an import, assume it's correct */
-        if (assignedType.getName().equals("extension") || assignedType.getName().equals("import")) {
-            return null;
-        }
-
-        /* the remaining case implies that both the assignee and the assigned are of the same type */
         if (!assigneeType.equals(assignedType)) {
-
+            System.out.println("I'm adding a report here 3");
             this.addReport();
 
             return null;
@@ -233,7 +197,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
     private String dealWithWhile(JmmNode node, String s) {
         ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
-        Type cond = visitor.visit(node.getJmmChild(0));
+        MyType cond = visitor.visit(node.getJmmChild(0));
 
         if (cond == null) {
             this.addReport();
@@ -241,7 +205,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
-        if (!cond.equals(new Type("boolean", false))) {
+        if (!cond.isBoolean()) {
             this.addReport();
         }
 

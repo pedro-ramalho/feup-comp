@@ -1,17 +1,16 @@
-class CallToUndeclaredMethod {
-    int x;
+import B;
+
+class ObjectAssignmentPassExtends extends B {
 
     public static void main(String[] args) {
+
     }
 
-    public int foo() {
-        int[] x;
-        int y;
+    public int calc(int arg) {
+        int x;
 
-        while(x[1]) {
+        x = 1;
 
-        }
-
-        return 1;
+        return x;
     }
 }
