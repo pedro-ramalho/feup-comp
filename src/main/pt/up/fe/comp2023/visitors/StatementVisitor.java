@@ -151,7 +151,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         }
 
         /* the assignee is of type 'extension', assume it's correct */
-        if (assigneeType.isExtension()) {
+        if (assigneeType.isExtension() || assignedType.isExtension()) {
 
             return null;
         }

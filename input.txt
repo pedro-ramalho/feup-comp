@@ -7,14 +7,12 @@ class ObjectAssignmentPassExtends extends B {
     }
 
     public int calc(int arg) {
-        int[] x;
-        boolean y;
+        int x;
+        int y;
 
-        x = new int[5];
+        B b;
 
-        while (y) {
-
-        }
+        y = b.foo(x);
 
         return 1;
     }
