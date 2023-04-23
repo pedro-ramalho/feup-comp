@@ -7,10 +7,10 @@ class ObjectAssignmentPassExtends extends B {
     }
 
     public int calc(int arg) {
-        int x;
+        int[] x;
 
-        x = 1;
+        x = new int[5];
 
-        return x;
+        return 1;
     }
 }

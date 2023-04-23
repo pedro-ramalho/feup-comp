@@ -175,7 +175,9 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         }
 
         if (!assigneeType.equals(assignedType)) {
-            System.out.println("I'm adding a report here 3");
+            System.out.println("assigneeType: " + assigneeType.getName() + ", " + assigneeType.isArray());
+            System.out.println("assignedType: " + assignedType.getName() + ", " + assignedType.isArray());
+
             this.addReport();
 
             return null;

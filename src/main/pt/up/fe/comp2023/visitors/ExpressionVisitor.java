@@ -173,6 +173,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType arrayLengthType = visit(arrayLengthNode, "");
 
         if (arrayLengthType == null) {
+            System.out.println("Report0");
             this.addReport();
 
             return null;
@@ -180,13 +181,16 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         /* the expression used for the array length is not of type 'int', must report an error */
         if (!arrayLengthType.isInt()) {
+            System.out.println("Report1");
             this.addReport();
 
             return null;
         }
 
         if (arrayTypeNode.hasAttribute("keyword")) {
-            return new MyType(arrayTypeNode.get("keyword"), arrayTypeNode.get("keyword").contains("[]"));
+            String keyword = arrayTypeNode.get("keyword");
+
+            return new MyType(keyword, true);
         }
         else {
             return visit(arrayTypeNode, "");

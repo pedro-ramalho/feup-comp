@@ -108,6 +108,10 @@ public class IdentifierHandler implements Handler {
 
         for (Symbol symbol : this.symbolTable.getFields()) {
             if (this.identifier.equals(symbol.getName())) {
+                if (this.isStatic) {
+                    return null;
+                }
+
                 Type type = symbol.getType();
 
                 String typeName = type.getName();
