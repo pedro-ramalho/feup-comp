@@ -3,17 +3,24 @@ import N;
 
 class A extends B {
     public static void main(String[] args) {
+        A a;
+        B b;
+        N n;
+        boolean x;
+        int y;
+
+        a = new A();
+        b = new B();
+        n = new N();
+
+        x = a.foo(b, n);
     }
 
-    public boolean foo(A a) {
+    public boolean foo(B b, N n) {
         return true;
     }
 
     public int bar() {
-        int x;
-
-        x = this.foo(this);
-
         return 1;
     }
 }

@@ -398,6 +398,12 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                     }
                 }
 
+                if (invokedArgTypeName.equals("extension")) {
+                    if (argTypeName.equals(this.extension)) {
+                        return new MyType(returnType.getName(), isPrimitive ? "primitive" : "object", returnType.isArray());
+                    }
+                }
+
                 /* arguments of different types, must add a report */
                 if (!(argTypeName.equals(invokedArgTypeName) && argTypeIsArray == invokedArgTypeIsArray)) {
                     this.addReport(node.get("lineStart"), node.get("colStart"), "arguments of different types!");
