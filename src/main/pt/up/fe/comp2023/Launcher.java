@@ -86,8 +86,13 @@ public class Launcher {
 
         int counter = 1;
 
+        if (reports.isEmpty()) {
+            System.out.println("All good! No reports were found.");
+        }
+
         for (Report report : reports) {
             System.out.println("- Report no. " + counter + ": " + report.toString());
+            counter++;
         }
 
         // ... add remaining stages

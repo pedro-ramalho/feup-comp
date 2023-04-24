@@ -5,7 +5,15 @@ class A extends B {
     public static void main(String[] args) {
     }
 
-    public int foo(A a) {
+    public boolean foo(A a) {
+        return true;
+    }
+
+    public int bar() {
+        int x;
+
+        x = this.foo(this);
+
         return 1;
     }
 }

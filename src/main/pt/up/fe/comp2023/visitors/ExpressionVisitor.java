@@ -387,6 +387,16 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
                 String invokedArgTypeName = invokedArgType.getName();
                 boolean invokedArgTypeIsArray = invokedArgType.isArray();
+                Type returnType = this.symbolTable.getReturnType(name);
+                String typename = returnType.getName();
+
+                boolean isPrimitive = typename.equals("int") || typename.equals("boolean") || typename.equals("String");
+
+                if (invokedArgTypeName.equals("this")) {
+                    if (argTypeName.equals(this.extension) || argTypeName.equals(this.symbolTable.getClassName())) {
+                        return new MyType(returnType.getName(), isPrimitive ? "primitive" : "object", returnType.isArray());
+                    }
+                }
 
                 /* arguments of different types, must add a report */
                 if (!(argTypeName.equals(invokedArgTypeName) && argTypeIsArray == invokedArgTypeIsArray)) {
