@@ -84,7 +84,11 @@ public class Launcher {
 
         JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
-        System.out.println("Found a total of " + reports.size() + " reports.");
+        int counter = 1;
+
+        for (Report report : reports) {
+            System.out.println("- Report no. " + counter + ": " + report.toString());
+        }
 
         // ... add remaining stages
     }

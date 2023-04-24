@@ -37,11 +37,10 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
         return splitImport[splitImport.length - 1];
     }
 
-    private void addReport() {
+    private void addReport(String line, String col, String message) {
         this.reports.add(new Report(
-                ReportType.ERROR, Stage.SEMANTIC, -1, -1, ""
+                ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(line), Integer.parseInt(col), message
         ));
-
     }
 
     @Override
@@ -99,14 +98,14 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
             }
 
             if (!exists) {
-                this.addReport();
+                this.addReport(node.get("lineStart"), node.get("colStart"), "var doesn't exist! (var declaration)");
 
                 return null;
             }
         }
 
         if (handler.getType() == null) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "handlerType is null! (var declaration)");
         }
 
         return null;

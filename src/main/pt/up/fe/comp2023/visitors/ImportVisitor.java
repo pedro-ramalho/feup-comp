@@ -7,6 +7,8 @@ import pt.up.fe.comp2023.MySymbolTable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 public class ImportVisitor extends AJmmVisitor<String, String> {
     private MySymbolTable symbolTable;

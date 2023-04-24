@@ -48,9 +48,9 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         addVisit("Condition", this::dealWithCondition);
     }
 
-    private void addReport() {
+    private void addReport(String line, String col, String message) {
         this.reports.add(new Report(
-                ReportType.ERROR, Stage.SEMANTIC, -1, -1, ""
+                ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(line), Integer.parseInt(col), message
         ));
     }
 
@@ -58,7 +58,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType conditionType = visit(node.getJmmChild(0), "");
 
         if (conditionType == null) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "conditionType is null!");
 
             return null;
         }
@@ -72,7 +72,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         /* the condition is not of type 'boolean', must report an error */
         if (!conditionType.isBoolean()) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "conditionType is not boolean!");
             return null;
         }
 
@@ -82,7 +82,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     private MyType dealWithObject(JmmNode node, String s) {
         /* the 'this' keyword cannot be used on a static method, report an error */
         if (this.isStatic) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "'this' was called in a static method!");
 
             return null;
         }
@@ -97,7 +97,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType identifierType = handler.getType();
 
         if (identifierType == null) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "identifierType is null!");
 
             return null;
         }
@@ -123,7 +123,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType rightOperandType = visit(rightOperand, "");
 
         if (leftOperandType == null || rightOperandType == null) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperandType or rightOperandType is null!");
 
             return null;
         }
@@ -131,14 +131,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         if (operation.isArithmetic()) {
             if (leftOperandType.isMethod()) {
                 if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
-                    this.addReport();
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperand comes from an import or extension, but isn't a method! (arithmetic operation)");
 
                     return null;
                 }
 
                 if (rightOperandType.isMethod()) {
                     if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
-                        this.addReport();
+                        this.addReport(node.get("lineStart"), node.get("colStart"), "rightOperand comes from an import or extension, but isn't a method! (arithmetic operation)");
 
                         return null;
                     }
@@ -153,14 +153,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
             if (rightOperandType.isMethod()) {
                 if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
-                    this.addReport();
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "rightOperand comes from an import or extension, but isn't a method! (arithmetic operation)");
 
                     return null;
                 }
 
                 if (leftOperandType.isMethod()) {
                     if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
-                        this.addReport();
+                        this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperand comes from an import or extension, but isn't a method! (arithmetic operation)");
 
                         return null;
                     }
@@ -177,7 +177,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                 return new MyType("int", "primitive",false);
             }
 
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperand or rightOperand are not of type int! (arithmetic operation)");
 
             return null;
         }
@@ -185,14 +185,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         if (operation.isLogical()) {
             if (leftOperandType.isMethod()) {
                 if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
-                    this.addReport();
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperand comes from an import or extension, but isn't a method! (logical operation)");
 
                     return null;
                 }
 
                 if (rightOperandType.isMethod()) {
                     if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
-                        this.addReport();
+                        this.addReport(node.get("lineStart"), node.get("colStart"), "rightOperand comes from an import or extension, but isn't a method! (logical operation)");
 
                         return null;
                     }
@@ -207,14 +207,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
             if (rightOperandType.isMethod()) {
                 if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
-                    this.addReport();
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "rightOperand comes from an import or extension, but isn't a method! (logical operation)");
 
                     return null;
                 }
 
                 if (leftOperandType.isMethod()) {
                     if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
-                        this.addReport();
+                        this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperand comes from an import or extension, but isn't a method! (logical operation)");
 
                         return null;
                     }
@@ -231,7 +231,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                 return new MyType("boolean", "primitive",false);
             }
 
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperand or rightOperand are not of type boolean! (logical operation)");
 
             return null;
         }
@@ -239,14 +239,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         if (operation.isComparison()) {
             if (leftOperandType.isMethod()) {
                 if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
-                    this.addReport();
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperand comes from an import or extension, but isn't a method! (comparison operation)");
 
                     return null;
                 }
 
                 if (rightOperandType.isMethod()) {
                     if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
-                        this.addReport();
+                        this.addReport(node.get("lineStart"), node.get("colStart"), "rightOperand comes from an import or extension, but isn't a method! (comparison operation)");
 
                         return null;
                     }
@@ -261,14 +261,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
             if (rightOperandType.isMethod()) {
                 if (!(rightOperandType.isExtension() || rightOperandType.isImport())) {
-                    this.addReport();
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "rightOperand comes from an import or extension, but isn't a method! (comparison operation)");
 
                     return null;
                 }
 
                 if (leftOperandType.isMethod()) {
                     if (!(leftOperandType.isExtension() || leftOperandType.isImport())) {
-                        this.addReport();
+                        this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperand comes from an import or extension, but isn't a method! (comparison operation)");
 
                         return null;
                     }
@@ -285,7 +285,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                 return new MyType("boolean", "primitive",false);
             }
 
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "leftOperand or rightOperand are not of type int! (comparison operation)");
 
             return null;
 
@@ -314,14 +314,14 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType arrayLengthType = visit(arrayLengthNode, "");
 
         if (arrayLengthType == null) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "arrayLengthType is null!");
 
             return null;
         }
 
         /* the expression used for the array length is not of type 'int', must report an error */
         if (!arrayLengthType.isInt()) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "arrayLengthType is not int!");;
 
             return null;
         }
@@ -344,7 +344,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType invokerType = visit(invoker, "");
 
         if (invokerType == null) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "invokerType is null!");
 
             return null;
         }
@@ -359,7 +359,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
                     return new MyType("extension", "method", false);
                 }
                 else {
-                    this.addReport();
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "the called method doesn't exist in the declared class!");
 
                     return null;
                 }
@@ -371,7 +371,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
             /* the number of arguments and invoked arguments are different, must add a report */
             if (numArgs != numInvokedArgs) {
-                this.addReport();
+                this.addReport(node.get("lineStart"), node.get("colStart"), "different number of arguments!");
 
                 return null;
             }
@@ -390,7 +390,8 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
                 /* arguments of different types, must add a report */
                 if (!(argTypeName.equals(invokedArgTypeName) && argTypeIsArray == invokedArgTypeIsArray)) {
-                    this.addReport();
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "arguments of different types!");
+
                     return null;
                 }
 
@@ -410,7 +411,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             IdentifierHandler handler = new IdentifierHandler(invoker.get("value"), this.method, this.extension, this.isStatic, this.symbolTable);
 
             if (handler.getType() == null) {
-                this.addReport();
+                this.addReport(node.get("lineStart"), node.get("colStart"), "handlerType is null! (method invocation)");
 
                 return null;
             }
@@ -425,13 +426,13 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType accessedType = visit(accessedExpr, "");
 
         if (accessedType == null) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "accessedType is null! (array length)");
 
             return null;
         }
 
         if (!accessedType.isArray()) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "accessedType isn't array! (array length)");
 
             return null;
         }
@@ -447,13 +448,13 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType indexType = visit(indexExpr, "");
 
         if (accessedType == null || indexType == null) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "accessedType or indexType is null! (array access)");
 
             return null;
         }
 
         if (!(accessedType.isArray() && indexType.isInt())) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "accessedType is not array or indexType is not int! (array access)");
 
             return null;
         }
@@ -465,13 +466,13 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType returnType = visit(node.getJmmChild(0), "");
 
         if (returnType == null) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "returnType is null! (negation)");
 
             return null;
         }
 
         if (!returnType.isBoolean()) {
-            this.addReport();
+            this.addReport(node.get("lineStart"), node.get("colStart"), "returnType is not boolean! (negation)");
 
             return null;
         }

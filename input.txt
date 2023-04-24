@@ -5,35 +5,7 @@ class A extends B {
     public static void main(String[] args) {
     }
 
-    public int foo() {
-        int x;
-        int y;
-        int z;
-        boolean a;
-        boolean b;
-        N n;
-
-        n = new N();
-        x = n.foo();
-        y = n.bar();
-        z = x + y;
-
-        while (true) {
-            n.foo();
-            B.foo();
-        }
-
-        if (new N()) {
-            n.foo();
-
-            x = N.lol();
-        }
-        else {
-            N.lol();
-            new N();
-            B.foo();
-        }
-
-        return this.bar();
+    public int foo(A a) {
+        return 1;
     }
 }
