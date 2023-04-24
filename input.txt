@@ -1,4 +1,5 @@
 import B;
+import N;
 
 class A extends B {
 
@@ -6,15 +7,18 @@ class A extends B {
 
     }
 
+    public int try(int arg) {
+        return 1;
+    }
+
     public int foo() {
-        int[] x;
+        A a;
+        N n;
+        int x;
+        int y;
 
-        if (!x) {
-
-        }
-        else {
-
-        }
+        n = new N();
+        x = n.blah(1, 2*3, y);
 
         return 1;
     }

@@ -363,7 +363,7 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             /* first, check if the method exists */
             if (!this.symbolTable.getMethods().contains(name)) {
                 if (this.extension != null) {
-                    return null;
+                    return new MyType("extension", "method", false);
                 }
                 else {
                     this.addReport();
