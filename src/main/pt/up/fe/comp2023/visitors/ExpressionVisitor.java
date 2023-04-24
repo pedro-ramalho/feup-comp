@@ -57,14 +57,15 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     private MyType dealWithCondition(JmmNode node, String s) {
         MyType conditionType = visit(node.getJmmChild(0), "");
 
-        System.out.println("condType: " + conditionType.getName() + ", " + conditionType.getOrigin());
-
         if (conditionType == null) {
             System.out.println("conditionType is null!");
             this.addReport();
 
             return null;
         }
+
+        System.out.println("condType: " + conditionType.getName() + ", " + conditionType.getOrigin());
+
 
         if (conditionType.isExtension() || conditionType.isImport()) {
             if (conditionType.isMethod()) {

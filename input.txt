@@ -1,15 +1,21 @@
-import A;
 import B;
 
-class CallToMethodAssumedInExtends extends A {
+class A extends B {
 
     public static void main(String[] args) {
 
     }
 
     public int foo() {
-        C c;
-        int x;
-        return 0;
+        int[] x;
+
+        if (!x) {
+
+        }
+        else {
+
+        }
+
+        return 1;
     }
 }
