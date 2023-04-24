@@ -1,28 +1,39 @@
 import B;
 import N;
-import M;
-import N1.N2.N3.N4.N5;
 
 class A extends B {
-
     public static void main(String[] args) {
-        N5 n;
+    }
+
+    public int foo() {
+        int x;
         int y;
+        int z;
+        boolean a;
+        boolean b;
+        N n;
+
+        n = new N();
+        x = n.foo();
+        y = n.bar();
+        z = x + y;
+
+        while (true) {
+            n.foo();
+            B.foo();
+        }
+
+        if (new N()) {
+            n.foo();
+
+            x = N.lol();
+        }
+        else {
+            N.lol();
+            new N();
+            B.foo();
+        }
+
+        return this.bar();
     }
-
-    public B bar() {
-        A a;
-        B b;
-
-        a = this;
-        b = this;
-
-        return this;
-    }
-
-    public int try(int arg) {
-        return 1;
-    }
-
-
 }

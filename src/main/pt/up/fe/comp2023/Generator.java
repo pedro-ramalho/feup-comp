@@ -383,7 +383,6 @@ public class Generator extends AJmmVisitor<String, String> {
     }
 
     private String dealWithIdentifier(JmmNode jmmNode, String s) {
-        System.out.println("Parent node = " + jmmNode.getJmmParent());
         return s + jmmNode.get("value");
     }
 
