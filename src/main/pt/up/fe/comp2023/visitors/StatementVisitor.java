@@ -63,6 +63,18 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
             return null;
         }
 
+        if (returnType.isThis()) {
+            if (stReturnType.getName().equals(this.symbolTable.getClassName())) {
+                return null;
+            }
+
+            if (stReturnType.getName().equals(this.extension)) {
+                return null;
+            }
+
+            this.addReport();
+        }
+
         if (stReturnType.getName().equals(this.symbolTable.getClassName())) {
             if (!returnType.isThis()) {
                 this.addReport();

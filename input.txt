@@ -1,21 +1,28 @@
 import B;
+import N;
+import M;
+import N1.N2.N3.N4.N5;
 
 class A extends B {
 
     public static void main(String[] args) {
+        N5 n;
+        int y;
+    }
 
+    public B bar() {
+        A a;
+        B b;
+
+        a = this;
+        b = this;
+
+        return this;
     }
 
     public int try(int arg) {
         return 1;
     }
 
-    public int foo() {
-        int x;
-        int y;
 
-        y = x[1];
-
-        return 1;
-    }
 }
