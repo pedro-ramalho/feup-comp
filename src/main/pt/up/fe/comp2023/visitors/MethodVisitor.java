@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2023.MySymbolTable;
 import pt.up.fe.comp2023.visitors.handlers.IdentifierHandler;
+import pt.up.fe.comp2023.visitors.utils.MyType;
 
 import java.util.ArrayList;
 
@@ -28,6 +29,12 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
 
         this.symbolTable = symbolTable;
         this.reports = reports;
+    }
+
+    private String parseImport(String imp) {
+        String[] splitImport = imp.split("\\.");
+
+        return splitImport[splitImport.length - 1];
     }
 
     private void addReport() {
@@ -71,6 +78,32 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
         String id = node.hasAttribute("var") ? node.get("var") : node.get("parameter");
 
         IdentifierHandler handler = new IdentifierHandler(id, this.name, this.extension, this.isStatic, this.symbolTable);
+
+        JmmNode child = node.getJmmChild(0);
+
+        if (child.getKind().equals("CustomType")) {
+            String typename = child.get("name");
+
+            boolean exists = false;
+
+            if (typename.equals(this.symbolTable.getClassName())) {
+                exists = true;
+            }
+
+            for (String imp : this.symbolTable.getImports()) {
+                if (typename.equals(this.parseImport(imp))) {
+                    exists = true;
+
+                    break;
+                }
+            }
+
+            if (!exists) {
+                this.addReport();
+
+                return null;
+            }
+        }
 
         if (handler.getType() == null) {
             this.addReport();

@@ -8,11 +8,8 @@ class CallToMethodAssumedInExtends extends A {
     }
 
     public int foo() {
-        B b;
+        C c;
         int x;
-
-        x = b.car();
-
         return 0;
     }
 }
