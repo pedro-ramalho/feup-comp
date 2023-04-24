@@ -58,14 +58,10 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
         MyType conditionType = visit(node.getJmmChild(0), "");
 
         if (conditionType == null) {
-            System.out.println("conditionType is null!");
             this.addReport();
 
             return null;
         }
-
-        System.out.println("condType: " + conditionType.getName() + ", " + conditionType.getOrigin());
-
 
         if (conditionType.isExtension() || conditionType.isImport()) {
             if (conditionType.isMethod()) {
@@ -307,7 +303,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         IdentifierHandler handler = new IdentifierHandler(customType, this.method, this.extension, this.isStatic, this.symbolTable);
 
-        System.out.println("type: " + handler.getType().getName());
 
         return handler.getType();
     }
@@ -326,7 +321,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         /* the expression used for the array length is not of type 'int', must report an error */
         if (!arrayLengthType.isInt()) {
-            System.out.println("Report1");
             this.addReport();
 
             return null;
@@ -355,7 +349,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
             return null;
         }
 
-        System.out.println("invokerType: " + invokerType.getName() + ", " + invokerType.isArray());
 
         /* dealing with a method of our own class */
         if (invokerType.isThis()) {
@@ -421,8 +414,6 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
                 return null;
             }
-
-            System.out.println("handlerType: " + handler.getType().getName() + ", " + handler.getType().getOrigin());
 
             return new MyType(handler.getType().getName(), "method", handler.getType().isArray());
         }

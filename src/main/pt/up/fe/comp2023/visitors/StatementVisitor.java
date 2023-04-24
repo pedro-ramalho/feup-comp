@@ -175,7 +175,6 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         }
 
         if (assigneeType.isPrimitive()) {
-            System.out.println("assigneeType is primitive!");
             if (assignedType.isExtension() && assignedType.isMethod()) {
                 return null;
             }
