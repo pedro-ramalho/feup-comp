@@ -1,26 +1,21 @@
 import B;
-import N;
 
-class A extends B {
+class ObjectAssignmentPassExtends extends B {
+
     public static void main(String[] args) {
-        A a;
+
+    }u
+
+    public ObjectAssignmentPassExtends foo() {
+        ObjectAssignmentPassExtends a;
         B b;
-        N n;
-        boolean x;
-        int y;
 
-        a = new A();
+        a = new ObjectAssignmentPassExtends();
         b = new B();
-        n = new N();
 
-        x = a.foo(b, n);
-    }
+        // ObjectAssignmentPassExtends extends B
+        b = a;
 
-    public boolean foo(B b, N n) {
-        return true;
-    }
-
-    public int bar() {
-        return 1;
+        return a;
     }
 }

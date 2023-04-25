@@ -73,7 +73,6 @@ public class MainVisitor extends AJmmVisitor<String, String> {
         IdentifierHandler handler = new IdentifierHandler(id, this.name, this.extension, this.isStatic, this.symbolTable);
 
         if (handler.getType() == null) {
-
             this.addReport();
         }
 

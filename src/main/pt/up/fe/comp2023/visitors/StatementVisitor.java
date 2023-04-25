@@ -47,6 +47,25 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         addVisit("ArrayAssignment", this::dealWithArrayAssignment);
     }
 
+    private String parseImport(String imp) {
+        String[] splitImport = imp.split("\\.");
+
+        return splitImport[splitImport.length - 1];
+    }
+
+    private boolean isImport(String id) {
+        for (String imp : this.symbolTable.getImports()) {
+            if (id.equals(this.parseImport(imp))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    private boolean isClassExtension(String id) {
+        return id.equals(this.extension);
+    }
+
     private String dealWithReturnStatement(JmmNode node, String s) {
         ExpressionVisitor visitor = new ExpressionVisitor(this.method, this.extension, this.isStatic, this.symbolTable, this.reports);
 
@@ -54,16 +73,18 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         Type stReturnType = this.symbolTable.getReturnType(this.method);
 
         if (returnType == null) {
-            this.addReport(node.get("lineStart"), node.get("colStart"), "returnType is null! (returnStatement)");
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The return type is NULL! (method: dealWithReturnStatement)");
 
             return null;
         }
 
-        if (returnType.isImport() || returnType.isExtension()) {
-            return null;
+        if (returnType.isMethod()) {
+            if (this.isImport(returnType.getName()) || this.isClassExtension(returnType.getName())) {
+                return null;
+            }
         }
 
-        if (returnType.isThis()) {
+        if (returnType.isThis() || returnType.getName().equals(this.symbolTable.getClassName())) {
             if (stReturnType.getName().equals(this.symbolTable.getClassName())) {
                 return null;
             }
@@ -72,19 +93,19 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
                 return null;
             }
 
-            this.addReport(node.get("lineStart"), node.get("colStart"), "returnType is this but it shouldn't! (returnStatement)");
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The return type is 'this', but it shouldn't! (method: dealWithReturnStatement)");
         }
 
         if (stReturnType.getName().equals(this.symbolTable.getClassName())) {
-            if (!returnType.isThis()) {
-                this.addReport(node.get("lineStart"), node.get("colStart"), "returnType is not this! (returnStatement)");;
+            if (!returnType.isThis() || !returnType.getName().equals(this.extension)) {
+                this.addReport(node.get("lineStart"), node.get("colStart"), "The return type is not THIS! (method: dealWithReturnStatement)");;
             }
 
             return null;
         }
 
         if (!(returnType.equals(new MyType(stReturnType.getName(), "", stReturnType.isArray())))) {
-            this.addReport(node.get("lineStart"), node.get("colStart"), "returnType is not correct! (returnStatement)");;
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The return type and the symbol table return type are different! (method: dealWithReturnStatement)");
         }
 
         return null;
@@ -118,19 +139,19 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         MyType exprType = visitor.visit(expression);
 
         if (accessType == null || exprType == null) {
-            this.addReport(node.get("lineStart"), node.get("colStart"), "accessType or exprType is null! (arrayAssignment)");;
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The access expression or type expression is NULL! (method: dealWithArrayAssignment)");
 
             return null;
         }
 
         if (!accessType.isInt()) {
-            this.addReport(node.get("lineStart"), node.get("colStart"), "accessType is not int! (arrayAssignment)");;
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The access expression is not of type INT! (method: dealWithArrayAssignment)");
 
             return null;
         }
 
         if (!exprType.isInt()) {
-            this.addReport(node.get("lineStart"), node.get("colStart"), "exprType is not int! (arrayAssignment)");;
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The expression is not of type INT! (method: dealWithArrayAssignment)");
 
             return null;
         }
@@ -144,7 +165,7 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         MyType assigneeType = handler.getType();
 
         if (assigneeType == null) {
-            this.addReport(node.get("lineStart"), node.get("colStart"), "assigneeType is null! (assignment)");;
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The assignee is NULL! (method: dealWithAssignment)");
 
             return null;
         }
@@ -156,48 +177,48 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
         MyType assignedType = visitor.visit(expression, "");
 
         if (assignedType == null) {
-            this.addReport(node.get("lineStart"), node.get("colStart"), "assignedType is null! (assignment)");;
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The assigned is NULL! (assignment)");
 
             return null;
         }
 
         /* the assignee is of type 'extension', assume it's correct */
-        if (assigneeType.isExtension() || assignedType.isExtension()) {
+        if (this.isClassExtension(assigneeType.getName()) || this.isClassExtension(assignedType.getName())) {
             return null;
         }
 
-        if (assigneeType.isImport()) {
-            if (assignedType.isImport()) {
+        if (this.isImport(assigneeType.getName())) {
+            if (this.isImport(assignedType.getName())) {
                 return null;
             }
 
-            if (assignedType.isThis()) {
-                this.addReport(node.get("lineStart"), node.get("colStart"), "import was assigned to this! (assignment)");;
+            if (assignedType.getName().equals("this") || assignedType.getName().equals(this.symbolTable.getClassName())) {
+                this.addReport(node.get("lineStart"), node.get("colStart"), "IMPORT was assigned to THIS! (method: dealWithAssignment)");;
             }
 
             return null;
         }
 
-        if (assigneeType.isThis()) {
-            if (!assignedType.isThis() && !assignedType.isExtension()) {
-                this.addReport(node.get("lineStart"), node.get("colStart"), "this was assigned to something other than 'this' or extension! (assignment)");;
+        if (assigneeType.getName().equals("this") || assigneeType.getName().equals(this.symbolTable.getClassName())) {
+            if (!assignedType.getName().equals("this") && !assignedType.getName().equals(this.symbolTable.getClassName()) && !assignedType.getName().equals(this.extension)) {
+                this.addReport(node.get("lineStart"), node.get("colStart"), "THIS was assigned to something other than THIS or EXTENSION! (method: dealWithAssignment)");
             }
 
             return null;
         }
 
         if (assigneeType.isPrimitive()) {
-            if (assignedType.isExtension() && assignedType.isMethod()) {
+            if (this.isClassExtension(assignedType.getName()) && assignedType.isMethod()) {
                 return null;
             }
 
-            if (assignedType.isImport() && assignedType.isMethod()) {
+            if (this.isImport(assignedType.getName()) && assignedType.isMethod()) {
                 return null;
             }
         }
 
         if (!assigneeType.equals(assignedType)) {
-            this.addReport(node.get("lineStart"), node.get("colStart"), "assigneeType and assignedType are of different types! (assignment)");
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The types of the assignee and assigned are different! (method: dealWithAssignment)");
 
             return null;
         }
@@ -223,17 +244,19 @@ public class StatementVisitor extends AJmmVisitor<String, String> {
                 MyType cond = visitor.visit(node.getJmmChild(0));
 
                 if (cond == null) {
-                    this.addReport(node.get("lineStart"), node.get("colStart"), "cond is null! (while)");;
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "Condition is NULL! (method: dealWithWhile)");
 
                     return null;
                 }
 
-                if (cond.isExtension() || cond.isImport()) {
-                    return null;
+                if (cond.isMethod()) {
+                    if (this.isClassExtension(cond.getName()) || this.isImport(cond.getName())) {
+                        return null;
+                    }
                 }
 
                 if (!cond.isBoolean()) {
-                    this.addReport(node.get("lineStart"), node.get("colStart"), "cond is not boolean! (while)");
+                    this.addReport(node.get("lineStart"), node.get("colStart"), "Condition is not of type BOOLEAN! (method: dealWithWhile)");
                 }
             }
             else {

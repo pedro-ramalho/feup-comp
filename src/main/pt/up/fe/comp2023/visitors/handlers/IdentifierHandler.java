@@ -10,6 +10,12 @@ import java.util.ArrayList;
 
 
 public class IdentifierHandler implements Handler {
+    private final String EXTENSION = "extension";
+    private final String METHOD = "method";
+    private final String IMPORT = "import";
+    private final String OBJECT = "object";
+    private final String THIS = "this";
+    private final String PRIMITIVE = "primitive";
     private String identifier;
     private String method;
     private String extension;
@@ -51,17 +57,17 @@ public class IdentifierHandler implements Handler {
     public MyType getType() {
         /* check if the identifier is a class extension */
         if (this.isClassExtension(this.identifier)) {
-            return new MyType("extension", "method", false);
+            return new MyType(this.identifier, this.METHOD, false);
         }
 
         /* check if the identifier is the class itself */
         if (this.isClassItself(this.identifier)) {
-            return new MyType("this", "method", false);
+            return new MyType(this.identifier, this.METHOD, false);
         }
 
         /* check if the identifier is an import */
         if (this.isImport(this.identifier)) {
-            return new MyType("import", "method", false);
+            return new MyType(this.identifier, this.METHOD, false);
         }
 
         /* check if the identifier is a method's local variable */
@@ -69,21 +75,18 @@ public class IdentifierHandler implements Handler {
             if (this.identifier.equals(symbol.getName())) {
                 Type type = symbol.getType();
 
-                String typeName = type.getName();
+                String typename = type.getName();
 
-                if (this.isClassExtension(typeName)) {
-                    return new MyType("extension", "object", false);
-                }
+                if (this.isClassExtension(typename))
+                    return new MyType(typename, this.OBJECT, false);
 
-                if (this.isClassItself(typeName)) {
-                    return new MyType("this", "object", false);
-                }
+                if (this.isClassItself(typename))
+                    return new MyType(typename, this.THIS, false);
 
-                if (this.isImport(typeName)) {
-                    return new MyType("import", "object", false);
-                }
+                if (this.isImport(typename))
+                    return new MyType(typename, this.OBJECT, false);
 
-                return new MyType(type.getName(), "primitive", type.isArray());
+                return new MyType(typename, this.PRIMITIVE, type.isArray());
             }
         }
 
@@ -92,47 +95,40 @@ public class IdentifierHandler implements Handler {
             if (this.identifier.equals(symbol.getName())) {
                 Type type = symbol.getType();
 
-                String typeName = type.getName();
+                String typename = type.getName();
 
-                if (this.isClassExtension(typeName)) {
-                    return new MyType("extension", "object", false);
-                }
+                if (this.isClassExtension(typename))
+                    return new MyType(typename, this.OBJECT, false);
 
-                if (this.isClassItself(typeName)) {
-                    return new MyType("this", "object", false);
-                }
+                if (this.isClassItself(typename))
+                    return new MyType(typename, this.THIS, false);
 
-                if (this.isImport(typeName)) {
-                    return new MyType("import", "object", false);
-                }
+                if (this.isImport(typename))
+                    return new MyType(typename, this.OBJECT, false);
 
-                return new MyType(type.getName(), "primitive", type.isArray());
+                return new MyType(typename, this.PRIMITIVE, type.isArray());
             }
         }
 
         for (Symbol symbol : this.symbolTable.getFields()) {
             if (this.identifier.equals(symbol.getName())) {
-                if (this.isStatic) {
+                if (this.isStatic)
                     return null;
-                }
 
                 Type type = symbol.getType();
 
-                String typeName = type.getName();
+                String typename = type.getName();
 
-                if (this.isClassExtension(typeName)) {
-                    return new MyType("extension", "object", false);
-                }
+                if (this.isClassExtension(typename))
+                    return new MyType(typename, this.OBJECT, false);
 
-                if (this.isClassItself(typeName)) {
-                    return new MyType("this", "object", false);
-                }
+                if (this.isClassItself(typename))
+                    return new MyType(typename, this.THIS, false);
 
-                if (this.isImport(typeName)) {
-                    return new MyType("import", "object", false);
-                }
+                if (this.isImport(typename))
+                    return new MyType(typename, this.OBJECT, false);
 
-                return new MyType(type.getName(), "primitive", type.isArray());
+                return new MyType(typename, this.PRIMITIVE, type.isArray());
             }
         }
 

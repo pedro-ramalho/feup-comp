@@ -61,8 +61,8 @@ public class Launcher {
 
         MySymbolTable symbolTable = gen.getSymbolTable();
 
-        System.out.println("Printing Symbol Table...");
-        symbolTable.printSymbolTable();
+        // System.out.println("Printing Symbol Table...");
+        // symbolTable.printSymbolTable();
 
         // TESTING OLLIR TO JASIMIN
         //System.out.println("OLLIR -> JASMIN");

@@ -98,14 +98,14 @@ public class MethodVisitor extends AJmmVisitor<String, String> {
             }
 
             if (!exists) {
-                this.addReport(node.get("lineStart"), node.get("colStart"), "var doesn't exist! (var declaration)");
+                this.addReport(node.get("lineStart"), node.get("colStart"), "Unknown type in variable declaration! (method: dealWithVarDeclaration)");
 
                 return null;
             }
         }
 
         if (handler.getType() == null) {
-            this.addReport(node.get("lineStart"), node.get("colStart"), "handlerType is null! (var declaration)");
+            this.addReport(node.get("lineStart"), node.get("colStart"), "The handler type is NULL! (method: dealWithVarDeclaration)");
         }
 
         return null;
