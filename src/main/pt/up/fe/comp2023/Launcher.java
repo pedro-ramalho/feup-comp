@@ -59,6 +59,9 @@ public class Launcher {
 
         System.out.println("Printing Symbol Table...");
         symbolTable.printSymbolTable();
+        OllirGenerator geny = new OllirGenerator();
+        String generatedCode = geny.visit(parserResult.getRootNode(),"");
+        System.out.println(generatedCode);
 
         // ... add remaining stages
     }

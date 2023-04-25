@@ -1,14 +1,22 @@
-import io;
-
-class MyClass {
-    int myfield;
-    Bruh myType;
-
-    public int calc(int arg1) {
-        return arg1;
+class CompileArithmetic {
+    int e;
+    int j;
+    public static void main(String[] args) {
+        int c;
+        int t;
+        c = 1+5;
+        t = this.foo(c);
     }
 
-    public static void main(String[] args) {
-        io.println(new calc());
+    public int foo(int t, int f, String j) {
+        int a;
+        int b;
+        int x;
+        c = a*b+t*d;
+        a = 1;
+        b = 2;
+        d = !a;
+        t = x;
+        return a + b;
     }
 }
