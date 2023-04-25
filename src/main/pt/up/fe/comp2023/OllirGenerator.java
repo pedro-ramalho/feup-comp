@@ -1,16 +1,20 @@
 package pt.up.fe.comp2023;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
-import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 
-public class OllirGenerator extends AJmmVisitor<String, String> {
+public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
 
-    private MySymbolTable symbolTable = new MySymbolTable();
+
+    private MySymbolTable symbolTable;
+    public OllirGenerator(MySymbolTable symbolTable){
+        this.symbolTable = symbolTable;
+    }
 
     private static final HashMap<String, String> typeString = new HashMap<String,String>();
 
@@ -110,15 +114,15 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         addVisit("CurrentObject",this::dealWithCurrentObject);
     }
 
-    private String dealWithProgram(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithProgram(JmmNode jmmNode, String s) {
         for (JmmNode child : jmmNode.getChildren())
-            s += visit(child, "");
-        return s;
+            s += visit(child, "").value();
+        return new ExprCodeResult("",s);
     }
 
 
 
-    private String dealWithImportDeclaration(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithImportDeclaration(JmmNode jmmNode, String s) {
         // fetch the import name
         String importName = jmmNode.get("name");
 
@@ -130,9 +134,9 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         }else {
             s = s + "import " + importName + '\n';
         }
-        return s;
+        return new ExprCodeResult("",s);
     }
-    private String dealWithClassDeclaration(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithClassDeclaration(JmmNode jmmNode, String s) {
         // fetch the class name
         String className = jmmNode.get("name");
         s = s + className + " {" + '\n';
@@ -167,15 +171,15 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         // fetch the class fields
         for (JmmNode methods : jmmNode.getChildren()) {
             if (methods.getKind().equals("Method") || methods.getKind().equals("Main")) {
-                s+= visit(methods,"");
+                s+= visit(methods,"").value();
             }
         }
 
         s = s + "}";
-        return s;
+        return new ExprCodeResult("",s);
     }
 
-    private String dealWithMain(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithMain(JmmNode jmmNode, String s) {
         // fetch the method name
         String body="";
         String declarations="";
@@ -185,19 +189,19 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         for (JmmNode child : jmmNode.getChildren()) {
             // fetch the methods local variables
             if (child.getKind().equals("VarDeclaration")) {
-                statements+= visit(child,"") + '\n';
+                statements+= visit(child,"").value() + '\n';
             }
             if(child.getKind().equals("Assignment")||child.getKind().equals("ArrayAssignment")){
-                statements+=visit(child,"");
+                statements+=visit(child,"").value();
             }
         }
         body = statements + declarations;
         s+= body;
         s += '}';
-        return s;
+        return new ExprCodeResult("",s);
     }
 
-    private String dealWithMethod(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithMethod(JmmNode jmmNode, String s) {
         // fetch the method name
         String methodName = jmmNode.get("name");
         String returnType = "";
@@ -210,12 +214,12 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         int currentAuxValue = temporaryVariableNumber;
         for (JmmNode child : jmmNode.getChildren()){
             if(child.getKind().equals("Argument")&&!parametersFlag){
-                parameters+=visit(child,"");
+                parameters+=visit(child,"").value();
                 parametersFlag = true;
             }
             if(child.getKind().equals("Argument")){
                 parameters+=',';
-                parameters+=visit(child,"");
+                parameters+=visit(child,"").value();
             }
             if(child.getKind().equals("ReturnType")){
                 JmmNode varType = child.getChildren().get(0);
@@ -226,13 +230,15 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
                 }
             }
             if(child.getKind().equals("VarDeclaration")){
-                declarations+= visit(child,"") + '\n';
+                declarations+= visit(child,"").value() + '\n';
             }
             if(child.getKind().equals("ReturnStatement")){
-                returnStatement+="ret"+returnType+ " "+ visit(child.getChildren().get(0),"");
+                ExprCodeResult childVal = visit(child.getChildren().get(0),"");
+
+                returnStatement+= childVal.prefixCode() +'\n' + "ret"+returnType+ " "+ childVal.value();
             }
             if(child.getKind().equals("Assignment")||child.getKind().equals("ArrayAssignment")){
-                statements+=visit(child,"");
+                statements+=visit(child,"").value();
             }
 
         }
@@ -267,10 +273,10 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
             }
         }*/
 
-        return s;
+        return new ExprCodeResult("",s);
     }
 
-    private String dealWithArgument(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithArgument(JmmNode jmmNode, String s) {
         String name = jmmNode.get("parameter");
         String type = "";
         JmmNode varType = jmmNode.getChildren().get(0);
@@ -279,10 +285,10 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         } else {
             type = varType.get("name");
         }
-        return s+name+type;
+        return new ExprCodeResult("",s+name+type);
     }
 
-    private String dealWithVarDeclaration(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithVarDeclaration(JmmNode jmmNode, String s) {
         String name = jmmNode.get("var");
         String type = "";
         JmmNode varType = jmmNode.getChildren().get(0);
@@ -291,13 +297,15 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         } else {
             type = varType.get("name");
         }
-        return s+name+type+";";
+        return new ExprCodeResult("",s+name+type+";");
     }
 
-    private String dealWithAssignment(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithAssignment(JmmNode jmmNode, String s) {
         String name = jmmNode.get("var");
         JmmNode child = jmmNode.getChildren().get(0);
-        String expression = visit(child,"");
+        ExprCodeResult val = visit(child,"");
+        String expression = val.prefixCode();
+        String auxVal = val.value();
         String type = "";
         String assign = "";
         if (child.getKind().equals("Negation")||child.getKind().equals("True")||child.getKind().equals("False")){
@@ -307,140 +315,143 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
         }else if(child.getKind().equals("MethodInvocation")){
             type = "";
         }
-        assign += name + type + " :=" + type + " " + expression;
-        return s + assign + '\n';
+        s += expression + '\n';
+        assign += name + type + " :=" + type + " " + auxVal;
+        return new ExprCodeResult("",s + assign + '\n');
     }
 
-    private String dealWithLiteral(JmmNode jmmNode, String s) {
-        return s + jmmNode.get("keyword");
+    private ExprCodeResult dealWithLiteral(JmmNode jmmNode, String s) {
+
+        return new ExprCodeResult("",s + jmmNode.get("keyword"));
     }
 
-    private String dealWithCondition(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithCondition(JmmNode jmmNode, String s) {
         return null;
     }
 
-    private String dealWithElseStatement(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithElseStatement(JmmNode jmmNode, String s) {
         return null;
     }
 
-    private String dealWithIfStatement(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithIfStatement(JmmNode jmmNode, String s) {
         return null;
     }
 
 
 
-    private String dealWithArrayAssignment(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithArrayAssignment(JmmNode jmmNode, String s) {
         String ret = s + jmmNode.get("var") + "[";
 
-        String inBrackets = visit(jmmNode.getChildren().get(1), "");
+        String inBrackets = visit(jmmNode.getChildren().get(1), "").value();
 
         ret += inBrackets + "] = ";
 
-        String expr = visit(jmmNode.getChildren().get(2), "");
+        String expr = visit(jmmNode.getChildren().get(2), "").value();
 
         ret += expr + ";";
 
-        return ret;
+        return new ExprCodeResult("",ret);
     }
 
-    private String dealWithExprStmt(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithExprStmt(JmmNode jmmNode, String s) {
         String ret = s;
 
         for (JmmNode child : jmmNode.getChildren())
-            ret += visit(child, "");
+            ret += visit(child, "").value();
 
-        return ret + ';';
+        return new ExprCodeResult("", ret + ';');
     }
 
-    private String dealWithWhile(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithWhile(JmmNode jmmNode, String s) {
         String s2 = s + "\t";
-        String condition = s + "while (" + visit(jmmNode.getChildren().get(0), "") + ") {\n";
+        String condition = s + "while (" + visit(jmmNode.getChildren().get(0), "").value() + ") {\n";
         String whileStmt = "";
 
         for (JmmNode child : jmmNode.getChildren().get(1).getChildren()) {
-            whileStmt += visit(child, s2);
+            whileStmt += visit(child, s2).value();
             whileStmt += '\n';
         }
 
         whileStmt += s + "}";
 
-        return condition + whileStmt;
+        return new ExprCodeResult("" ,condition + whileStmt);
     }
 
-    private String dealWithConditional(JmmNode jmmNode, String s) {
-        String condition = "(" + visit(jmmNode.getChildren().get(0), "") + ")";
+    private ExprCodeResult dealWithConditional(JmmNode jmmNode, String s) {
+        String condition = "(" + visit(jmmNode.getChildren().get(0), "").value() + ")";
 
         String ret = s + "if " + condition;
         String s2 = s + "\t";
 
         if (jmmNode.getChildren().get(1).getKind().equals("CodeBlock")) {
-            ret += visit(jmmNode.getChildren().get(1), s);
+            ret += visit(jmmNode.getChildren().get(1), s).value();
         }
         else {
-            ret += "\n" + visit(jmmNode.getChildren().get(1), s2);
+            ret += "\n" + visit(jmmNode.getChildren().get(1), s2).value();
             ret += "\n";
         }
 
         ret += s + "else";
 
         if (jmmNode.getChildren().get(2).getKind().equals("CodeBlock")) {
-            ret += visit(jmmNode.getChildren().get(2), s);
+            ret += visit(jmmNode.getChildren().get(2), s).value();
         }
         else {
-            ret += "\n" + visit(jmmNode.getChildren().get(2), s2);
+            ret += "\n" + visit(jmmNode.getChildren().get(2), s2).value();
             ret += "\n";
         }
 
-        return ret;
+        return new ExprCodeResult("",ret);
     }
 
 
 
-    private String dealWithCodeBlock(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithCodeBlock(JmmNode jmmNode, String s) {
         s = (s != null ? s : "");
         String s2 = s + "\t";
         String ret = " {\n";
 
         for (JmmNode child : jmmNode.getChildren()) {
-            ret += visit(child, s2);
+            ret += visit(child, s2).value();
             ret += "\n";
         }
 
         ret += s + "}\n";
 
-        return ret;
+        return new ExprCodeResult("",ret);
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-    private String dealWithCurrentObject(JmmNode jmmNode, String s) {
-        return s + "this";
+    private ExprCodeResult dealWithCurrentObject(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s + "this");
     }
 
-    private String dealWithIdentifier(JmmNode jmmNode, String s) {
-        return s + jmmNode.get("value");
+    private ExprCodeResult dealWithIdentifier(JmmNode jmmNode, String s) {
+        String methodAbove = getMethodName(jmmNode);
+        String name = jmmNode.get("value");
+        System.out.println(symbolTable.getFields());
+        String type = (symbolTable.findVariable(methodAbove,name).getType()).getName();
+        String typeConverted = "";
+        if(typeString.containsKey(type)){
+            typeConverted+= typeString.get(type);
+        }else{
+            typeConverted+=type;
+        }
+
+
+        return new ExprCodeResult("", name+typeConverted);
     }
 
-    private String dealWithFalse(JmmNode jmmNode, String s) {
-        return s + "false.bool";
+    private ExprCodeResult dealWithFalse(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s + "false.bool");
     }
 
-    private String dealWithTrue(JmmNode jmmNode, String s) {
-        return s + "true.bool";
+    private ExprCodeResult dealWithTrue(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("",s + "true.bool");
     }
 
-    private String dealWithBinaryOp(JmmNode jmmNode, String s) {
-        String leftExpr = "";
+    private ExprCodeResult dealWithBinaryOp(JmmNode jmmNode, String s) {
+        /*String leftExpr = "";
         String rightExpr = "";
         String leftVal = "";
         String rightVal = "";
@@ -486,27 +497,38 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
             rightExpr += visit(jmmNode.getChildren().get(1),"");
             assignAux += leftExpr + ' ' + op + opType + ' ' + rightExpr + '\n';
         }
-        return prev + s + assignAux;
+
+        return new ExprCodeResult("", prev + s + assignAux);*/
+        var lhsCode = visit(jmmNode.getJmmChild(0));
+        var rhsCode = visit(jmmNode.getJmmChild(1));
+
+        var code = new String();
+        code += lhsCode.prefixCode();
+        code += rhsCode.prefixCode();
+        var value = "t" + temporaryVariableNumber;
+        temporaryVariableNumber++;
+        code += (value + " = " + lhsCode.value() + " " + jmmNode.get("op") + " " + rhsCode.value() + '\n');
+        return new ExprCodeResult(code,value);
     }
 
-    private String dealWithInteger(JmmNode jmmNode, String s) {
-        return s + jmmNode.get("value") + ".i32";
+    private ExprCodeResult dealWithInteger(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s + jmmNode.get("value") + ".i32");
     }
 
-    private String dealWithParenthesis(JmmNode jmmNode, String s) {
-        return s + "(" + visit(jmmNode.getChildren().get(0),"") + ")";
+    private ExprCodeResult dealWithParenthesis(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s + "(" + visit(jmmNode.getChildren().get(0),"") + ")");
     }
 
-    private String dealWithCustomInstantiation(JmmNode jmmNode, String s) {
-        return s + "new " + jmmNode.get("objectType") + "()";
+    private ExprCodeResult dealWithCustomInstantiation(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s + "new " + jmmNode.get("objectType") + "()");
     }
 
-    private String dealWithArrayInstantiation(JmmNode jmmNode, String s) {
-        return s + "new int [" +  visit(jmmNode.getChildren().get(0),"") + "]";
+    private ExprCodeResult dealWithArrayInstantiation(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s + "new int [" +  visit(jmmNode.getChildren().get(0),"") + "]");
     }
 
 
-    private String dealWithMethodInvocation(JmmNode jmmNode, String s) {
+    private ExprCodeResult dealWithMethodInvocation(JmmNode jmmNode, String s) {
 
         String ret = s + visit(jmmNode.getChildren().get(0),"") + "." + jmmNode.get("method") + "(";
         for(int idx = 1; idx < jmmNode.getChildren().size(); idx++) {
@@ -515,26 +537,39 @@ public class OllirGenerator extends AJmmVisitor<String, String> {
                 ret += ", "; 
         }
         ret += ")";
-        return ret;
+        return new ExprCodeResult("", ret);
     }
 
-    private String dealWithArrayLength(JmmNode jmmNode, String s) {
-        return s + visit(jmmNode.getChildren().get(0),"") + ".length";
+    private ExprCodeResult dealWithArrayLength(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s + visit(jmmNode.getChildren().get(0),"") + ".length");
     }
 
-    private String dealWithArrayAccess(JmmNode jmmNode, String s) {
-        return s + visit(jmmNode.getChildren().get(0),"") + "[" + visit(jmmNode.getChildren().get(1),"") + "]";
+    private ExprCodeResult dealWithArrayAccess(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s + visit(jmmNode.getChildren().get(0),"") + "[" + visit(jmmNode.getChildren().get(1),"") + "]");
     }
 
-    private String dealWithNegation(JmmNode jmmNode, String s) {
-        return s + "!.bool " + visit(jmmNode.getChildren().get(0),"");
+    private ExprCodeResult dealWithNegation(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s + "!.bool " + visit(jmmNode.getChildren().get(0),""));
     }
 
-    private String dealWithCustomType(JmmNode jmmNode, String s) {
-        return s+jmmNode.get("name");
+    private ExprCodeResult dealWithCustomType(JmmNode jmmNode, String s) {
+        return new ExprCodeResult("", s+jmmNode.get("name"));
     }
 
     public MySymbolTable getSymbolTable() {
         return this.symbolTable;
+    }
+    private String getMethodName(JmmNode node) {
+        Optional<JmmNode> ancestor = node.getAncestor("Method");
+
+        String name = "main";
+
+        if (ancestor.isPresent()) {
+            JmmNode method = ancestor.get();
+
+            name = method.get("name");
+        }
+
+        return name;
     }
 }

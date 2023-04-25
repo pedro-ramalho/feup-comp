@@ -141,6 +141,38 @@ public class MySymbolTable implements SymbolTable {
         return true;
     }
 
+    public Symbol findVariable(String method, String variable){
+        Symbol myVar;
+        List<Symbol> local=  getLocalVariables(method);
+        if (local != null){
+            for(Symbol symbol : local){
+                if (symbol.getName().equals(variable)){
+                    myVar = symbol;
+                    return myVar;
+                }
+            }
+        }
+        List<Symbol> para = getParameters(method);
+        if (para != null){
+            for(Symbol symbol : para){
+                if(symbol.getName().equals(variable)){
+                    myVar = symbol;
+                    return myVar;
+                }
+            }
+        }
+        List<Symbol> field = getFields();
+        if (field!=null){
+            for(Symbol symbol : field){
+                if(symbol.getName().equals(variable)){
+                    myVar = symbol;
+                    return myVar;
+                }
+            }
+        }
+        return null;
+    }
+
     public void printSymbolTable() {
         System.out.println("Class: " + this.getClassName());
         System.out.println("Imports: " + this.getImports());
