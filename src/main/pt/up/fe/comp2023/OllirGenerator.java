@@ -302,18 +302,19 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
 
     private ExprCodeResult dealWithAssignment(JmmNode jmmNode, String s) {
         String name = jmmNode.get("var");
+        String methodAbove = getMethodName(jmmNode);
+        String type = getType((symbolTable.findVariable(methodAbove,name).getType()).getName());
         JmmNode child = jmmNode.getChildren().get(0);
         ExprCodeResult val = visit(child,"");
         String expression = val.prefixCode();
         String auxVal = val.value();
-        String type = "";
         String assign = "";
         if (child.getKind().equals("Negation")||child.getKind().equals("True")||child.getKind().equals("False")){
-            type = typeString.get("bool");
+            //type = typeString.get("bool");
         }else if(child.getKind().equals("BinaryOp")){
-            type = typeString.get(child.get("op"));
+            //type = typeString.get(child.get("op"));
         }else if(child.getKind().equals("MethodInvocation")){
-            type = "";
+            //type = "";
         }
         s += expression + '\n';
         assign += name + type + " :=" + type + " " + auxVal;
@@ -429,17 +430,10 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private ExprCodeResult dealWithIdentifier(JmmNode jmmNode, String s) {
         String methodAbove = getMethodName(jmmNode);
         String name = jmmNode.get("value");
-        System.out.println(symbolTable.getFields());
-        String type = (symbolTable.findVariable(methodAbove,name).getType()).getName();
-        String typeConverted = "";
-        if(typeString.containsKey(type)){
-            typeConverted+= typeString.get(type);
-        }else{
-            typeConverted+=type;
-        }
+        String type = this.getType((symbolTable.findVariable(methodAbove,name).getType()).getName());
 
 
-        return new ExprCodeResult("", name+typeConverted);
+        return new ExprCodeResult("", name+type);
     }
 
     private ExprCodeResult dealWithFalse(JmmNode jmmNode, String s) {
@@ -451,68 +445,21 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithBinaryOp(JmmNode jmmNode, String s) {
-        /*String leftExpr = "";
-        String rightExpr = "";
-        String leftVal = "";
-        String rightVal = "";
-        String assignAux = "";
-        int leftAux = 0;
-        int rightAux = 0;
-        String op = jmmNode.get("op");
-        String opType = typeString.get(op);
-        String prev = "";
-        int t = temporaryVariableNumber;
-        if(jmmNode.getJmmParent().getKind().equals("BinaryOp")){
-            assignAux += "Aux" + temporaryVariableNumber + opType + " := ";
-        }
-        if(jmmNode.getChildren().get(0).getKind().equals("BinaryOp")&&jmmNode.getChildren().get(1).getKind().equals("BinaryOp")){
-            leftExpr += visit(jmmNode.getChildren().get(0),"");
-            leftAux = temporaryVariableNumber;
-            leftVal = "Aux"+ leftAux;
-            temporaryVariableNumber++;
-            rightExpr += visit(jmmNode.getChildren().get(1),"");
-            rightAux = temporaryVariableNumber;
-            rightVal = "Aux"+ rightAux;
-            temporaryVariableNumber++;
-            prev += leftExpr + rightExpr;
-            assignAux += leftVal + opType + ' ' + op + opType + ' ' + rightVal + opType + '\n';
-        }else if(jmmNode.getChildren().get(0).getKind().equals("BinaryOp")){
-            leftExpr += visit(jmmNode.getChildren().get(0),"");
-            leftAux = temporaryVariableNumber;
-            leftVal = "Aux"+ leftAux;
-            temporaryVariableNumber++;
-            rightExpr += visit(jmmNode.getChildren().get(1),"");
-            prev += leftExpr;
-            assignAux += leftVal + opType + ' ' + op + opType + ' ' + rightExpr + '\n';
-        }else if(jmmNode.getChildren().get(1).getKind().equals("BinaryOp")){
-            leftExpr += visit(jmmNode.getChildren().get(0),"");
-            rightExpr += visit(jmmNode.getChildren().get(1),"");
-            rightAux = temporaryVariableNumber;
-            rightVal = "Aux"+ rightAux;
-            temporaryVariableNumber++;
-            prev += rightExpr;
-            assignAux += leftExpr + ' ' +  op + opType + ' ' + rightVal + opType + '\n';
-        }else{
-            leftExpr += visit(jmmNode.getChildren().get(0),"");
-            rightExpr += visit(jmmNode.getChildren().get(1),"");
-            assignAux += leftExpr + ' ' + op + opType + ' ' + rightExpr + '\n';
-        }
-
-        return new ExprCodeResult("", prev + s + assignAux);*/
         var lhsCode = visit(jmmNode.getJmmChild(0));
         var rhsCode = visit(jmmNode.getJmmChild(1));
 
         var code = new String();
         code += lhsCode.prefixCode();
         code += rhsCode.prefixCode();
-        var value = "t" + temporaryVariableNumber;
+        String type = getType(jmmNode.get("op"));
+        var value = "t" + temporaryVariableNumber+type;
         temporaryVariableNumber++;
-        code += (value + " = " + lhsCode.value() + " " + jmmNode.get("op") + " " + rhsCode.value() + '\n');
+        code += (value + " =" +type+ " " + lhsCode.value() + " " + jmmNode.get("op") + type + " " + rhsCode.value() + '\n');
         return new ExprCodeResult(code,value);
     }
 
     private ExprCodeResult dealWithInteger(JmmNode jmmNode, String s) {
-        return new ExprCodeResult("", s + jmmNode.get("value") + ".i32");
+        return new ExprCodeResult("", jmmNode.get("value") + ".i32");
     }
 
     private ExprCodeResult dealWithParenthesis(JmmNode jmmNode, String s) {
@@ -571,5 +518,14 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }
 
         return name;
+    }
+    private String getType(String name){
+        String type;
+        if(typeString.containsKey(name)){
+            type = typeString.get(name);
+        }else{
+            type = "." + name;
+        }
+        return type;
     }
 }

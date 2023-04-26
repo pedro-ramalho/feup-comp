@@ -1,25 +1,16 @@
 class CompileArithmetic {
-    int e;
-    int j;
-    int t;
-    int d;
+
     public static void main(String[] args) {
-        int c;
-        int t;
-        c = 1+5;
-        t = c;
+
     }
 
-    public int foo(int t, int f, String j) {
+    public int foo() {
         int a;
         int b;
-        int x;
-        int c;
+
         a = 1;
         b = 2;
-        x = 3;
-        t = x;
-        c = a*b+t*d;
+
         return a + b;
     }
 }
