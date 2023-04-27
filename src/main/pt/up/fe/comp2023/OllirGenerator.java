@@ -546,11 +546,17 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             para += temp.value();
         }
         String invokeType = getInvoke(lps);
-        var value = "t" + temporaryVariableNumber+returnType;
-        temporaryVariableNumber++;
-        String ret = expressions + value +" :=" + returnType + " "+  invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
+        String ret =expressions;
+        if(returnType != ".V"){
+            var value = "t" + temporaryVariableNumber+returnType;
+            temporaryVariableNumber++;
+            ret += value +" :=" + returnType + " "+ invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
+            return new ExprCodeResult(ret, value);
+        }else{
+            ret += invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
+            return new ExprCodeResult("",ret);
+        }
 
-        return new ExprCodeResult(ret, value);
     }
 
     private ExprCodeResult dealWithArrayLength(JmmNode jmmNode, String s) {
