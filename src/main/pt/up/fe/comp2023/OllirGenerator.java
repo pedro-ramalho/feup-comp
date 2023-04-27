@@ -496,11 +496,11 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private ExprCodeResult dealWithMethodInvocation(JmmNode jmmNode, String s) {
         String lpsKind = jmmNode.getChildren().get(0).getKind();
         String lps;
-        String midType="";
+        //String midType="";
         String expressions = "";
-        String methodName = jmmNode.get("method");
-        String methodAbove = getMethodName(jmmNode);
-        String returnType="";
+        //String methodName = jmmNode.get("method");
+        //String methodAbove = getMethodName(jmmNode);
+        //String returnType="";
         if (lpsKind.equals("This")){
             lps = "this";
         }else if(lpsKind.equals("MethodInvocation")){
@@ -509,7 +509,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             lps = templps.value();
         }else{
             lps = jmmNode.getChildren().get(0).get("value");
-            String type = "";
+        /*  String type = "";
             try{
                type += getType((symbolTable.findVariable(methodAbove,lps).getType()).getName());
                lps += type;
@@ -536,9 +536,11 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             }
         }
         if (returnType == ""){
-            returnType = ".V";
+            returnType = ".V";*/
         }
+        String methodName = jmmNode.get("method");//rem
         String para = "";
+        String type;//rem
         for(int idx = 1; idx < jmmNode.getChildren().size(); idx++) {
             para += ", ";
             ExprCodeResult temp = visit(jmmNode.getChildren().get(idx),"");
@@ -546,9 +548,10 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             para += temp.value();
         }
         String invokeType = getInvoke(lps);
-        String ret =expressions;
+        String ret = invokeType + "(" + lps + ", " + '"' + methodName + '"' + para + ").V";//rem
+        return new ExprCodeResult("", ret);//rem
+        /*String ret =expressions;
         if(returnType != ".V"){
-            returnType = ".V";
             var value = "t" + temporaryVariableNumber+returnType;
             temporaryVariableNumber++;
             ret += value +" :=" + returnType + " "+ invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
@@ -556,7 +559,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }else{
             ret += invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
             return new ExprCodeResult("",ret);
-        }
+        }*/
 
     }
 
