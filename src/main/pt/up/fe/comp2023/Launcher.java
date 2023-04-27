@@ -84,6 +84,8 @@ public class Launcher {
 
         JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
+        TestUtils.noErrors(reports);
+
         int counter = 1;
 
         if (reports.isEmpty()) {

@@ -1,21 +1,15 @@
-import B;
+class A {
+    int a;
 
-class ObjectAssignmentPassExtends extends B {
-
-    public static void main(String[] args) {
-
-    }u
-
-    public ObjectAssignmentPassExtends foo() {
-        ObjectAssignmentPassExtends a;
-        B b;
-
-        a = new ObjectAssignmentPassExtends();
-        b = new B();
-
-        // ObjectAssignmentPassExtends extends B
-        b = a;
-
+    public int x() {
+        a = 10;
+        io.print(a);
         return a;
+    }
+ 
+    public static void main(String[] args) {
+        A a;
+        a = new A();
+        a.x();
     }
 }
