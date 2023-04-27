@@ -35,8 +35,8 @@ class CompileMethodInvocation {
 
         return 0;
     }
-}*/
-/*import T;
+}
+import T;
 
 class CompileMethodInvocation {
     int j;

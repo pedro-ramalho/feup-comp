@@ -526,7 +526,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             expressions += temp.prefixCode();
             para += temp.value();
         }
-        String invokeType = getInvoke(lps);
+        String invokeType = getInvoke(lps,methodAbove);
         String ret =expressions;
         if(returnType != ".V"){
             var value = "t" + temporaryVariableNumber+returnType;
@@ -581,8 +581,10 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }
         return type;
     }
-    private String getInvoke(String lhsName){
+    private String getInvoke(String lhsName, String method){
         if (lhsName.equals("this")){
+            return "invokevirtual";
+        }else if(symbolTable.findVariable(lhsName, method)!=null){
             return "invokevirtual";
         }
         List<String> imports = symbolTable.getImports();
