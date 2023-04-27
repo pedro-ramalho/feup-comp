@@ -8,7 +8,11 @@ public class MyJmmOptimization implements JmmOptimization {
 
     @Override
     public OllirResult toOllir(JmmSemanticsResult jmmSemanticsResult) {
+        System.out.println("Generating OLLIR code... ");
 
-        return null;
+        OllirGenerator ollirGenerator = new OllirGenerator((MySymbolTable) jmmSemanticsResult.getSymbolTable());
+        ExprCodeResult ollirText = ollirGenerator.visit(jmmSemanticsResult.getRootNode(),"");
+        System.out.println(ollirText.value());
+        return new OllirResult(ollirText.value(), jmmSemanticsResult.getConfig());
     }
 }

@@ -1,14 +1,21 @@
 package pt.up.fe.comp2023;
 
 import java.io.File;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
-import com.sun.source.util.SourcePositions;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.jasmin.JasminResult;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2023.visitors.ProgramVisitor;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -47,21 +54,54 @@ public class Launcher {
         // Print the resulting AST
         System.out.println(parserResult.getRootNode().toTree());
 
-        // Testing the generated code
-        // Generator gen = new Generator();
-        // String generatedCode = gen.visit(parserResult.getRootNode(), "");
-        // System.out.println(generatedCode);
 
-         Generator gen = new Generator();
-        gen.visit(parserResult.getRootNode(), "");
+
+        // Testing the generated code
+        Generator gen = new Generator();
+        String generatedCode = gen.visit(parserResult.getRootNode(), "");
+        System.out.println(generatedCode);
 
         MySymbolTable symbolTable = gen.getSymbolTable();
 
-        System.out.println("Printing Symbol Table...");
-        symbolTable.printSymbolTable();
-        OllirGenerator geny = new OllirGenerator(symbolTable);
-        String generatedCode = geny.visit(parserResult.getRootNode(),"").value();
-        System.out.println(generatedCode);
+
+        // System.out.println("Printing Symbol Table...");
+        // symbolTable.printSymbolTable();
+
+        ArrayList<Report> reports = new ArrayList<>();
+
+        ProgramVisitor visitor = new ProgramVisitor(symbolTable, reports);
+
+        visitor.visit(parserResult.getRootNode(), "");
+
+        Analysis analysis = new Analysis();
+
+        JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
+
+        int counter = 1;
+
+        if (reports.isEmpty()) {
+            System.out.println("All good! No reports were found.");
+        }
+
+        for (Report report : reports) {
+            System.out.println("- Report no. " + counter + ": " + report.toString());
+            counter++;
+        }
+
+        MyJmmOptimization optimization = new MyJmmOptimization();
+        OllirResult ollirResult = optimization.toOllir(semanticsResult);
+
+        TestUtils.noErrors(ollirResult);
+
+        // TESTING OLLIR TO JASIMIN
+        //System.out.println("OLLIR -> JASMIN");
+        //String ollirCode = SpecsIo.read(inputFile);
+        //OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
+        MyJasminBackend jasminBackend = new MyJasminBackend();
+        JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
+        System.out.println(myJasminResult.getJasminCode());
+        myJasminResult.compile();
+        myJasminResult.run();
 
         // ... add remaining stages
     }
@@ -83,5 +123,6 @@ public class Launcher {
 
         return config;
     }
+
 
 }

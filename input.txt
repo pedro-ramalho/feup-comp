@@ -1,3 +1,23 @@
+/*class CompileArithmetic {
+
+    public static void main(String[] args) {
+    }
+
+    public int foo(int a) {
+        int b;
+
+        a = 1;
+        b = 2;
+
+        return a + b;
+    }
+    public int fo(){
+        int t;
+        t = this.foo(this.foo(2));
+        return t;
+
+    }
+}*/
 class CompileArithmetic {
 
     public static void main(String[] args) {
@@ -14,3 +34,4 @@ class CompileArithmetic {
         return a + b;
     }
 }
+
