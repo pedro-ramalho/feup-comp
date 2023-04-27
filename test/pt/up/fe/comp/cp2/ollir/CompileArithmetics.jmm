@@ -1,0 +1,28 @@
+import io;
+
+class CompileArithmetics {
+    int e;
+    int j;
+    int t;
+    int d;
+    String l;
+    public static void main(String[] args) {
+        int c;
+        int t;
+        c = 1+5;
+        t = io.foo(this.foo(c,c,l));
+    }
+
+    public int foo(int t, int f, String j) {
+        int a;
+        int b;
+        int x;
+        int c;
+        a = 1;
+        b = 2;
+        x = 3;
+        t = x;
+        c = a*b+t*d;
+        return a + b;
+    }
+}

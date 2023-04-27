@@ -1,21 +1,37 @@
-import B;
+/*class CompileArithmetic {
 
-class ObjectAssignmentPassExtends extends B {
+    public static void main(String[] args) {
+    }
+
+    public int foo(int a) {
+        int b;
+
+        a = 1;
+        b = 2;
+
+        return a + b;
+    }
+    public int fo(){
+        int t;
+        t = this.foo(this.foo(2));
+        return t;
+
+    }
+}*/
+class CompileArithmetic {
 
     public static void main(String[] args) {
 
-    }u
+    }
 
-    public ObjectAssignmentPassExtends foo() {
-        ObjectAssignmentPassExtends a;
-        B b;
+    public int foo() {
+        int a;
+        int b;
 
-        a = new ObjectAssignmentPassExtends();
-        b = new B();
+        a = 1;
+        b = 2;
 
-        // ObjectAssignmentPassExtends extends B
-        b = a;
-
-        return a;
+        return a + b;
     }
 }
+

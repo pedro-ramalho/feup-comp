@@ -142,6 +142,87 @@ public class MySymbolTable implements SymbolTable {
         return true;
     }
 
+    public Symbol findVariable(String method, String variable){
+        Symbol myVar;
+        List<Symbol> local=  getLocalVariables(method);
+        if (local != null){
+            for(Symbol symbol : local){
+                if (symbol.getName().equals(variable)){
+                    myVar = symbol;
+                    return myVar;
+                }
+            }
+        }
+        List<Symbol> para = getParameters(method);
+        if (para != null){
+            for(Symbol symbol : para){
+                if(symbol.getName().equals(variable)){
+                    myVar = symbol;
+                    return myVar;
+                }
+            }
+        }
+        List<Symbol> field = getFields();
+        if (field!=null){
+            for(Symbol symbol : field){
+                if(symbol.getName().equals(variable)){
+                    myVar = symbol;
+                    return myVar;
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean isField(String method, String variable){
+        List<Symbol> local=  getLocalVariables(method);
+        if (local != null){
+            for(Symbol symbol : local){
+                if (symbol.getName().equals(variable)){
+                    return false;
+                }
+            }
+        }
+        List<Symbol> para = getParameters(method);
+        if (para != null){
+            for(Symbol symbol : para){
+                if(symbol.getName().equals(variable)){
+                    return false;
+                }
+            }
+        }
+        List<Symbol> field = getFields();
+        if (field!=null){
+            for(Symbol symbol : field){
+                if(symbol.getName().equals(variable)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    public int isParameter(String method, String variable){
+        List<Symbol> local=  getLocalVariables(method);
+        if (local != null){
+            for(Symbol symbol : local){
+                if (symbol.getName().equals(variable)){
+                    return 0;
+                }
+            }
+        }
+        List<Symbol> para = getParameters(method);
+        int i = 0;
+        if (para != null){
+            for(Symbol symbol : para){
+                    i++;
+                if(symbol.getName().equals(variable)){
+                    return i;
+                }
+            }
+        }
+        return 0;
+    }
+
     public void printSymbolTable() {
         System.out.println("Class: " + this.getClassName());
         System.out.println("Imports: " + this.getImports());
