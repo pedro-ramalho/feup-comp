@@ -548,6 +548,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         String invokeType = getInvoke(lps);
         String ret =expressions;
         if(returnType != ".V"){
+            returnType = ".V";
             var value = "t" + temporaryVariableNumber+returnType;
             temporaryVariableNumber++;
             ret += value +" :=" + returnType + " "+ invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
