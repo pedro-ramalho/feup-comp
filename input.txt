@@ -1,13 +1,77 @@
-class A {
+/*class CompileArithmetic {
+
+    public static void main(String[] args) {
+    }
+
+    public int foo(int a) {
+        int b;
+
+        a = 1;
+        b = 2;
+
+        return a + b;
+    }
+    public int fo(){
+        int t;
+        t = 2*3 * this.foo(this.foo(2*4)) + 2*5+3*4;
+        return t;
+
+    }
+}*/
+/*import T;
+
+class CompileMethodInvocation {
+
+    public static void main(String[] args) {
+
+    }
+
+    public int foo() {
+        String a;
+
+        a = new String();
+
+        //io.println(a);
+
+        return 0;
+    }
+}
+import T;
+
+class CompileMethodInvocation {
+    int j;
+
+    public static void main(String[] args) {
+
+    }
+    public T foo() {
+        T y;
+        return y;
+    }
+}
+import io.x.y.z;
+
+class OllirToJasminInvoke {
+
+    public static void main(String[] args) {
+        OllirToJasminInvoke test;
+
+        test = new OllirToJasminInvoke();
+    }
+
+}*/
+import io;
+
+class A{
     int a;
 
-    public int x() {
-        a = 10;
+    public A x(){
+        a=10;
         io.print(a);
         return a;
     }
- 
-    public static void main(String[] args) {
+
+    public static void main(String[] args){
         A a;
         a = new A();
         a.x();

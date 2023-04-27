@@ -54,6 +54,8 @@ public class Launcher {
         // Print the resulting AST
         System.out.println(parserResult.getRootNode().toTree());
 
+
+
         // Testing the generated code
         Generator gen = new Generator();
         String generatedCode = gen.visit(parserResult.getRootNode(), "");
@@ -61,18 +63,9 @@ public class Launcher {
 
         MySymbolTable symbolTable = gen.getSymbolTable();
 
+
         // System.out.println("Printing Symbol Table...");
         // symbolTable.printSymbolTable();
-
-        // TESTING OLLIR TO JASIMIN
-        //System.out.println("OLLIR -> JASMIN");
-        //String ollirCode = SpecsIo.read(inputFile);
-        //OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
-        //MyJasminBackend jasminBackend = new MyJasminBackend();
-        //JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
-        //System.out.println(myJasminResult.getJasminCode());
-        //myJasminResult.compile();
-        //myJasminResult.run();
 
         ArrayList<Report> reports = new ArrayList<>();
 
@@ -96,6 +89,21 @@ public class Launcher {
             System.out.println("- Report no. " + counter + ": " + report.toString());
             counter++;
         }
+
+        MyJmmOptimization optimization = new MyJmmOptimization();
+        OllirResult ollirResult = optimization.toOllir(semanticsResult);
+
+        TestUtils.noErrors(ollirResult);
+
+        // TESTING OLLIR TO JASIMIN
+        //System.out.println("OLLIR -> JASMIN");
+        //String ollirCode = SpecsIo.read(inputFile);
+        //OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
+        MyJasminBackend jasminBackend = new MyJasminBackend();
+        JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
+        System.out.println(myJasminResult.getJasminCode());
+        myJasminResult.compile();
+        myJasminResult.run();
 
         // ... add remaining stages
     }
