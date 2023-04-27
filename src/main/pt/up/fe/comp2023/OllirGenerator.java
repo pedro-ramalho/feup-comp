@@ -488,15 +488,30 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
 
 
     private ExprCodeResult dealWithMethodInvocation(JmmNode jmmNode, String s) {
-        ExprCodeResult lps = visit(jmmNode.getChildren().get(0),"");
-
-        String ret = s + visit(jmmNode.getChildren().get(0),"") + "." + jmmNode.get("method") + "(";
-        for(int idx = 1; idx < jmmNode.getChildren().size(); idx++) {
-            ret += visit(jmmNode.getChildren().get(idx),"");
-            if (idx != jmmNode.getChildren().size() - 1)
-                ret += ", "; 
+        String lpsKind = jmmNode.getChildren().get(0).getKind();
+        String lps;
+        String expressions = "";
+        if (lpsKind.equals("This")){
+            lps = "this";
+        }else if(lpsKind.equals("MethodInvocation")){
+            ExprCodeResult templps = visit(jmmNode.getChildren().get(0),"");
+            expressions += templps.prefixCode();
+            lps = templps.value();
+        }else{
+            lps = jmmNode.getChildren().get(0).get("value");
+            //lps += getType(lps);
+            //String type = getType((symbolTable.findVariable(methodAbove,name).getType()).getName());
         }
-        ret += ")";
+        String methodName = jmmNode.get("method");
+        String para = "";
+        for(int idx = 1; idx < jmmNode.getChildren().size(); idx++) {
+            para += ", ";
+            ExprCodeResult temp = visit(jmmNode.getChildren().get(idx),"");
+            expressions += temp.prefixCode();
+            para += temp.value();
+        }
+        String invokeType = getInvoke(lps);
+        String ret = invokeType + "(" + lps + ", " + '"' + methodName + '"' + para + ").V";
         return new ExprCodeResult("", ret);
     }
 

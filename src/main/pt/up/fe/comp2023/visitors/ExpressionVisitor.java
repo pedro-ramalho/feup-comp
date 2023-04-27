@@ -316,6 +316,11 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
 
         /* dealing with a method of an imported/extended class */
         else {
+            if (!invoker.hasAttribute("value")) {
+                this.addReport(node.get("lineStart"), node.get("colStart"), "The type of the handler is NULL! (method: dealWithMethodInvocation)");
+
+                return null;
+            }
             IdentifierHandler handler = new IdentifierHandler(invoker.get("value"), this.method, this.extension, this.isStatic, this.symbolTable);
 
             if (handler.getType() == null) {

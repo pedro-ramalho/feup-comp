@@ -18,7 +18,9 @@
 
     }
 }*/
-class CompileArithmetic {
+import io;
+
+class CompileMethodInvocation {
 
     public static void main(String[] args) {
 
@@ -26,12 +28,11 @@ class CompileArithmetic {
 
     public int foo() {
         int a;
-        int b;
 
         a = 1;
-        b = 2;
 
-        return a + b;
+        io.println(a);
+
+        return 0;
     }
 }
-
