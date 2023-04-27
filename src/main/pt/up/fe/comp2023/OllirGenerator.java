@@ -529,7 +529,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             ret += value +" :=" + returnType + " "+ invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
             return new ExprCodeResult(ret, value);
         }else{
-            ret += invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
+            ret += invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType;
             return new ExprCodeResult("",ret);
         }
 
