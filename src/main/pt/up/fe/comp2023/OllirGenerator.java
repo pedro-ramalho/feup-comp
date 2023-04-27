@@ -197,7 +197,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         body = statements + declarations;
         s+= body;
         s+=returnStatement;
-        s += '}';
+        s += "}\n";
         return new ExprCodeResult("",s);
     }
 
@@ -248,7 +248,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }
         temporaryVariableNumber = currentAuxValue;
         body = declarations + statements;
-        s+= ".method " + jmmNode.get("modifier") + iStatic + " " + methodName+"("+parameters+")"+returnType+"{"+'\n'+body+returnStatement+'}';
+        s+= ".method " + jmmNode.get("modifier") + iStatic + " " + methodName+"("+parameters+")"+returnType+"{"+'\n'+body+returnStatement+"}\n";
 
 
         /*for (JmmNode child : jmmNode.getChildren()) {
@@ -485,7 +485,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         var value = "t" + temporaryVariableNumber+type;
         temporaryVariableNumber++;
         String newExp = value + " :=" + type + " new ("+ type.substring(1) + ")" + type + ";\n" + "invokespecial("+value+","+'"'+"<init>"+'"'+").V;\n";
-        return new ExprCodeResult("", value);
+        return new ExprCodeResult(newExp, value);
     }
 
     private ExprCodeResult dealWithArrayInstantiation(JmmNode jmmNode, String s) {

@@ -13,7 +13,7 @@ class CompileArithmetic {
     }
     public int fo(){
         int t;
-        t = this.foo(this.foo(2));
+        t = 2*3 * this.foo(this.foo(2*4)) + 2*5+3*4;
         return t;
 
     }
