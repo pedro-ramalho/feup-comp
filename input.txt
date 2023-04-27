@@ -1,4 +1,4 @@
-class CompileArithmetic {
+/*class CompileArithmetic {
 
     public static void main(String[] args) {
     }
@@ -17,7 +17,7 @@ class CompileArithmetic {
         return t;
 
     }
-}
+}*/
 /*import T;
 
 class CompileMethodInvocation {
@@ -49,3 +49,15 @@ class CompileMethodInvocation {
         return y;
     }
 }*/
+import io;
+
+class OllirToJasminInvoke {
+
+    public static void main(String[] args) {
+        OllirToJasminInvoke test;
+
+        test = new OllirToJasminInvoke();
+    }
+
+}
+

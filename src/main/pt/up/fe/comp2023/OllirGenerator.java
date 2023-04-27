@@ -484,7 +484,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }
         var value = "t" + temporaryVariableNumber+type;
         temporaryVariableNumber++;
-        String newExp = value + " :=" + type + " new ("+ type.substring(1) + ")" + type + ";\n" + "invokespecial("+value+","+'"'+"<init>"+'"'+").V;\n";
+        String newExp = value + " :=" + type + " new("+ type.substring(1) + ")" + type + ";\n" + "invokespecial("+value+","+'"'+"<init>"+'"'+").V;\n";
         return new ExprCodeResult(newExp, value);
     }
 
