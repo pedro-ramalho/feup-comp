@@ -470,7 +470,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private ExprCodeResult dealWithMethodInvocation(JmmNode jmmNode, String s) {
         String lpsKind = jmmNode.getChildren().get(0).getKind();
         String lps;
-        //String midType="";
+        String midType="";
         String expressions = "";
         String methodName = jmmNode.get("method");
         String methodAbove = getMethodName(jmmNode);
@@ -488,7 +488,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                type += getType((symbolTable.findVariable(methodAbove,lps).getType()).getName());
                lps += type;
             }catch (NullPointerException ignored){}
-        /*
+
         }
         if(lps=="this"){
             midType = symbolTable.getClassName();
@@ -507,7 +507,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             Type tempType = symbolTable.getReturnType(methodName);
             if (tempType != null){
                 returnType = getType(tempType.getName());
-            }*/
+            }
         }
         if (returnType == ""){
             returnType = ".V";
@@ -520,8 +520,6 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             para += temp.value();
         }
         String invokeType = getInvoke(lps);
-        //String ret = invokeType + "(" + lps + ", " + '"' + methodName + '"' + para + ").V";//rem
-        //return new ExprCodeResult("", ret);//rem
         String ret =expressions;
         if(returnType != ".V"){
             var value = "t" + temporaryVariableNumber+returnType;
