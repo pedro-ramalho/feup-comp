@@ -232,7 +232,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 if (varType.getKind().equals("Literal")) {
                     returnType = typeString.get(varType.get("keyword"));
                 } else {
-                    returnType = varType.get("name");
+                    returnType = "." + varType.get("name");
                 }
             }
             if(child.getKind().equals("VarDeclaration")){

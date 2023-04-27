@@ -18,7 +18,7 @@
 
     }
 }*/
-import T;
+/*import T;
 
 class CompileMethodInvocation {
 
@@ -34,5 +34,18 @@ class CompileMethodInvocation {
         //io.println(a);
 
         return 0;
+    }
+}*/
+import T;
+
+class CompileMethodInvocation {
+    int j;
+
+    public static void main(String[] args) {
+
+    }
+    public T foo() {
+        T y;
+        return y;
     }
 }
