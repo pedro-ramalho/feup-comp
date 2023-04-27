@@ -126,11 +126,9 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private ExprCodeResult dealWithImportDeclaration(JmmNode jmmNode, String s) {
         // fetch the import name
         String importName = jmmNode.get("name");
-
-        String importPack = "";
         // fetch the package that was imported
         if (jmmNode.hasAttribute("pack") && jmmNode.get("pack")!="[]") {
-            importPack = jmmNode.get("pack");
+            String importPack = jmmNode.get("pack");
             s += "import " + importName+"."+importPack+ ';' + '\n';
         }else {
             s += "import " + importName + ';' + '\n';
@@ -140,14 +138,15 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private ExprCodeResult dealWithClassDeclaration(JmmNode jmmNode, String s) {
         // fetch the class name
         String className = jmmNode.get("name");
-        s = s + className + " {" + '\n';
-
-
-        /*String classExtension = "";
+        String classExtension = "";
         // fetch the class extension
         if (jmmNode.hasAttribute("extension"))
-            classExtension = jmmNode.get("extension");
-        */
+            classExtension = " extends " +jmmNode.get("extension");
+        s = s + className +  classExtension +" {" + '\n';
+
+
+
+
 
         for (JmmNode child : jmmNode.getChildren()) {
             if (child.getKind().equals("ClassField")) {
@@ -504,6 +503,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }
         String methodName = jmmNode.get("method");
         String para = "";
+        String type;
         for(int idx = 1; idx < jmmNode.getChildren().size(); idx++) {
             para += ", ";
             ExprCodeResult temp = visit(jmmNode.getChildren().get(idx),"");
