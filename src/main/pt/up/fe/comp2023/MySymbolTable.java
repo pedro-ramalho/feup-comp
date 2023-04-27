@@ -178,7 +178,10 @@ public class MySymbolTable implements SymbolTable {
         if(findVariable(method,variable) != null){
             return false;
         }
-        for (String imp : this.getImports()){
+        for (String imp : this.getImports()){;
+            if (imp.charAt(imp.length()-1)=='.'){
+                imp = imp.substring(0,imp.length()-1);
+            }
             if(imp.endsWith(variable)){
                 return true;
             }

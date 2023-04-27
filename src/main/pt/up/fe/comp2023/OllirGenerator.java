@@ -504,9 +504,10 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             midType = lps;
         }else{
             if(lps.charAt(0)=='$'){
-                midType = lps.split("\\.")[1];
+                midType = lps.split("\\.")[2];
             }else{
-                midType = lps.split("\\.")[0];
+                System.out.println(lps);
+                midType = lps.split("\\.")[1];
             }
 
         }
