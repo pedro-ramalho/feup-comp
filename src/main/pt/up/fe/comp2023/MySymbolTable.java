@@ -174,6 +174,18 @@ public class MySymbolTable implements SymbolTable {
         return null;
     }
 
+    public boolean isImport(String method, String variable){
+        if(findVariable(method,variable) != null){
+            return false;
+        }
+        for (String imp : this.getImports()){
+            if(imp.endsWith(variable)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isField(String method, String variable){
         List<Symbol> local=  getLocalVariables(method);
         if (local != null){

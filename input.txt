@@ -1,4 +1,4 @@
-/*class CompileArithmetic {
+class CompileArithmetic {
 
     public static void main(String[] args) {
     }
@@ -17,7 +17,7 @@
         return t;
 
     }
-}*/
+}
 /*import T;
 
 class CompileMethodInvocation {
@@ -36,7 +36,7 @@ class CompileMethodInvocation {
         return 0;
     }
 }*/
-import T;
+/*import T;
 
 class CompileMethodInvocation {
     int j;
@@ -48,4 +48,4 @@ class CompileMethodInvocation {
         T y;
         return y;
     }
-}
+}*/
