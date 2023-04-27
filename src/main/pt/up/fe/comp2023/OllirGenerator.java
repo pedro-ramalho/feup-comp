@@ -478,7 +478,16 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithCustomInstantiation(JmmNode jmmNode, String s) {
-        return new ExprCodeResult("", s + "new " + jmmNode.get("objectType") + "()");
+        String type;
+        if(jmmNode.getChildren().get(0).hasAttribute("keyword")){
+            type = typeString.get(jmmNode.getChildren().get(0).get("keyword"));
+        }else{
+            type = "." + jmmNode.getChildren().get(0).get("name");
+        }
+        var value = "t" + temporaryVariableNumber+type;
+        temporaryVariableNumber++;
+        String newExp = value + " :=" + type + " new ("+ type.substring(1) + ")" + type + ";\n" + "invokespecial("+value+","+'"'+"<init>"+'"'+").V;\n";
+        return new ExprCodeResult("", value);
     }
 
     private ExprCodeResult dealWithArrayInstantiation(JmmNode jmmNode, String s) {

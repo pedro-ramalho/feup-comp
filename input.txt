@@ -18,7 +18,7 @@
 
     }
 }*/
-import io;
+import T;
 
 class CompileMethodInvocation {
 
@@ -27,11 +27,11 @@ class CompileMethodInvocation {
     }
 
     public int foo() {
-        int a;
+        String a;
 
-        a = 1;
+        a = new String();
 
-        io.println(a);
+        //io.println(a);
 
         return 0;
     }

@@ -190,7 +190,12 @@ public class ExpressionVisitor extends AJmmVisitor<String, MyType> {
     }
 
     private MyType dealWithCustomInstantiation(JmmNode node, String s) {
-        String typename = node.getJmmChild(0).get("name");
+        String typename;
+        if(node.getChildren().get(0).hasAttribute("keyword")){
+            typename = node.getChildren().get(0).get("keyword");
+        }else{
+            typename = node.getJmmChild(0).get("name");
+        }
 
         if (typename.equals(this.symbolTable.getClassName())) {
             return new MyType(typename, "object", typename.contains("[]"));
