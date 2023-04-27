@@ -587,7 +587,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }
         List<String> imports = symbolTable.getImports();
         for(String i : imports){
-            ArrayList<String> list_imp = new ArrayList<String>(Arrays.asList(i.split(".")));
+            ArrayList<String> list_imp = new ArrayList<String>(Arrays.asList(i.split("\\.")));
             if(list_imp.get(list_imp.size() - 1).equals(lhsName)){
                 return "invokestatic";
             }
