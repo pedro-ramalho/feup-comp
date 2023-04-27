@@ -499,7 +499,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         //String midType="";
         String expressions = "";
         //String methodName = jmmNode.get("method");
-        //String methodAbove = getMethodName(jmmNode);
+        String methodAbove = getMethodName(jmmNode);
         //String returnType="";
         if (lpsKind.equals("This")){
             lps = "this";
@@ -509,12 +509,12 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             lps = templps.value();
         }else{
             lps = jmmNode.getChildren().get(0).get("value");
-        /*  String type = "";
+          String type = "";
             try{
                type += getType((symbolTable.findVariable(methodAbove,lps).getType()).getName());
                lps += type;
             }catch (NullPointerException ignored){}
-
+        /*
         }
         if(lps=="this"){
             midType = symbolTable.getClassName();
