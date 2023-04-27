@@ -49,7 +49,7 @@ class CompileMethodInvocation {
         return y;
     }
 }*/
-import io;
+import io.x.y.z;
 
 class OllirToJasminInvoke {
 

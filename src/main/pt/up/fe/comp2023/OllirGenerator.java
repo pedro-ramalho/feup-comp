@@ -127,7 +127,14 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         // fetch the package that was imported
         if (jmmNode.hasAttribute("pack") && jmmNode.get("pack")!="[]") {
             String importPack = jmmNode.get("pack");
-            s += "import " + importName+"."+importPack+ ';' + '\n';
+            String r1 = importPack.replace("[", "");
+            String r2 = r1.replace("]", "");
+            String r3 = r2.replace(" ", "");
+
+            ArrayList<String> list = new ArrayList<String>(Arrays.asList(r3.split(",")));
+
+            s += "import " + importName + '.' + String.join(".", list) + ';' + '\n';
+
         }else {
             s += "import " + importName + ';' + '\n';
         }
