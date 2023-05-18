@@ -65,15 +65,16 @@ import io;
 class A{
     int a;
 
-    public A x(){
+    public int x(){
         a=10;
         io.print(a);
         return a;
     }
 
     public static void main(String[] args){
-        A a;
-        a = new A();
-        a.x();
+        int t;
+        int a;
+        a = 4;
+        t = 1+2*4+a*9+5;
     }
 }
