@@ -26,11 +26,21 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         addVisit("BinaryOp", this::dealWithBinaryOp);
         addVisit("Parenthesis", this::dealWithParenthesis);
         addVisit("Integer", this::dealWithInteger);
+        addVisit("True", this::dealWithTrue);
+        addVisit("False", this::dealWithFalse);
         addVisit("Identifier", this::dealWithIdentifier);
         addVisit("Assignment", this::dealWithAssignment);
 
         /* add a default visitor so that we skip useless nodes */
         setDefaultVisit(this::dealWithDefault);
+    }
+
+    private String dealWithFalse(JmmNode jmmNode, String s) {
+        return "False";
+    }
+
+    private String dealWithTrue(JmmNode jmmNode, String s) {
+        return "True";
     }
 
     private String dealWithAssignment(JmmNode node, String s) {

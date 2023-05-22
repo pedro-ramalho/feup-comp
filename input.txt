@@ -1,14 +1,14 @@
 class A {
     public int foo() {
-        int x;
-        int y;
-        int z;
+        boolean x;
+        boolean y;
+        boolean z;
 
-        x = 2 * (5 + 10 * (2 + 3));
-        y = x + 10;
-        z = (x * y) * (1 + 2);
+        x = true;
+        y = false;
+        z = true && true;
 
-        return x;
+        return 1;
     }
 
     public static void main(String[] args) {
