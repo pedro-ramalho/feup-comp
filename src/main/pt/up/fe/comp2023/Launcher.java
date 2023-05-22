@@ -15,6 +15,7 @@ import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2023.optimization.Optimizer;
 import pt.up.fe.comp2023.visitors.ProgramVisitor;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
@@ -90,20 +91,27 @@ public class Launcher {
             counter++;
         }
 
-        MyJmmOptimization optimization = new MyJmmOptimization();
-        OllirResult ollirResult = optimization.toOllir(semanticsResult);
+        System.out.println("Starting the otpimization process...");
 
-        TestUtils.noErrors(ollirResult);
+        Optimizer optimizer = new Optimizer();
+
+        JmmSemanticsResult optimized = optimizer.optimize(semanticsResult);
+        System.out.println(optimized.getRootNode().toTree());
+
+        //MyJmmOptimization optimization = new MyJmmOptimization();
+        //OllirResult ollirResult = optimization.toOllir(semanticsResult);
+
+        //TestUtils.noErrors(ollirResult);
 
         // TESTING OLLIR TO JASIMIN
         //System.out.println("OLLIR -> JASMIN");
         //String ollirCode = SpecsIo.read(inputFile);
         //OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
-        MyJasminBackend jasminBackend = new MyJasminBackend();
-        JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
-        System.out.println(myJasminResult.getJasminCode());
-        myJasminResult.compile();
-        myJasminResult.run();
+        //MyJasminBackend jasminBackend = new MyJasminBackend();
+        //JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
+        //System.out.println(myJasminResult.getJasminCode());
+        //myJasminResult.compile();
+        //myJasminResult.run();
 
         // ... add remaining stages
     }
