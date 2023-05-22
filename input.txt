@@ -1,9 +1,12 @@
 class A {
     public int foo() {
         int x;
+        int y;
+        int z;
 
         x = 2 * (5 + 10 * (2 + 3));
-
+        y = x + 10;
+        z = (x * y) * (1 + 2);
 
         return x;
     }

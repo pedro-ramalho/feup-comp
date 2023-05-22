@@ -6,14 +6,19 @@ import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 
 import java.sql.SQLOutput;
 import java.util.HashMap;
+import java.util.Map;
 
 public class CPVisitor extends AJmmVisitor<String, String> {
     private int transformations;
+
     private boolean transformed;
+
+    private HashMap<String, String> values;
 
     public CPVisitor() {
         this.transformations = 0;
         this.transformed = false;
+        this.values = new HashMap<>();
     }
 
     @Override
@@ -21,9 +26,25 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         addVisit("BinaryOp", this::dealWithBinaryOp);
         addVisit("Parenthesis", this::dealWithParenthesis);
         addVisit("Integer", this::dealWithInteger);
+        addVisit("Identifier", this::dealWithIdentifier);
+        addVisit("Assignment", this::dealWithAssignment);
 
         /* add a default visitor so that we skip useless nodes */
         setDefaultVisit(this::dealWithDefault);
+    }
+
+    private String dealWithAssignment(JmmNode node, String s) {
+        String var = node.get("var");
+
+        String value = visit(node.getJmmChild(0), "");
+
+        this.values.put(var, value);
+
+        for (Map.Entry<String, String> entry : this.values.entrySet()) {
+            System.out.println("K: " + entry.getKey() + ", V: " + entry.getValue());
+        }
+
+        return null;
     }
 
     private String dealWithInteger(JmmNode node, String s) {
@@ -34,6 +55,15 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         for (JmmNode child : node.getChildren()) visit(child, "");
 
         return "";
+    }
+
+    private String dealWithIdentifier(JmmNode node, String s) {
+        String identifier = node.get("value");
+
+        if (this.values.containsKey(identifier))
+            return this.values.get(identifier);
+
+        return null;
     }
 
     private String dealWithParenthesis(JmmNode node, String s) {
