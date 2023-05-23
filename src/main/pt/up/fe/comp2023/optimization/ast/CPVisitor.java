@@ -3,6 +3,7 @@ package pt.up.fe.comp2023.optimization.ast;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
+import pt.up.fe.comp2023.optimization.ast.utils.CPVisitorUtils;
 
 import java.sql.SQLOutput;
 import java.util.HashMap;
@@ -15,10 +16,14 @@ public class CPVisitor extends AJmmVisitor<String, String> {
 
     private HashMap<String, String> values;
 
+    private CPVisitorUtils utils;
+
     public CPVisitor() {
         this.transformations = 0;
         this.transformed = false;
         this.values = new HashMap<>();
+
+        this.utils = new CPVisitorUtils();
     }
 
     @Override
@@ -89,32 +94,6 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         };
     }
 
-    private int getArithmeticResult(int lval, int rval, String op) {
-        return switch(op) {
-            case "*" -> lval * rval;
-            case "/" -> lval / rval;
-            case "+" -> lval + rval;
-            case "-" -> lval - rval;
-            default  -> throw new RuntimeException("Invalid operation when dealing with BinaryOp: " + op);
-        };
-    }
-
-    private boolean getLogicalResult(boolean lval, boolean rval, String op) {
-        return switch(op) {
-            case "&&" -> lval && rval;
-            case "||" -> lval || rval;
-            default  -> throw new RuntimeException("Invalid operation when dealing with BinaryOp: " + op);
-        };
-    }
-
-    private boolean getComparisonResult(int lval, int rval, String op) {
-        return switch(op) {
-            case "<" -> lval < rval;
-            case ">" -> lval > rval;
-            default  -> throw new RuntimeException("Invalid operation when dealing with BinaryOp: " + op);
-        };
-    }
-
     private void replace(JmmNode newNode, JmmNode oldNode) {
         JmmNode parent = oldNode.getJmmParent();
 
@@ -137,7 +116,7 @@ public class CPVisitor extends AJmmVisitor<String, String> {
             int lval = Integer.parseInt(visit(lexpr, ""));
             int rval = Integer.parseInt(visit(rexpr, ""));
 
-            String result = String.valueOf(getArithmeticResult(lval, rval, op));
+            String result = String.valueOf(this.utils.getArithmeticResult(lval, rval, op));
 
             JmmNode newNode = new JmmNodeImpl("Integer");
             newNode.put("value", result);
@@ -149,9 +128,9 @@ public class CPVisitor extends AJmmVisitor<String, String> {
 
         if (optype == OpType.BINARY_OP_LOGICAL) {
             boolean lval = (visit(lexpr, "")).equals("True");
-            boolean rval = (visit(lexpr, "")).equals("True");
+            boolean rval = (visit(rexpr, "")).equals("True");
 
-            String result = getLogicalResult(lval, rval, op) ? "True" : "False";
+            String result = this.utils.getLogicalResult(lval, rval, op) ? "True" : "False";
 
             JmmNode newNode = new JmmNodeImpl(result);
 
@@ -164,7 +143,7 @@ public class CPVisitor extends AJmmVisitor<String, String> {
             int lval = Integer.parseInt(visit(lexpr, ""));
             int rval = Integer.parseInt(visit(rexpr, ""));
 
-            String result = getComparisonResult(lval, rval, op) ? "True" : "False";
+            String result = this.utils.getComparisonResult(lval, rval, op) ? "True" : "False";
             JmmNode newNode = new JmmNodeImpl(result);
 
             this.replace(newNode, node);

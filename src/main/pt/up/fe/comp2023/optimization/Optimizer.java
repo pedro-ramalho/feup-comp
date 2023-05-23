@@ -21,6 +21,7 @@ public class Optimizer implements JmmOptimization {
 
     @Override
     public OllirResult optimize(OllirResult ollirResult) {
+
         return JmmOptimization.super.optimize(ollirResult);
     }
 }

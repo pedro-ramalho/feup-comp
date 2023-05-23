@@ -1,12 +1,12 @@
 class A {
     public int foo() {
-        boolean x;
-        boolean y;
-        boolean z;
+        int x;
+        int y;
+        int z;
 
-        x = true;
-        y = false;
-        z = true && true;
+        x = 10;
+        y = 5 + (2 * 3);
+        z = x + y;
 
         return 1;
     }

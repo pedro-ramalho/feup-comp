@@ -104,14 +104,14 @@ public class Launcher {
         //TestUtils.noErrors(ollirResult);
 
         // TESTING OLLIR TO JASIMIN
-        //System.out.println("OLLIR -> JASMIN");
-        //String ollirCode = SpecsIo.read(inputFile);
-        //OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
-        //MyJasminBackend jasminBackend = new MyJasminBackend();
-        //JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
-        //System.out.println(myJasminResult.getJasminCode());
-        //myJasminResult.compile();
-        //myJasminResult.run();
+        System.out.println("OLLIR -> JASMIN");
+        String ollirCode = SpecsIo.read(inputFile);
+        OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
+        MyJasminBackend jasminBackend = new MyJasminBackend();
+        JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
+        System.out.println(myJasminResult.getJasminCode());
+        myJasminResult.compile();
+        myJasminResult.run();
 
         // ... add remaining stages
     }
