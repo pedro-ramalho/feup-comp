@@ -82,7 +82,7 @@ statement
 
 expression
     : '(' expression ')' #Parenthesis
-    | expression '[' expression ']' #ArrayAccesss
+    | expression '[' expression ']' #ArrayAccess
     | expression '.' 'length' #ArrayLength
     | expression '.' method=ID '(' (expression(',' expression)*)?')' #MethodInvocation
     | '!' expression #Negation
