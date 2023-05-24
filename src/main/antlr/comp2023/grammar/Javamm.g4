@@ -82,6 +82,7 @@ statement
 
 expression
     : '!' expression #Negation
+    | expression '[' expression ']' #ArrayAccess
     | expression '.' 'length' #ArrayLength
     | expression '.' method=ID '(' (expression(',' expression)*)?')' #MethodInvocation
     | 'new' type '[' expression ']' #ArrayInstantiation
@@ -91,7 +92,6 @@ expression
     | expression op=('+' | '-') expression #BinaryOp
     | expression op=('<' | '>') expression #BinaryOp
     | expression op=('&&' | '||') expression #BinaryOp
-    | expression '[' expression ']' #ArrayAccess
     | value=INTEGER #Integer
     | 'true' #True
     | 'false' #False
