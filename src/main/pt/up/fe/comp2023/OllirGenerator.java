@@ -408,8 +408,8 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         String ret = s;
         for (JmmNode child : jmmNode.getChildren()) {
             ExprCodeResult aux = visit(child, "");
-            ret += aux.prefixCode();
-            ret += aux.value();
+            ret += aux.prefixCode()+"\n";
+            ret += aux.value()+"\n";
         }
 
         return new ExprCodeResult("",ret);
@@ -438,11 +438,11 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithFalse(JmmNode jmmNode, String s) {
-        return new ExprCodeResult("", s + "0.bool");
+        return new ExprCodeResult("", "0.bool");
     }
 
     private ExprCodeResult dealWithTrue(JmmNode jmmNode, String s) {
-        return new ExprCodeResult("",s + "true.bool");
+        return new ExprCodeResult("","1.bool");
     }
 
     private ExprCodeResult dealWithBinaryOp(JmmNode jmmNode, String s) {

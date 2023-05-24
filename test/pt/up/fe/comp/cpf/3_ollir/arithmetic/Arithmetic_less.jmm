@@ -5,11 +5,11 @@ class Arithmetic_less {
 		boolean a;
 
 		a = 10 < 20;
-		
+
 		if(a) {
 			io.print(1);
 		} else {
-			io.print(0);		
+			io.print(0);
 		}
 	}
 }
