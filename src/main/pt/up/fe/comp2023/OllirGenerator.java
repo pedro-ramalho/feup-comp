@@ -594,6 +594,6 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 return "invokestatic";
             }
         }
-        return "invokevirtual";
+        return "invokestatic";
     }
 }
