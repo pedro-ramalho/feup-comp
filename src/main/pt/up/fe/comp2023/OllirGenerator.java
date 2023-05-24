@@ -39,6 +39,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private int temporaryVariableNumber = 0;
+    private int temporaryLabelNumber = 0;
 
 
     private boolean isArray(String literal) {
@@ -309,15 +310,18 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithCondition(JmmNode jmmNode, String s) {
-        return null;
+        ExprCodeResult expression = visit(jmmNode.getChildren().get(0), "");
+        return new ExprCodeResult(expression.prefixCode(),expression.value());
     }
 
     private ExprCodeResult dealWithElseStatement(JmmNode jmmNode, String s) {
-        return null;
+        ExprCodeResult statement = visit(jmmNode.getChildren().get(0), "");
+        return new ExprCodeResult(statement.prefixCode(),statement.value());
     }
 
     private ExprCodeResult dealWithIfStatement(JmmNode jmmNode, String s) {
-        return null;
+        ExprCodeResult statement = visit(jmmNode.getChildren().get(0), "");
+        return new ExprCodeResult(statement.prefixCode(),statement.value());
     }
 
 
@@ -361,45 +365,52 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithConditional(JmmNode jmmNode, String s) {
-        String condition = "(" + visit(jmmNode.getChildren().get(0), "").value() + ")";
+        String previousExpressions = "";
+        ExprCodeResult condition = visit(jmmNode.getChildren().get(0), "");
+        previousExpressions += condition.prefixCode();
+        int value = temporaryLabelNumber;
+        temporaryLabelNumber++;
+        String initialLabel = "if_then_" + value;
+        String finalLabel = "if_end_" + value;
+        String ret = s + "if (" + condition.value() + ")"+ " goto " + initialLabel + ";\n";
 
-        String ret = s + "if " + condition;
-        String s2 = s + "\t";
-
-        if (jmmNode.getChildren().get(1).getKind().equals("CodeBlock")) {
-            ret += visit(jmmNode.getChildren().get(1), s).value();
-        }
-        else {
-            ret += "\n" + visit(jmmNode.getChildren().get(1), s2).value();
-            ret += "\n";
-        }
-
-        ret += s + "else";
+        ExprCodeResult ifStmt = visit(jmmNode.getChildren().get(1), "");
+        ExprCodeResult elseStmt = visit(jmmNode.getChildren().get(2), "");
 
         if (jmmNode.getChildren().get(2).getKind().equals("CodeBlock")) {
-            ret += visit(jmmNode.getChildren().get(2), s).value();
+            ret += elseStmt.value();
         }
         else {
-            ret += "\n" + visit(jmmNode.getChildren().get(2), s2).value();
-            ret += "\n";
+            ret += elseStmt.prefixCode();
+            ret += elseStmt.value();
         }
 
-        return new ExprCodeResult("",ret);
+        ret+= "goto " + finalLabel + ";\n";
+        ret+= initialLabel + ":\n";
+
+
+        if (jmmNode.getChildren().get(1).getKind().equals("CodeBlock")) {
+            ret += ifStmt.value();
+        }
+        else {
+            ret += ifStmt.prefixCode();
+            ret += ifStmt.value();
+        }
+
+        ret += finalLabel + ":\n";
+        return new ExprCodeResult(previousExpressions,ret);
     }
 
 
 
     private ExprCodeResult dealWithCodeBlock(JmmNode jmmNode, String s) {
         s = (s != null ? s : "");
-        String s2 = s + "\t";
-        String ret = " {\n";
-
+        String ret = s;
         for (JmmNode child : jmmNode.getChildren()) {
-            ret += visit(child, s2).value();
-            ret += "\n";
+            ExprCodeResult aux = visit(child, "");
+            ret += aux.prefixCode();
+            ret += aux.value();
         }
-
-        ret += s + "}\n";
 
         return new ExprCodeResult("",ret);
     }
@@ -427,7 +438,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithFalse(JmmNode jmmNode, String s) {
-        return new ExprCodeResult("", s + "false.bool");
+        return new ExprCodeResult("", s + "0.bool");
     }
 
     private ExprCodeResult dealWithTrue(JmmNode jmmNode, String s) {
