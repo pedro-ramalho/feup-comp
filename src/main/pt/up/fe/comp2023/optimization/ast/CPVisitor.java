@@ -5,25 +5,27 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 import pt.up.fe.comp2023.optimization.ast.utils.CPVisitorUtils;
 
-import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CPVisitor extends AJmmVisitor<String, String> {
     private int transformations;
-
     private boolean transformed;
-
+    private boolean scoped;
     private HashMap<String, String> values;
-
+    private HashMap<String, String> scopedValues;
     private CPVisitorUtils utils;
+    private final Folder folder;
 
     public CPVisitor() {
         this.transformations = 0;
         this.transformed = false;
+        this.scoped = false;
         this.values = new HashMap<>();
+        this.scopedValues = new HashMap<>();
 
         this.utils = new CPVisitorUtils();
+        this.folder = new Folder();
     }
 
     @Override
@@ -40,6 +42,26 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         setDefaultVisit(this::dealWithDefault);
     }
 
+    private void clearScope() {
+        this.scopedValues.clear();
+    }
+
+    private void updateScope() {
+        for (Map.Entry<String, String> scopedValue : this.scopedValues.entrySet()) {
+            String K = scopedValue.getKey();
+            String V = scopedValue.getValue();
+
+            if (this.values.containsKey(K))
+                this.values.put(K, V);
+        }
+    }
+
+    private String dealWithDefault(JmmNode node, String s) {
+        for (JmmNode child : node.getChildren()) visit(child, "");
+
+        return "";
+    }
+
     private String dealWithFalse(JmmNode jmmNode, String s) {
         return "False";
     }
@@ -53,7 +75,14 @@ public class CPVisitor extends AJmmVisitor<String, String> {
 
         String value = visit(node.getJmmChild(0), "");
 
-        this.values.put(var, value);
+        /* add the result of the assignment to the values hashmap */
+
+        if (this.scoped) {
+            this.scopedValues.put(var, value);
+        }
+        else {
+            this.values.put(var, value);
+        }
 
         return null;
     }
@@ -62,14 +91,12 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         return node.get("value");
     }
 
-    private String dealWithDefault(JmmNode node, String s) {
-        for (JmmNode child : node.getChildren()) visit(child, "");
-
-        return "";
-    }
-
     private String dealWithIdentifier(JmmNode node, String s) {
         String identifier = node.get("value");
+
+        if (this.scoped)
+            if (this.scopedValues.containsKey(identifier))
+                return this.scopedValues.get(identifier);
 
         if (this.values.containsKey(identifier))
             return this.values.get(identifier);

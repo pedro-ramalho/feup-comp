@@ -96,15 +96,15 @@ public class Launcher {
 
         Optimizer optimizer = new Optimizer();
 
-        //JmmSemanticsResult optimized = optimizer.optimize(semanticsResult);
-        //System.out.println(optimized.getRootNode().toTree());
+        JmmSemanticsResult optimized = optimizer.optimize(semanticsResult);
+        System.out.println(optimized.getRootNode().toTree());
 
-        MyJmmOptimization optimization = new MyJmmOptimization();
-        OllirResult ollirResult = optimization.toOllir(semanticsResult);
+        //MyJmmOptimization optimization = new MyJmmOptimization();
+        //OllirResult ollirResult = optimization.toOllir(semanticsResult);
 
-        Liveness liveness = new Liveness(ollirResult);
+        //Liveness liveness = new Liveness(ollirResult);
 
-        liveness.in();
+        //liveness.in();
 
         //TestUtils.noErrors(ollirResult);
 

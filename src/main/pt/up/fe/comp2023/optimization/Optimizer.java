@@ -9,9 +9,14 @@ import pt.up.fe.comp2023.optimization.ast.CPVisitor;
 public class Optimizer implements JmmOptimization {
     @Override
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
+        if (semanticsResult.getConfig().getOrDefault("optimize", "false").equals("false")) {
+            return semanticsResult;
+        }
+
+        System.out.println("[LOG] Optimize method was called!");
         CPVisitor visitor = new CPVisitor();
         visitor.visit(semanticsResult.getRootNode());
-
+        System.out.println("[LOG] Finished visiting!");
         return semanticsResult;
     }
 
