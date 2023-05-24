@@ -1,5 +1,7 @@
 package pt.up.fe.comp2023.optimization.ast.utils;
 
+import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 import pt.up.fe.comp2023.optimization.ast.OpType;
 
 public class Result {
@@ -28,6 +30,18 @@ public class Result {
             case NOT_EXPR             -> "";
             default -> throw new RuntimeException();
         };
+    }
+
+    public JmmNode getNode() {
+        if (this.type == OpType.BINARY_OP_ARITHMETIC) {
+            return new JmmNodeImpl("Integer");
+        }
+
+        if (this.type == OpType.BINARY_OP_LOGICAL || this.type == OpType.BINARY_OP_COMPARISON) {
+            return new JmmNodeImpl(this.result);
+        }
+
+        return null;
     }
 
     public String getArithmeticResult() {

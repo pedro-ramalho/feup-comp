@@ -4,27 +4,26 @@ import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 import pt.up.fe.comp2023.optimization.ast.utils.CPVisitorUtils;
+import pt.up.fe.comp2023.optimization.ast.utils.Result;
+import pt.up.fe.comp2023.optimization.ast.utils.Variable;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class CPVisitor extends AJmmVisitor<String, String> {
     private int transformations;
     private boolean transformed;
-    private boolean scoped;
+
     private HashMap<String, String> values;
-    private HashMap<String, String> scopedValues;
-    private CPVisitorUtils utils;
+    private HashMap<Variable, Boolean> constants;
     private final Folder folder;
 
     public CPVisitor() {
         this.transformations = 0;
         this.transformed = false;
-        this.scoped = false;
-        this.values = new HashMap<>();
-        this.scopedValues = new HashMap<>();
 
-        this.utils = new CPVisitorUtils();
+        this.values = new HashMap<>();
+        this.constants = new HashMap<>();
+
         this.folder = new Folder();
     }
 
@@ -40,20 +39,6 @@ public class CPVisitor extends AJmmVisitor<String, String> {
 
         /* add a default visitor so that we skip useless nodes */
         setDefaultVisit(this::dealWithDefault);
-    }
-
-    private void clearScope() {
-        this.scopedValues.clear();
-    }
-
-    private void updateScope() {
-        for (Map.Entry<String, String> scopedValue : this.scopedValues.entrySet()) {
-            String K = scopedValue.getKey();
-            String V = scopedValue.getValue();
-
-            if (this.values.containsKey(K))
-                this.values.put(K, V);
-        }
     }
 
     private String dealWithDefault(JmmNode node, String s) {
@@ -75,14 +60,7 @@ public class CPVisitor extends AJmmVisitor<String, String> {
 
         String value = visit(node.getJmmChild(0), "");
 
-        /* add the result of the assignment to the values hashmap */
-
-        if (this.scoped) {
-            this.scopedValues.put(var, value);
-        }
-        else {
-            this.values.put(var, value);
-        }
+        this.values.put(var, value);
 
         return null;
     }
@@ -93,10 +71,6 @@ public class CPVisitor extends AJmmVisitor<String, String> {
 
     private String dealWithIdentifier(JmmNode node, String s) {
         String identifier = node.get("value");
-
-        if (this.scoped)
-            if (this.scopedValues.containsKey(identifier))
-                return this.scopedValues.get(identifier);
 
         if (this.values.containsKey(identifier))
             return this.values.get(identifier);
@@ -129,51 +103,44 @@ public class CPVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithBinaryOp(JmmNode node, String s) {
+        /* lhs and rhs of the operation */
         JmmNode lexpr = node.getJmmChild(0);
         JmmNode rexpr = node.getJmmChild(1);
 
+        /* fetch the operation type */
         String op = node.get("op");
-        OpType optype = getOpType(op);
+        OpType optype = this.getOpType(op);
+
+        /* fetch the operands */
+        String lval = visit(lexpr, "");
+        String rval = visit(rexpr, "");
+
+        System.out.println("lval: " + lval);
+        System.out.println("rval: " + rval);
+
+        /* computate the result of the operation*/
+        Result result = new Result(lval, rval, optype, op);
+        String resval = result.get();
 
         if (optype == OpType.BINARY_OP_ARITHMETIC) {
-            int lval = Integer.parseInt(visit(lexpr, ""));
-            int rval = Integer.parseInt(visit(rexpr, ""));
+            JmmNode updated = new JmmNodeImpl("Integer");
+            updated.put("value", resval);
 
-            String result = String.valueOf(this.utils.getArithmeticResult(lval, rval, op));
-
-            JmmNode newNode = new JmmNodeImpl("Integer");
-            newNode.put("value", result);
-
-            this.replace(newNode, node);
-
-            return result;
+            this.folder.fold(updated, node);
         }
 
         if (optype == OpType.BINARY_OP_LOGICAL) {
-            boolean lval = (visit(lexpr, "")).equals("True");
-            boolean rval = (visit(rexpr, "")).equals("True");
+            JmmNode updated = new JmmNodeImpl(resval);
 
-            String result = this.utils.getLogicalResult(lval, rval, op) ? "True" : "False";
-
-            JmmNode newNode = new JmmNodeImpl(result);
-
-            this.replace(newNode, node);
-
-            return result;
+            this.folder.fold(updated, node);
         }
 
         if (optype == OpType.BINARY_OP_COMPARISON) {
-            int lval = Integer.parseInt(visit(lexpr, ""));
-            int rval = Integer.parseInt(visit(rexpr, ""));
+            JmmNode updated = new JmmNodeImpl(resval);
 
-            String result = this.utils.getComparisonResult(lval, rval, op) ? "True" : "False";
-            JmmNode newNode = new JmmNodeImpl(result);
-
-            this.replace(newNode, node);
-
-            return result;
+            this.folder.fold(updated, node);
         }
 
-        return null;
+        return resval;
     }
 }

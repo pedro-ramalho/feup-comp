@@ -5,14 +5,14 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 public class Folder {
     public Folder() {}
 
-    public void replace(JmmNode newNode, JmmNode oldNode) {
-        JmmNode parent = oldNode.getJmmParent();
+    public void fold(JmmNode updated, JmmNode old) {
+        JmmNode parent = old.getJmmParent();
 
-        int position = parent.getChildren().indexOf(oldNode);
+        int position = parent.getChildren().indexOf(old);
 
         parent.removeJmmChild(position);
-        parent.add(newNode, position);
+        parent.add(updated, position);
 
-        newNode.setParent(parent);
+        updated.setParent(parent);
     }
 }
