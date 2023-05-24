@@ -168,10 +168,10 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                     type = varType.get("name");
                 }
 
-                s = s + '\t' + ".field private " + varName + type + ";" + '\n';
+                s = s + '\t' + ".field public " + varName + type + ";" + '\n';
             }
         }
-        s = s + "\t.construct " + className+"().V { \n\t\t invokespecial(this, \"<init>\").V;\n\t}\n";
+        s = s + "\t.construct " + className+"().V { \n\t\t invokespecial(this, \"\").V;\n\t}\n";
 
         // fetch the class fields
         for (JmmNode methods : jmmNode.getChildren()) {
@@ -268,7 +268,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         if (varType.getKind().equals("Literal")) {
             type = typeString.get(varType.get("keyword"));
         } else {
-            type = varType.get("name");
+            type = "." + varType.get("name");
         }
         return new ExprCodeResult("",s+name+type);
     }
@@ -465,7 +465,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }
         var value = "t" + temporaryVariableNumber+type;
         temporaryVariableNumber++;
-        String newExp = value + " :=" + type + " new("+ type.substring(1) + ")" + type + ";\n" + "invokespecial("+value+","+'"'+"<init>"+'"'+").V;\n";
+        String newExp = value + " :=" + type + " new("+ type.substring(1) + ")" + type + ";\n" + "invokespecial("+value+","+'"'+""+'"'+").V;\n";
         return new ExprCodeResult(newExp, value);
     }
 
@@ -484,13 +484,13 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         String returnType="";
         if (lpsKind.equals("This")){
             lps = "this";
-        }else if(lpsKind.equals("MethodInvocation")){
+        }else if(lpsKind.equals("MethodInvocation") || lpsKind.equals("CustomInstantiation")){
             ExprCodeResult templps = visit(jmmNode.getChildren().get(0),"");
             expressions += templps.prefixCode();
             lps = templps.value();
         }else{
             lps = jmmNode.getChildren().get(0).get("value");
-          String type = "";
+            String type = "";
             try{
                type += getType((symbolTable.findVariable(methodAbove,lps).getType()).getName());
                lps += type;
@@ -506,7 +506,6 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             if(lps.charAt(0)=='$'){
                 midType = lps.split("\\.")[2];
             }else{
-                System.out.println(lps);
                 midType = lps.split("\\.")[1];
             }
 
@@ -595,6 +594,6 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 return "invokestatic";
             }
         }
-        return "invokestatic";
+        return "invokevirtual";
     }
 }
