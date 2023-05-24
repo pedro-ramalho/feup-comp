@@ -171,7 +171,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 s = s + '\t' + ".field public " + varName + type + ";" + '\n';
             }
         }
-        s = s + "\t.construct " + className+"().V { \n\t\t invokespecial(this, \"\").V;\n\t}\n";
+        s = s + "\t.construct " + className+"().V { \n\t\t invokespecial(this, \"<init>\").V;\n\t}\n";
 
         // fetch the class fields
         for (JmmNode methods : jmmNode.getChildren()) {
@@ -465,7 +465,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }
         var value = "t" + temporaryVariableNumber+type;
         temporaryVariableNumber++;
-        String newExp = value + " :=" + type + " new("+ type.substring(1) + ")" + type + ";\n" + "invokespecial("+value+","+'"'+""+'"'+").V;\n";
+        String newExp = value + " :=" + type + " new("+ type.substring(1) + ")" + type + ";\n" + "invokespecial("+value+","+'"'+"<init>"+'"'+").V;\n";
         return new ExprCodeResult(newExp, value);
     }
 
@@ -594,6 +594,6 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 return "invokestatic";
             }
         }
-        return "invokestatic";
+        return "invokevirtual";
     }
 }
