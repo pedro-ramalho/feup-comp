@@ -291,7 +291,11 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private ExprCodeResult dealWithAssignment(JmmNode jmmNode, String s) {
         String name = jmmNode.get("var");
         String methodAbove = getMethodName(jmmNode);
-        String type = getType((symbolTable.findVariable(methodAbove,name).getType()).getName());
+        Type nameType = symbolTable.findVariable(methodAbove,name).getType();
+        String type = this.getType((nameType).getName());
+        if(nameType.isArray()){
+            type = ".array"+type;
+        }
         JmmNode child = jmmNode.getChildren().get(0);
         ExprCodeResult val = visit(child,"");
         String expression = val.prefixCode();
@@ -329,17 +333,17 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
 
 
     private ExprCodeResult dealWithArrayAssignment(JmmNode jmmNode, String s) {
-        ExprCodeResult assigned = visit(jmmNode.getChildren().get(0), "");
-        ExprCodeResult index = visit(jmmNode.getChildren().get(1), "");
+        ExprCodeResult index = visit(jmmNode.getChildren().get(0), "");
+        ExprCodeResult assigned = visit(jmmNode.getChildren().get(1), "");
         String name = jmmNode.get("var");
         String methodAbove = getMethodName(jmmNode);
         String type = getType((symbolTable.findVariable(methodAbove,name).getType()).getName());
-        String prefix = assigned.prefixCode()+index.prefixCode();
+        String prefix = index.prefixCode()+assigned.prefixCode();
         String ret = name + "[";
         if (symbolTable.isField(methodAbove,name)){
-            ret += "putfield(this, " + name + type + ", " +  assigned.value() + ").V;";
+            ret += "putfield(this, " + name + type + ", " +  assigned.value() + ").V;\n";
         }else{
-            ret += index.value() + "]"+ type + " :=" + type + " " + assigned.value() + ";";
+            ret += index.value() + "]"+ type + " :=" + type + " " + assigned.value() + ";\n";
         }
         return new ExprCodeResult(prefix,ret);
     }
@@ -350,7 +354,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         for (JmmNode child : jmmNode.getChildren())
             ret += visit(child, "").value();
 
-        return new ExprCodeResult("", ret + ';');
+        return new ExprCodeResult("", ret + ";\n");
     }
 
     private ExprCodeResult dealWithWhile(JmmNode jmmNode, String s) {
@@ -496,7 +500,26 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithArrayInstantiation(JmmNode jmmNode, String s) {
-        return new ExprCodeResult("", s + "new int [" +  visit(jmmNode.getChildren().get(0),"") + "]");
+        int sizeval = temporaryVariableNumber;
+        temporaryVariableNumber++;
+        int tempval = temporaryVariableNumber;
+        temporaryVariableNumber++;
+        String size = "t" + sizeval + ".i32";
+        String prefix = "";
+        ExprCodeResult sizeExpr = visit(jmmNode.getChildren().get(1),"");
+        String sizeExp = size + " :=" + ".i32 " + sizeExpr.value() + ";\n";
+        String type = "";
+        JmmNode varType = jmmNode.getChildren().get(0);
+        if (varType.getKind().equals("Literal")) {
+            type = typeString.get(varType.get("keyword"));
+        } else {
+            type = varType.get("name");
+        }
+        type = ".array" + type;
+        String temp = "t" + tempval + type;
+        String tempExp = temp + " :=" + type + " new(array, " + size + ")" + type + ";\n";
+        prefix += sizeExpr.prefixCode() + sizeExp + tempExp;
+        return new ExprCodeResult(prefix, temp);
     }
 
 
@@ -567,7 +590,13 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithArrayLength(JmmNode jmmNode, String s) {
-        return new ExprCodeResult("", s + visit(jmmNode.getChildren().get(0),"") + ".length");
+        int temp = temporaryVariableNumber;
+        temporaryVariableNumber++;
+        String aux = "t" + temp + ".i32";
+        ExprCodeResult variable = visit(jmmNode.getChildren().get(0),"");
+        String auxAssign = aux + " :=.i32" + " arraylength(" + variable.value() + ").i32;\n";
+        String prefix = variable.prefixCode() + auxAssign;
+        return new ExprCodeResult(prefix, aux);
     }
 
     private ExprCodeResult dealWithArrayAccess(JmmNode jmmNode, String s) {
