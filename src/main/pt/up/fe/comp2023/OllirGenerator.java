@@ -329,17 +329,19 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
 
 
     private ExprCodeResult dealWithArrayAssignment(JmmNode jmmNode, String s) {
-        String ret = s + jmmNode.get("var") + "[";
-
-        String inBrackets = visit(jmmNode.getChildren().get(1), "").value();
-
-        ret += inBrackets + "] = ";
-
-        String expr = visit(jmmNode.getChildren().get(2), "").value();
-
-        ret += expr + ";";
-
-        return new ExprCodeResult("",ret);
+        ExprCodeResult assigned = visit(jmmNode.getChildren().get(0), "");
+        ExprCodeResult index = visit(jmmNode.getChildren().get(1), "");
+        String name = jmmNode.get("var");
+        String methodAbove = getMethodName(jmmNode);
+        String type = getType((symbolTable.findVariable(methodAbove,name).getType()).getName());
+        String prefix = assigned.prefixCode()+index.prefixCode();
+        String ret = name + "[";
+        if (symbolTable.isField(methodAbove,name)){
+            ret += "putfield(this, " + name + type + ", " +  assigned.value() + ").V;";
+        }else{
+            ret += index.value() + "]"+ type + " :=" + type + " " + assigned.value() + ";";
+        }
+        return new ExprCodeResult(prefix,ret);
     }
 
     private ExprCodeResult dealWithExprStmt(JmmNode jmmNode, String s) {
@@ -432,7 +434,13 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private ExprCodeResult dealWithIdentifier(JmmNode jmmNode, String s) {
         String methodAbove = getMethodName(jmmNode);
         String name = jmmNode.get("value");
-        String type = this.getType((symbolTable.findVariable(methodAbove,name).getType()).getName());
+        System.out.println(symbolTable.findVariable(methodAbove,name));
+        Type nameType = symbolTable.findVariable(methodAbove,name).getType();
+        String type = this.getType((nameType).getName());
+        if(nameType.isArray()){
+            type = ".array"+type;
+        }
+        System.out.println("type: " + type + " name:" + name);
         int t = symbolTable.isParameter(methodAbove,name);
         if(symbolTable.isField(methodAbove,name)){
             var value = "t" + temporaryVariableNumber+type;
@@ -565,7 +573,23 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithArrayAccess(JmmNode jmmNode, String s) {
-        return new ExprCodeResult("", s + visit(jmmNode.getChildren().get(0),"") + "[" + visit(jmmNode.getChildren().get(1),"") + "]");
+        ExprCodeResult accessed = visit(jmmNode.getChildren().get(0),"");
+        ExprCodeResult index = visit(jmmNode.getChildren().get(1),"");
+        String type = "";
+        type = ".i32";
+        String arrayType = "";
+        arrayType = ".array.i32";
+        /*if (symbolTable.findVariable(methodAbove,accessed.value()) == null){
+            type = getType(symbolTable.findVariable(methodAbove,accessed.value()).getType().getName());
+        }*/
+        int temp = temporaryVariableNumber;
+        temporaryVariableNumber++;
+        String aux = "t" + temp + type;
+        String auxAssign = aux + " :=.i32 " + accessed.value() + "[" + index.value() + "]"+type;
+        //String methodAbove = getMethodName(jmmNode);
+
+
+        return new ExprCodeResult(accessed.prefixCode() + index.prefixCode()+auxAssign+"\n", aux);
     }
 
     private ExprCodeResult dealWithNegation(JmmNode jmmNode, String s) {
