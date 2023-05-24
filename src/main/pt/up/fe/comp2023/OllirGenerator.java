@@ -216,7 +216,8 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         String parameters = "";
         String declarations = "";
         String body = "";
-        String statements = "";
+        ExprCodeResult statements = new ExprCodeResult("", "");
+        String statementsString = "";
         String returnStatement = "";
         String iStatic = "";
         if (jmmNode.hasAttribute("isStatic")){
@@ -250,12 +251,13 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 returnStatement+= childVal.prefixCode() +'\n' + "ret"+returnType+ " "+ childVal.value()+";";
             }
             if(child.getKind().equals("MethodStatement")){
-                statements+=visit(child.getChildren().get(0),"").value();
+                statements = visit(child.getChildren().get(0),"");
+                statementsString+=statements.prefixCode() + statements.value() + '\n';
             }
 
         }
         temporaryVariableNumber = currentAuxValue;
-        body = declarations + statements;
+        body = declarations + statementsString;
         s+= ".method " + jmmNode.get("modifier") + iStatic + " " + methodName+"("+parameters+")"+returnType+"{"+'\n'+body+returnStatement+"}\n";
 
 
@@ -350,18 +352,25 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     }
 
     private ExprCodeResult dealWithWhile(JmmNode jmmNode, String s) {
-        String s2 = s + "\t";
-        String condition = s + "while (" + visit(jmmNode.getChildren().get(0), "").value() + ") {\n";
-        String whileStmt = "";
+        String previousExpressions = "";
+        ExprCodeResult condition = visit(jmmNode.getChildren().get(0), "");
+        previousExpressions += condition.prefixCode();
+        int value = temporaryLabelNumber;
+        temporaryLabelNumber++;
+        String condLabel = "while_cond_" + value;
+        String bodyLabel = "while_body_" + value;
 
-        for (JmmNode child : jmmNode.getChildren().get(1).getChildren()) {
-            whileStmt += visit(child, s2).value();
-            whileStmt += '\n';
+        String whileBody = "";
+        if (jmmNode.getChildren().get(1).getKind().equals("CodeBlock")) {
+            whileBody += visit(jmmNode.getChildren().get(1), "").value();
         }
 
-        whileStmt += s + "}";
-
-        return new ExprCodeResult("" ,condition + whileStmt);
+        String ret = s + "goto " + condLabel + ";\n";
+        ret += bodyLabel + ":\n";
+        ret += whileBody;
+        ret += condLabel + ":\n";
+        ret += previousExpressions + "if (" + condition.value() + ") goto " + bodyLabel + ";\n";
+        return new ExprCodeResult("" ,ret);
     }
 
     private ExprCodeResult dealWithConditional(JmmNode jmmNode, String s) {
