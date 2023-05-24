@@ -55,10 +55,6 @@ public class CPVisitor extends AJmmVisitor<String, String> {
 
         this.values.put(var, value);
 
-        for (Map.Entry<String, String> entry : this.values.entrySet()) {
-            System.out.println("K: " + entry.getKey() + ", V: " + entry.getValue());
-        }
-
         return null;
     }
 
