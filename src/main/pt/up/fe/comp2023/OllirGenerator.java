@@ -434,13 +434,11 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private ExprCodeResult dealWithIdentifier(JmmNode jmmNode, String s) {
         String methodAbove = getMethodName(jmmNode);
         String name = jmmNode.get("value");
-        System.out.println(symbolTable.findVariable(methodAbove,name));
         Type nameType = symbolTable.findVariable(methodAbove,name).getType();
         String type = this.getType((nameType).getName());
         if(nameType.isArray()){
             type = ".array"+type;
         }
-        System.out.println("type: " + type + " name:" + name);
         int t = symbolTable.isParameter(methodAbove,name);
         if(symbolTable.isField(methodAbove,name)){
             var value = "t" + temporaryVariableNumber+type;
@@ -577,15 +575,13 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         ExprCodeResult index = visit(jmmNode.getChildren().get(1),"");
         String type = "";
         type = ".i32";
-        String arrayType = "";
-        arrayType = ".array.i32";
         /*if (symbolTable.findVariable(methodAbove,accessed.value()) == null){
             type = getType(symbolTable.findVariable(methodAbove,accessed.value()).getType().getName());
         }*/
         int temp = temporaryVariableNumber;
         temporaryVariableNumber++;
         String aux = "t" + temp + type;
-        String auxAssign = aux + " :=.i32 " + accessed.value() + "[" + index.value() + "]"+type;
+        String auxAssign = aux + " :=.i32 " + accessed.value() + "[" + index.value() + "]"+type+";\n";
         //String methodAbove = getMethodName(jmmNode);
 
 
