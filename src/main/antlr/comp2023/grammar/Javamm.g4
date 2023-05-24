@@ -81,13 +81,13 @@ statement
     ;
 
 expression
-    : '!' expression #Negation
+    : '(' expression ')' #Parenthesis
     | expression '[' expression ']' #ArrayAccess
     | expression '.' 'length' #ArrayLength
     | expression '.' method=ID '(' (expression(',' expression)*)?')' #MethodInvocation
+    | '!' expression #Negation
     | 'new' type '[' expression ']' #ArrayInstantiation
     | 'new' type '(' ')' #CustomInstantiation
-    | '(' expression ')' #Parenthesis
     | expression op=('*' | '/') expression #BinaryOp
     | expression op=('+' | '-') expression #BinaryOp
     | expression op=('<' | '>') expression #BinaryOp
