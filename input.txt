@@ -1,80 +1,15 @@
-/*class CompileArithmetic {
-
-    public static void main(String[] args) {
-    }
-
-    public int foo(int a) {
-        int b;
-
-        a = 1;
-        b = 2;
-
-        return a + b;
-    }
-    public int fo(){
-        int t;
-        t = 2*3 * this.foo(this.foo(2*4)) + 2*5+3*4;
-        return t;
-
-    }
-}*/
-/*import T;
-
-class CompileMethodInvocation {
-
-    public static void main(String[] args) {
-
-    }
-
-    public int foo() {
-        String a;
-
-        a = new String();
-
-        //io.println(a);
-
-        return 0;
-    }
-}
-import T;
-
-class CompileMethodInvocation {
-    int j;
-
-    public static void main(String[] args) {
-
-    }
-    public T foo() {
-        T y;
-        return y;
-    }
-}
-import io.x.y.z;
-
-class OllirToJasminInvoke {
-
-    public static void main(String[] args) {
-        OllirToJasminInvoke test;
-
-        test = new OllirToJasminInvoke();
-    }
-
-}*/
 import io;
-
-class A{
-    int a;
-
-    public int x(){
-        a=10;
-        io.print(a);
-        return a;
-    }
-
-    public static void main(String[] args){
-        int t;
-        int a;
-        a = 4;
-        t = 1+2*4+a*9+5;
-    }
+class AddMultConstants {
+	public static void main(String[] args) {
+		int[] a;
+		int t;
+		int i;
+		a = new int[10];
+		a[0] = 1;
+		a[1] = 2;
+		a[2] = 3;
+		a[3] = 4;
+		i = 2;
+		t = 2 + 5 + a[i];
+	}
 }
