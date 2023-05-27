@@ -93,7 +93,7 @@ public class Launcher {
         Optimizer optimizer = new Optimizer();
         JmmSemanticsResult optimized = optimizer.optimize(semanticsResult);
 
-        System.out.println(optimized.getRootNode().toTree());
+        //System.out.println(optimized.getRootNode().toTree());
 
         //MyJmmOptimization optimization = new MyJmmOptimization();
         //OllirResult ollirResult = optimization.toOllir(semanticsResult);

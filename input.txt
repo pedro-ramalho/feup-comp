@@ -1,7 +1,11 @@
 class A {
-    public boolean foo() {
-        boolean a;
-        a = true;
-        return a;
+    public int foo() {
+        int x;
+        int y;
+
+        x = 1;
+        y = x + 2;
+
+        return y;
     }
 }

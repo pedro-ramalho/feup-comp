@@ -7,8 +7,10 @@ import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp2023.ExprCodeResult;
 import pt.up.fe.comp2023.MySymbolTable;
 import pt.up.fe.comp2023.OllirGenerator;
+import pt.up.fe.comp2023.optimization.ast.CFVisitor;
 import pt.up.fe.comp2023.optimization.ast.CPVisitor;
 
+import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,8 +25,27 @@ public class Optimizer implements JmmOptimization {
         //if (toOptimize.equals("false")) return semanticsResult;
 
         /* apply propagation */
-        CPVisitor visitor = new CPVisitor();
-        visitor.visit(semanticsResult.getRootNode());
+
+        CPVisitor cpv;
+        CFVisitor cfv;
+
+        int iter = 1;
+
+        do {
+            /* propagate constants */
+            cpv = new CPVisitor();
+            cpv.visit(semanticsResult.getRootNode());
+
+            /* fold constants */
+            cfv = new CFVisitor();
+            cfv.visit(semanticsResult.getRootNode());
+
+            /* display resulting AST */
+            System.out.println("- OPT iter no. " + iter);
+            System.out.println(semanticsResult.getRootNode().toTree());
+
+            iter++;
+        } while (cpv.transformed() && cfv.folded());
 
         return semanticsResult;
     }

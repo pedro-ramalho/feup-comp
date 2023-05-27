@@ -10,9 +10,7 @@ public class Result {
 
     private final OpType type;
     private final String op;
-
     private String result;
-
 
     public Result(String lval, String rval, OpType type, String op) {
         this.lval = lval;
