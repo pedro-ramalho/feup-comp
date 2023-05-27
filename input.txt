@@ -1,17 +1,18 @@
-import ioPlus;
-class SimpleIfElseStat {
+import io;
 
+class A {
+    int a;
 
-    public int func(int a, int b){
-		int result;
-
-        if(a < b){
-          result = a;
-        } else {
-			result = b;
-        }
-
-        return result;
+    public int x(){
+        a = 10;
+        io.print(a);
+        return a;
     }
 
+    public static void main(String[] args){
+        A a;
+        int i;
+        a = new A();
+        i = a.x();
+    }
 }

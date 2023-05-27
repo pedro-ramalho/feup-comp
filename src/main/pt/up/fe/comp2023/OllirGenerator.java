@@ -351,8 +351,12 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private ExprCodeResult dealWithExprStmt(JmmNode jmmNode, String s) {
         String ret = s;
 
-        for (JmmNode child : jmmNode.getChildren())
-            ret += visit(child, "").value();
+        for (JmmNode child : jmmNode.getChildren()){
+            ExprCodeResult statement = visit(child, "");
+            ret += statement.prefixCode() + statement.value();
+        }
+
+
 
         return new ExprCodeResult("", ret + ";\n");
     }
@@ -546,6 +550,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             }catch (NullPointerException ignored){}
 
         }
+        System.out.println(lps);
         if(lps=="this"){
             midType = symbolTable.getClassName();
         }
@@ -559,6 +564,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             }
 
         }
+        System.out.println(midType);
         if (midType.equals(symbolTable.getClassName())){
             Type tempType = symbolTable.getReturnType(methodName);
             if (tempType != null){
@@ -578,6 +584,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         String invokeType = getInvoke(lps,methodAbove);
         String ret =expressions;
         if(returnType != ".V"){
+            System.out.println("AAAAAAAAA");
             var value = "t" + temporaryVariableNumber+returnType;
             temporaryVariableNumber++;
             ret += value +" :=" + returnType + " "+ invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
