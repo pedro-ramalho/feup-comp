@@ -122,6 +122,4 @@ public class Cpf2_SemanticAnalysis {
 
         CpUtils.assertEquals("Lookup of field", "10", jasminResult.run().trim(), jasminResult);
     }
-
-
 }

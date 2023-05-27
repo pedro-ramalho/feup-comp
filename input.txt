@@ -1,18 +1,15 @@
-import io;
-
 class A {
-    int a;
+    public int foo() {
+        int x;
+        int y;
 
-    public int x(){
-        a = 10;
-        io.print(a);
-        return a;
-    }
+        x = 1;
+        y = x + 2;
 
-    public static void main(String[] args){
-        A a;
-        int i;
-        a = new A();
-        i = a.x();
+        while (x < 5) {
+            x = x + 1;
+        }
+
+        return x;
     }
 }

@@ -15,6 +15,8 @@ import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2023.optimization.Optimizer;
+import pt.up.fe.comp2023.optimization.ollir.Liveness;
 import pt.up.fe.comp2023.visitors.ProgramVisitor;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsLogs;
@@ -51,11 +53,6 @@ public class Launcher {
         // Check if there are parsing errors
         TestUtils.noErrors(parserResult.getReports());
 
-        // Print the resulting AST
-        System.out.println(parserResult.getRootNode().toTree());
-
-
-
         // Testing the generated code
         Generator gen = new Generator();
         String generatedCode = gen.visit(parserResult.getRootNode(), "");
@@ -77,6 +74,8 @@ public class Launcher {
 
         JmmSemanticsResult semanticsResult = analysis.semanticAnalysis(parserResult);
 
+        System.out.println(semanticsResult.getRootNode().toTree());
+
         TestUtils.noErrors(reports);
 
         int counter = 1;
@@ -90,20 +89,24 @@ public class Launcher {
             counter++;
         }
 
-        MyJmmOptimization optimization = new MyJmmOptimization();
-        OllirResult ollirResult = optimization.toOllir(semanticsResult);
+        System.out.println("Starting the otpimization process...");
+        Optimizer optimizer = new Optimizer();
+        JmmSemanticsResult optimized = optimizer.optimize(semanticsResult);
 
-        TestUtils.noErrors(ollirResult);
+        //System.out.println(optimized.getRootNode().toTree());
+
+        //MyJmmOptimization optimization = new MyJmmOptimization();
+        //OllirResult ollirResult = optimization.toOllir(semanticsResult);
+
+        //Liveness liveness = new Liveness(ollirResult);
+
+        //liveness.in();
+
+        //TestUtils.noErrors(ollirResult);
 
         // TESTING OLLIR TO JASIMIN
-        //System.out.println("OLLIR -> JASMIN");
-        //String ollirCode = SpecsIo.read(inputFile);
-        //OllirResult ollirResult = new OllirResult(ollirCode, Collections.emptyMap());
-        MyJasminBackend jasminBackend = new MyJasminBackend();
-        JasminResult myJasminResult = jasminBackend.toJasmin(ollirResult);
-        System.out.println(myJasminResult.getJasminCode());
-        myJasminResult.compile();
-        myJasminResult.run();
+
+
 
         // ... add remaining stages
     }

@@ -9,7 +9,6 @@ import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class MyJasminBackend implements JasminBackend {
     private String className;
     private AccessModifiers accessLevel;
