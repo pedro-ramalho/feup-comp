@@ -14,9 +14,6 @@ public class MyJasminBackend implements JasminBackend {
     private String className;
     private AccessModifiers accessLevel;
     private String superClass;
-    private int limit_stack = 0;
-    private int limit_locals = 0;
-
     private int currStackSize = 0;
 
     private int maxStackSize = 0;
@@ -157,8 +154,8 @@ public class MyJasminBackend implements JasminBackend {
         for (Instruction instruction : instructions) {
             code.append(getInstructions(instruction, method));
             if (instruction.getInstType() == InstructionType.CALL && ((CallInstruction) (instruction)).getReturnType().getTypeOfElement() != ElementType.VOID) {
-                code.append("\t").append("pop").append("\n");
                 updateStackSize(-1);
+                code.append("\t").append("pop").append("\n");
             }
         }
         return code.toString();
@@ -211,7 +208,7 @@ public class MyJasminBackend implements JasminBackend {
     }
 
     private String getGoToInstruction(GotoInstruction instruction) {
-        return "goto " + instruction.getLabel();
+        return "\tgoto " + instruction.getLabel() + "\n";
     }
 
     private String getBranchInstruction(CondBranchInstruction instruction, Method method) {
@@ -219,19 +216,22 @@ public class MyJasminBackend implements JasminBackend {
 
         if (instruction instanceof SingleOpCondInstruction) {
             Element operand = ((SingleOpCondInstruction) instruction).getCondition().getSingleOperand();
-            LiteralElement literal = (LiteralElement) operand;
             code.append(getLoad(operand, method));
 
             // Use ifeq or ifne based on the condition type
             if (operand.isLiteral()) {
+                LiteralElement literal = (LiteralElement) operand;
                 if (Integer.parseInt(literal.getLiteral()) == 0) {
-                    code.append("ifeq " + instruction.getLabel());
+                    updateStackSize(-1);
+                    code.append("\tifeq " + instruction.getLabel() + "\n");
                 } else {
-                    code.append("ifne " + instruction.getLabel());
+                    updateStackSize(-1);
+                    code.append("\tifne " + instruction.getLabel() + "\n");
                 }
             } else {
                 // Default to using ifne
-                code.append("ifne " + instruction.getLabel());
+                updateStackSize(-1);
+                code.append("\tifne " + instruction.getLabel() + "\n");
             }
         } else if (instruction instanceof OpCondInstruction) {
             OpInstruction opInstruction = ((OpCondInstruction) instruction).getCondition();
@@ -259,15 +259,44 @@ public class MyJasminBackend implements JasminBackend {
         }
 
         switch (type) {
-            case EQ -> code.append("if_icmpeq " + condBranchInstruction.getLabel());
-            case NEQ -> code.append("if_icmpne " + condBranchInstruction.getLabel());
-            case LTH -> code.append("if_icmplt " + condBranchInstruction.getLabel());
-            case GTH -> code.append("if_icmpgt " + condBranchInstruction.getLabel());
-            case LTE -> code.append("if_icmple " + condBranchInstruction.getLabel());
-            case GTE -> code.append("if_icmpge " + condBranchInstruction.getLabel());
-            case AND, ANDB -> code.append("iand\n").append("ifne " + condBranchInstruction.getLabel());
-            case OR, ORB -> code.append("ior\n").append("ifne " + condBranchInstruction.getLabel());
-            case NOT, NOTB -> code.append("ifeq " + condBranchInstruction.getLabel());
+            case EQ -> {
+                updateStackSize(-2);
+                code.append("\tif_icmpeq " + condBranchInstruction.getLabel() + "\n");
+            }
+            case NEQ -> {
+                updateStackSize(-2);
+                code.append("\tif_icmpne " + condBranchInstruction.getLabel() + "\n");
+            }
+            case LTH -> {
+                updateStackSize(-2);
+                code.append("\tif_icmplt " + condBranchInstruction.getLabel() + "\n");
+            }
+            case GTH -> {
+                updateStackSize(-2);
+                code.append("\tif_icmpgt " + condBranchInstruction.getLabel() + "\n");
+            }
+            case LTE -> {
+                updateStackSize(-2);
+                code.append("\tif_icmple " + condBranchInstruction.getLabel() + "\n");
+            }
+            case GTE -> {
+                updateStackSize(-2);
+                code.append("\tif_icmpge " + condBranchInstruction.getLabel() + "\n");
+            }
+            case AND, ANDB -> {
+                updateStackSize(-1);
+                updateStackSize(-1);
+                code.append("\tiand\n").append("\tifne " + condBranchInstruction.getLabel() + "\n");
+            }
+            case OR, ORB -> {
+                updateStackSize(-1);
+                updateStackSize(-1);
+                code.append("\tior\n").append("\tifne " + condBranchInstruction.getLabel() + "\n");
+            }
+            case NOT, NOTB -> {
+                updateStackSize(-1);
+                code.append("\tifeq " + condBranchInstruction.getLabel() + "\n");
+            }
         }
         return code.toString();
     }
@@ -328,6 +357,7 @@ public class MyJasminBackend implements JasminBackend {
             }
 
             case NEW -> {
+                updateStackSize(1);
                 ElementType elementType = firstArg.getType().getTypeOfElement();
                 if (elementType == ElementType.OBJECTREF || elementType == ElementType.CLASS) {
                     code.append("\tnew ").append(firstArg.getName()).append("\n");
@@ -339,9 +369,13 @@ public class MyJasminBackend implements JasminBackend {
                         return "";
                     }
                     code.append(getLoad(operands.get(0), method)).append("\n");
-                    code.append("newarray int");
+                    code.append("newarray int ");
                 }
                 break;
+            }
+            case arraylength -> {
+                code.append(getLoad(instruction.getFirstArg(), method));
+                code.append("arraylength");
             }
             case ldc -> {
                 code.append(getLoad(firstArg, method)).append("\n");
@@ -352,6 +386,7 @@ public class MyJasminBackend implements JasminBackend {
     }
 
     private String getPutFieldInstruction(PutFieldInstruction instruction, Method method) {
+        updateStackSize(-2);
         Element firstOp = instruction.getFirstOperand();
         Element secondOp = instruction.getSecondOperand();
 
@@ -398,52 +433,62 @@ public class MyJasminBackend implements JasminBackend {
         code.append(getLoad(leftElement, method)).append(getLoad(rightElement, method)).append("\t");
         switch (operationType) {
             case ADD: {
+                updateStackSize(-1);
                 code.append("iadd");
                 break;
             }
             case SUB: {
+                updateStackSize(-1);
                 code.append("isub");
                 break;
             }
             case MUL: {
+                updateStackSize(-1);
                 code.append("imul");
                 break;
             }
             case DIV: {
+                updateStackSize(-1);
                 code.append("idiv");
                 break;
             }
             case LTH: {
+                updateStackSize(-2);
                 String operationStr = "LESS_THAN";
                 String operation = "if_icmplt " + operationStr + "_" + this.labelCounter;
                 code.append(getIf(operationStr, operation));
                 break;
             }
             case GTH: {
+                updateStackSize(-2);
                 String operationStr = "GREATER_THAN";
                 String operation = "if_icmpgt " + operationStr + "_" + this.labelCounter;
                 code.append(getIf(operationStr, operation));
                 break;
             }
             case LTE: {
+                updateStackSize(-2);
                 String operationStr = "LESS_THAN_OR_EQUAL";
                 String operation = "if_icmple " + operationStr + "_" + this.labelCounter;
                 code.append(getIf(operationStr, operation));
                 break;
             }
             case GTE: {
+                updateStackSize(-2);
                 String operationStr = "GREATER_THAN_OR_EQUAL";
                 String operation = "if_icmpge " + operationStr + "_" + this.labelCounter;
                 code.append(getIf(operationStr, operation));
                 break;
             }
             case EQ: {
+                updateStackSize(-2);
                 String operationStr = "EQUAL";
                 String operation = "if_icmpeq " + operationStr + "_" + this.labelCounter;
                 code.append(getIf(operationStr, operation));
                 break;
             }
             case NEQ: {
+                updateStackSize(-2);
                 String operationStr = "NOT_EQUAL";
                 String operation = "if_icmpne " + operationStr + "_" + this.labelCounter;
                 code.append(getIf(operationStr, operation));
@@ -469,10 +514,12 @@ public class MyJasminBackend implements JasminBackend {
             }
 */
             case AND, ANDB: {
+                updateStackSize(-1);
                 code.append("iand");
                 break;
             }
             case OR, ORB: {
+                updateStackSize(-1);
                 code.append("ior");
                 break;
             }
@@ -488,7 +535,9 @@ public class MyJasminBackend implements JasminBackend {
         Element element = instruction.getOperand();
 
         if (operationType == OperationType.NOT || operationType == OperationType.NOTB) {
-            code.append(getLoad(element, method)).append("\n\tifeq\n");
+//            code.append(getLoad(element, method)).append("\n\tifeq\n");
+            code.append(getLoad(element, method));
+            code.append("\ticonst_1\n");
         }
         return code.toString();
     }
@@ -507,9 +556,11 @@ public class MyJasminBackend implements JasminBackend {
             case BOOLEAN, INT32, OBJECTREF, CLASS, STRING, ARRAYREF:
 
                 if (returnType == ElementType.BOOLEAN || returnType == ElementType.INT32) {
+                    updateStackSize(-1);
                     code.append("ireturn\n");
                 }
                 else {
+                    updateStackSize(-1);
                     code.append("areturn\n");
                 }
                 break;
@@ -525,6 +576,32 @@ public class MyJasminBackend implements JasminBackend {
 
         if (dest.isLiteral()) {
             return "";
+        }
+
+        if (dest instanceof ArrayOperand arrayOperand) {
+            StringBuilder code = new StringBuilder();
+            Descriptor arrayDescriptor = method.getVarTable().get(arrayOperand.getName());
+            updateStackSize(1);
+            code.append("\taload" + (arrayDescriptor.getVirtualReg() < 4 ? "_" : "") + "\n");
+
+            Element index = arrayOperand.getIndexOperands().get(0);
+            code.append(getLoad(index, method));
+
+            code.append((getInstructions(instruction.getRhs(), method)));
+
+            ElementType elementType = instruction.getTypeOfAssign().getTypeOfElement();
+
+            switch (elementType) {
+                case THIS, OBJECTREF, CLASS, STRING, ARRAYREF -> {
+                    updateStackSize(-3);
+                    code.append("aastore");
+                }
+                case INT32, BOOLEAN -> {
+                    updateStackSize(-3);
+                    code.append("iastore");
+                }
+            }
+            return code.toString();
         }
 
         Instruction rhs = instruction.getRhs();
@@ -546,6 +623,7 @@ public class MyJasminBackend implements JasminBackend {
                     if (literalInt >= 0 && literalInt <= 5) return "\ticonst_" + literalInt + "\n";
                     if (literalInt >= -128 && literalInt <= 127) return "\tbipush " + literalInt + "\n";
                     if (literalInt >= -32768 && literalInt <= 32767) return "\tsipush " + literalInt + "\n";
+                    updateStackSize(1);
                     return "\tldc " + literalInt + "\n";
                 }
                 default: return "";
@@ -559,17 +637,41 @@ public class MyJasminBackend implements JasminBackend {
 
             switch (operandDescriptor.getVarType().getTypeOfElement()) {
                 case INT32, BOOLEAN: {
+                    updateStackSize(1);
                     return "\tiload" + (operandDescriptor.getVirtualReg() < 4 ? "_" : " ") + operandDescriptor.getVirtualReg() + "\n";
                 }
                 case CLASS, OBJECTREF, THIS, STRING: {
                     updateStackSize(1);
                     return "\taload" + (operandDescriptor.getVirtualReg() < 4 ? "_" : " ") + operandDescriptor.getVirtualReg() + "\n";
                 }
-                case ARRAYREF: {
+                case ARRAYREF: {/*
+                    StringBuilder code = new StringBuilder();
+                    Descriptor arrayDescriptor = method.getVarTable().get(operand.getName());
+
+                    ArrayOperand arrayOperand = (ArrayOperand) operand;
+
                     updateStackSize(1);
+                    code.append("\taload" + (arrayDescriptor.getVirtualReg() < 4 ? "_" : "") + "\n");
+
+                    Element index = arrayOperand.getIndexOperands().get(0);
+                    code.append(getLoad(index, method));
+
+                    switch (element.getType().getTypeOfElement()) {
+                        case THIS, OBJECTREF, CLASS, STRING, ARRAYREF -> {
+                            updateStackSize(-1);
+                            code.append("\taaload");
+                        }
+                        case INT32, BOOLEAN -> {
+                            updateStackSize(-1);
+                            code.append("\tiaload");
+                        }
+                    }
+*/
+
                     StringBuilder code = new StringBuilder();
 
-                    code.append("\t").append("aload ").append(operandDescriptor.getVirtualReg());
+                    updateStackSize(1);
+                    code.append("\t").append("aload ").append(operandDescriptor.getVirtualReg()).append("\n");
 
                     if (element instanceof ArrayOperand) {
                         ArrayOperand arrayOperand = (ArrayOperand) operand;
@@ -579,7 +681,9 @@ public class MyJasminBackend implements JasminBackend {
                         Element index = indexes.get(0);
 
                         code.append(getLoad(index, method)).append("\n");
-                        code.append("iaload");
+
+                        updateStackSize(-1);
+                        code.append("\tiaload");
 
                     }
                     return code.toString();
@@ -600,6 +704,7 @@ public class MyJasminBackend implements JasminBackend {
                     if (element instanceof ArrayOperand) {
                         ArrayOperand arrayOperand = (ArrayOperand) operand;
                         StringBuilder code = new StringBuilder();
+                        updateStackSize(1);
                         code.append("aload").append(operandDescriptor.getVirtualReg()).append("\n");
 
                         ArrayList<Element> indexes = arrayOperand.getIndexOperands();
@@ -609,9 +714,11 @@ public class MyJasminBackend implements JasminBackend {
                         return code.toString();
                     }
 
+                    updateStackSize(-1);
                     return "\tistore" + (operandDescriptor.getVirtualReg() < 4 ? "_" : " ") + operandDescriptor.getVirtualReg() + "\n";
                 }
                 case CLASS, OBJECTREF, THIS, STRING: {
+                    updateStackSize(-1);
                     return "\tastore" + (operandDescriptor.getVirtualReg() < 4 ? "_" : " ") + operandDescriptor.getVirtualReg() + "\n";
                 }
 
@@ -620,6 +727,7 @@ public class MyJasminBackend implements JasminBackend {
 
                     if (element instanceof ArrayOperand) {
                         ArrayOperand arrayOperand = (ArrayOperand) operand;
+                        updateStackSize(1);
                         code.append("aload").append(operandDescriptor.getVirtualReg()).append("\n");
 
                         ArrayList<Element> indexes = arrayOperand.getIndexOperands();
@@ -639,19 +747,10 @@ public class MyJasminBackend implements JasminBackend {
 
     private String getIf(String operationStr, String operation) {
         StringBuilder code = new StringBuilder();
-/*
-        code.append(instructions).append(" Then_").append(this.conditionalCounter).append("\n");
-        code.append("\tldc 0").append("\n");
-        code.append("\tgoto Finally_").append(this.conditionalCounter).append("\n");
-        code.append("\tThen_").append(this.conditionalCounter).append(":").append("\n");
-        code.append("\tldc 1").append("\n");
-        code.append("\tFinally_").append(this.conditionalCounter).append(":");
-        this.conditionalCounter++;
-*/
 
         code.append(operation).append("\n");
         code.append("\tldc 0\n");
-        code.append("\tNOT_" + operationStr + "_" + this.labelCounter + "\n");
+        code.append("\tgoto NOT_" + operationStr + "_" + this.labelCounter + "\n");
         code.append("\t" + operationStr + "_" + this.labelCounter + ":\n");
         code.append("\tldc 1\n");
         code.append("\tNOT_" + operationStr + "_" + this.labelCounter + ":\n");
