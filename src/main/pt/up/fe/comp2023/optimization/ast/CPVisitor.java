@@ -2,10 +2,7 @@ package pt.up.fe.comp2023.optimization.ast;
 
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
-import pt.up.fe.comp2023.optimization.ast.handlers.WhileVisitor;
 import pt.up.fe.comp2023.optimization.ast.utils.Replacer;
-import pt.up.fe.comp2023.optimization.ast.utils.Result;
 
 import java.util.HashMap;
 
@@ -29,9 +26,20 @@ public class CPVisitor extends AJmmVisitor<String, String> {
     protected void buildVisitor() {
         addVisit("Identifier", this::dealWithIdentifier);
         addVisit("Assignment", this::dealWithAssignment);
+        addVisit("While", this::dealWithWhile);
 
         /* add a default visitor so that we skip useless nodes */
         setDefaultVisit(this::dealWithDefault);
+    }
+
+    private String dealWithWhile(JmmNode node, String s) {
+        WhileVisitor visitor = new WhileVisitor(this.constants);
+
+        System.out.println("[DEBUG] - Before visiting while");
+        visitor.visit(node, "");
+        System.out.println("[DEBUG] - After visiting while");
+
+        return null;
     }
 
 
@@ -40,7 +48,8 @@ public class CPVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithDefault(JmmNode node, String s) {
-        for (JmmNode child : node.getChildren()) visit(child, "");
+        for (JmmNode child : node.getChildren())
+            visit(child, "");
 
         return "";
     }

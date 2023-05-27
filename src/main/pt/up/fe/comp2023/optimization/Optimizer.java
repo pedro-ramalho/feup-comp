@@ -22,9 +22,7 @@ public class Optimizer implements JmmOptimization {
         String toOptimize = config.getOrDefault("optimize", "false");
 
         /* skip the optimization process */
-        //if (toOptimize.equals("false")) return semanticsResult;
-
-        /* apply propagation */
+        if (toOptimize.equals("false")) return semanticsResult;
 
         CPVisitor cpv;
         CFVisitor cfv;

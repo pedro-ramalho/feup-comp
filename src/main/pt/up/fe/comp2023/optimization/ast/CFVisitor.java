@@ -3,13 +3,12 @@ package pt.up.fe.comp2023.optimization.ast;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
-import pt.up.fe.comp2023.optimization.ast.OpType;
 import pt.up.fe.comp2023.optimization.ast.utils.Replacer;
 import pt.up.fe.comp2023.optimization.ast.utils.Result;
 
 public class CFVisitor extends AJmmVisitor<String, String> {
     private boolean folded;
-    private Replacer replacer;
+    private final Replacer replacer;
 
     public CFVisitor() {
         this.folded = false;
