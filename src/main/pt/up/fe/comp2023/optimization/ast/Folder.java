@@ -14,5 +14,6 @@ public class Folder {
         parent.add(updated, position);
 
         updated.setParent(parent);
+
     }
 }

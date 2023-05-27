@@ -1,9 +1,7 @@
 class A {
-    public int foo() {
+    public boolean foo() {
         boolean a;
-
-        a = true && true;
-
-        return 1;
+        a = true;
+        return a;
     }
 }

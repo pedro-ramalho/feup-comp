@@ -23,14 +23,11 @@ public class InstructionLiveness {
     }
 
     public void showDef() {
-        for (String s : this.def) {
-            System.out.println("[-] def element: " + s);
-        }
+        for (String s : this.def) System.out.println("[-] def element: " + s);
+
     }
     public void showUse() {
-        for (String s : this.use) {
-            System.out.println("[+] use element: " + s);
-        }
+        for (String s : this.use) System.out.println("[+] use element: " + s);
     }
 
     private void binaryOpHandler(BinaryOpInstruction inst) {

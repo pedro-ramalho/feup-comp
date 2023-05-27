@@ -7,6 +7,7 @@ import pt.up.fe.comp2023.optimization.ast.utils.CPVisitorUtils;
 import pt.up.fe.comp2023.optimization.ast.utils.Result;
 import pt.up.fe.comp2023.optimization.ast.utils.Variable;
 
+import java.sql.SQLOutput;
 import java.util.HashMap;
 
 public class CPVisitor extends AJmmVisitor<String, String> {
@@ -14,7 +15,9 @@ public class CPVisitor extends AJmmVisitor<String, String> {
     private boolean transformed;
 
     private HashMap<String, String> values;
-    private HashMap<Variable, Boolean> constants;
+
+    private HashMap<String, JmmNode> constants;
+
     private final Folder folder;
 
     public CPVisitor() {
@@ -36,9 +39,19 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         addVisit("False", this::dealWithFalse);
         addVisit("Identifier", this::dealWithIdentifier);
         addVisit("Assignment", this::dealWithAssignment);
+        addVisit("Conditional", this::dealWithConditional);
+        addVisit("While", this::dealWithWhile);
 
         /* add a default visitor so that we skip useless nodes */
         setDefaultVisit(this::dealWithDefault);
+    }
+
+    private String dealWithWhile(JmmNode jmmNode, String s) {
+        return null;
+    }
+
+    private String dealWithConditional(JmmNode jmmNode, String s) {
+        return null;
     }
 
     private String dealWithDefault(JmmNode node, String s) {
@@ -55,12 +68,22 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         return "True";
     }
 
+    private boolean isLiteral(String kind) {
+        return kind.equals("Integer") || kind.equals("True") || kind.equals("False");
+    }
+
     private String dealWithAssignment(JmmNode node, String s) {
-        String var = node.get("var");
+        /* lhs of the assignment, identifier */
+        String identifier = node.get("var");
 
-        String value = visit(node.getJmmChild(0), "");
+        /* rhs of the assignment, expression */
+        JmmNode rhs = node.getJmmChild(0);
 
-        this.values.put(var, value);
+        /* if it's a literal, add it to the constants map */
+        if (this.isLiteral(rhs.getKind()))
+            this.constants.put(identifier, rhs);
+        else
+            visit(rhs, "");
 
         return null;
     }
@@ -72,8 +95,14 @@ public class CPVisitor extends AJmmVisitor<String, String> {
     private String dealWithIdentifier(JmmNode node, String s) {
         String identifier = node.get("value");
 
-        if (this.values.containsKey(identifier))
-            return this.values.get(identifier);
+        if (this.constants.containsKey(identifier)) {
+            JmmNode updated = this.constants.get(identifier);
+
+            node.replace(updated);
+
+            /* since we replaced a node in the AST, a transformation has been made */
+            this.transformed = true;
+        }
 
         return null;
     }
@@ -90,18 +119,7 @@ public class CPVisitor extends AJmmVisitor<String, String> {
             default -> null;
         };
     }
-
-    private void replace(JmmNode newNode, JmmNode oldNode) {
-        JmmNode parent = oldNode.getJmmParent();
-
-        int position = parent.getChildren().indexOf(oldNode);
-
-        parent.removeJmmChild(position);
-        parent.add(newNode, position);
-
-        newNode.setParent(parent);
-    }
-
+    
     private String dealWithBinaryOp(JmmNode node, String s) {
         /* lhs and rhs of the operation */
         JmmNode lexpr = node.getJmmChild(0);
@@ -115,10 +133,7 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         String lval = visit(lexpr, "");
         String rval = visit(rexpr, "");
 
-        System.out.println("lval: " + lval);
-        System.out.println("rval: " + rval);
-
-        /* computate the result of the operation*/
+        /* computate the result of the operation */
         Result result = new Result(lval, rval, optype, op);
         String resval = result.get();
 
