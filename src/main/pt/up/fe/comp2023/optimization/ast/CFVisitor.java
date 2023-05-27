@@ -18,11 +18,16 @@ public class CFVisitor extends AJmmVisitor<String, String> {
     @Override
     protected void buildVisitor() {
         addVisit("BinaryOp", this::dealWithBinaryOp);
+        addVisit("Parenthesis", this::dealWithParenthesis);
         addVisit("Integer", this::dealWithInteger);
         addVisit("True", this::dealWithTrue);
         addVisit("False", this::dealWithFalse);
 
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private String dealWithParenthesis(JmmNode jmmNode, String s) {
+        return visit(jmmNode.getJmmChild(0), "");
     }
 
     public boolean folded() {
@@ -62,16 +67,10 @@ public class CFVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithBinaryOp(JmmNode node, String s) {
+        System.out.println("Parent kind: " + node.getJmmParent().getKind());
         String op = node.get("op");
         JmmNode lexpr = node.getJmmChild(0);
         JmmNode rexpr = node.getJmmChild(1);
-
-        String lkind = lexpr.getKind();
-        String rkind = rexpr.getKind();
-
-        /* both expressions must be literals */
-        if (!(this.isLiteral(lkind) && this.isLiteral(rkind)))
-            return null;
 
         String lval = visit(lexpr, "");
         String rval = visit(rexpr, "");
@@ -105,6 +104,6 @@ public class CFVisitor extends AJmmVisitor<String, String> {
             this.folded = true;
         }
 
-        return null;
+        return resval;
     }
 }

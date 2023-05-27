@@ -4,11 +4,7 @@ class A {
         int y;
 
         x = 1;
-        y = x + 2;
-
-        while (x < 5) {
-            x = x + 1;
-        }
+        y = (x + 2) * 2;
 
         return x;
     }

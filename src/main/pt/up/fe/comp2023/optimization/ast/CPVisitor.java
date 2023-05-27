@@ -27,9 +27,14 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         addVisit("Identifier", this::dealWithIdentifier);
         addVisit("Assignment", this::dealWithAssignment);
         addVisit("While", this::dealWithWhile);
+        addVisit("Parenthesis", this::dealWithParenthesis);
 
         /* add a default visitor so that we skip useless nodes */
         setDefaultVisit(this::dealWithDefault);
+    }
+
+    private String dealWithParenthesis(JmmNode jmmNode, String s) {
+        return visit(jmmNode.getJmmChild(0), "");
     }
 
     private String dealWithWhile(JmmNode node, String s) {
