@@ -32,7 +32,7 @@ public class MyJasminBackend implements JasminBackend {
     }
 
     private String generateStacklimits() {
-        return "\t .limit stack " + (this.maxStackSize + 2) + "\n";
+        return "\t .limit stack " + (this.maxStackSize + 4) + "\n";
     }
 
     private String generateLocalLimits(Method method) {
@@ -369,13 +369,13 @@ public class MyJasminBackend implements JasminBackend {
                         return "";
                     }
                     code.append(getLoad(operands.get(0), method)).append("\n");
-                    code.append("newarray int ");
+                    code.append("\tnewarray int \n");
                 }
                 break;
             }
             case arraylength -> {
                 code.append(getLoad(instruction.getFirstArg(), method));
-                code.append("arraylength");
+                code.append("\tarraylength\n");
             }
             case ldc -> {
                 code.append(getLoad(firstArg, method)).append("\n");
@@ -582,7 +582,7 @@ public class MyJasminBackend implements JasminBackend {
             StringBuilder code = new StringBuilder();
             Descriptor arrayDescriptor = method.getVarTable().get(arrayOperand.getName());
             updateStackSize(1);
-            code.append("\taload" + (arrayDescriptor.getVirtualReg() < 4 ? "_" : "") + "\n");
+            code.append("\taload" + (arrayDescriptor.getVirtualReg() < 4 ? "_" : " ") + arrayDescriptor.getVirtualReg() + "\n");
 
             Element index = arrayOperand.getIndexOperands().get(0);
             code.append(getLoad(index, method));
@@ -594,11 +594,11 @@ public class MyJasminBackend implements JasminBackend {
             switch (elementType) {
                 case THIS, OBJECTREF, CLASS, STRING, ARRAYREF -> {
                     updateStackSize(-3);
-                    code.append("aastore");
+                    code.append("\taastore\n");
                 }
                 case INT32, BOOLEAN -> {
                     updateStackSize(-3);
-                    code.append("iastore");
+                    code.append("\tiastore\n");
                 }
             }
             return code.toString();
@@ -671,7 +671,7 @@ public class MyJasminBackend implements JasminBackend {
                     StringBuilder code = new StringBuilder();
 
                     updateStackSize(1);
-                    code.append("\t").append("aload ").append(operandDescriptor.getVirtualReg()).append("\n");
+                code.append("\t").append("aload").append((operandDescriptor.getVirtualReg() < 4 ? "_" : " ")).append(operandDescriptor.getVirtualReg()).append("\n");
 
                     if (element instanceof ArrayOperand) {
                         ArrayOperand arrayOperand = (ArrayOperand) operand;
@@ -683,7 +683,7 @@ public class MyJasminBackend implements JasminBackend {
                         code.append(getLoad(index, method)).append("\n");
 
                         updateStackSize(-1);
-                        code.append("\tiaload");
+                        code.append("\tiaload\n");
 
                     }
                     return code.toString();
@@ -694,6 +694,8 @@ public class MyJasminBackend implements JasminBackend {
     }
 
     private String getStore(Element element, Method method) {
+
+
         if (element.isLiteral()) return "";
         else {
             Operand operand = (Operand) element;
@@ -705,7 +707,7 @@ public class MyJasminBackend implements JasminBackend {
                         ArrayOperand arrayOperand = (ArrayOperand) operand;
                         StringBuilder code = new StringBuilder();
                         updateStackSize(1);
-                        code.append("aload").append(operandDescriptor.getVirtualReg()).append("\n");
+                        code.append("aload").append((operandDescriptor.getVirtualReg() < 4 ? "_" : " ")).append(operandDescriptor.getVirtualReg()).append("\n");
 
                         ArrayList<Element> indexes = arrayOperand.getIndexOperands();
                         Element index = indexes.get(0);
@@ -728,14 +730,14 @@ public class MyJasminBackend implements JasminBackend {
                     if (element instanceof ArrayOperand) {
                         ArrayOperand arrayOperand = (ArrayOperand) operand;
                         updateStackSize(1);
-                        code.append("aload").append(operandDescriptor.getVirtualReg()).append("\n");
+                        code.append("\taload").append((operandDescriptor.getVirtualReg() < 4 ? "_" : " ")).append(operandDescriptor.getVirtualReg()).append("\n");
 
                         ArrayList<Element> indexes = arrayOperand.getIndexOperands();
                         Element index = indexes.get(0);
 
                         code.append(getLoad(index, method)).append("\n");
                     } else {
-                        code.append("astore").append(operandDescriptor.getVirtualReg());
+                        code.append("\tastore_").append(operandDescriptor.getVirtualReg());
                     }
 
                     return code.toString();
@@ -743,6 +745,49 @@ public class MyJasminBackend implements JasminBackend {
                 default: return "";
             }
         }
+    }
+
+/*    private String checkIncrement(AssignInstruction instruction, Method method, Descriptor lhsDescriptor) {
+        StringBuilder code = new StringBuilder();
+        final Instruction rhsInstruction = instruction.getRhs();
+        if (!(rhsInstruction instanceof BinaryOpInstruction binaryOpInstruction)) return "";
+
+        OperationType operationType = binaryOpInstruction.getOperation().getOpType();
+        if (operationType != OperationType.ADD) return "";
+
+        final Element leftOperand = binaryOpInstruction.getLeftOperand();
+        final Element rightOperand = binaryOpInstruction.getRightOperand();
+
+        final Descriptor leftDescriptor = method.getVarTable().get(getElementName(leftOperand));
+        final Descriptor rightDescriptor = method.getVarTable().get(getElementName(rightOperand));
+
+        Descriptor varDecriptor;
+        Element complement;
+
+        if (leftDescriptor == null || leftDescriptor.getVirtualReg() != lhsDescriptor.getVirtualReg()) {
+            if (rightDescriptor == null || rightDescriptor.getVirtualReg() != lhsDescriptor.getVirtualReg())
+                return "";
+            varDecriptor = rightDescriptor;
+            complement = leftOperand;
+        } else {
+            varDecriptor = leftDescriptor;
+            complement = rightOperand;
+        }
+
+        if (!complement.isLiteral() || complement.getType().getTypeOfElement() != ElementType.INT32) return "";
+
+        final int increment = Integer.parseInt(getElementName(complement));
+        if (increment < -128 || increment > 127) return ""; // Max 1 byte
+
+        code.append("iinc " + varDecriptor.getVirtualReg() + " " +  increment);
+
+        return code.toString();
+    }*/
+
+    public static String getElementName(Element element) {
+        if (element.isLiteral())
+            return ((LiteralElement) element).getLiteral();
+        return ((Operand) element).getName();
     }
 
     private String getIf(String operationStr, String operation) {
@@ -759,10 +804,8 @@ public class MyJasminBackend implements JasminBackend {
     }
 
     private void updateStackSize(int size) {
-        this.currStackSize += size;
-        if (this.currStackSize > this.maxStackSize) {
-            this.maxStackSize = this.currStackSize;
-        }
+            this.currStackSize += size;
+            this.maxStackSize = Math.max(this.maxStackSize, this.currStackSize);
     }
 }
 
