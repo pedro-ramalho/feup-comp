@@ -22,7 +22,7 @@ public class Optimizer implements JmmOptimization {
         String toOptimize = config.getOrDefault("optimize", "false");
 
         /* skip the optimization process */
-        if (toOptimize.equals("false")) return semanticsResult;
+        //if (toOptimize.equals("false")) return semanticsResult;
 
         CPVisitor cpv;
         CFVisitor cfv;
@@ -34,13 +34,14 @@ public class Optimizer implements JmmOptimization {
             cpv = new CPVisitor();
             cpv.visit(semanticsResult.getRootNode());
 
-            /* fold constants */
             cfv = new CFVisitor();
             cfv.visit(semanticsResult.getRootNode());
 
             System.out.println("- Optimization no. " + iter);
             System.out.println(semanticsResult.getRootNode().toTree());
+
             iter++;
+
         } while (cpv.transformed() || cfv.folded());
 
         return semanticsResult;

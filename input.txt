@@ -2,9 +2,11 @@ class A {
     public int foo() {
         int x;
         int y;
+        boolean a;
+        boolean b;
+        boolean c;
 
-        x = 1;
-        y = (x + 2) * 2;
+        a = (true || false) && false;
 
         return x;
     }

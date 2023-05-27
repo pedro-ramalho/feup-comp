@@ -72,8 +72,15 @@ public class CFVisitor extends AJmmVisitor<String, String> {
         JmmNode lexpr = node.getJmmChild(0);
         JmmNode rexpr = node.getJmmChild(1);
 
+        System.out.println("lexpr kind: " + lexpr.getKind());
+        System.out.println("rexpr kind: " + rexpr.getKind());
+
         String lval = visit(lexpr, "");
         String rval = visit(rexpr, "");
+
+        System.out.println("lval: " + lval);
+        System.out.println("rval: " + rval);
+
         OpType type = this.getOpType(op);
 
         Result result = new Result(lval, rval, type, op);
