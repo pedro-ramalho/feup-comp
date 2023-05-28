@@ -4,6 +4,7 @@ import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2023.optimization.ast.utils.Replacer;
 
+import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -80,14 +81,15 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         return null;
     }
 
-
     private boolean isLiteral(String kind) {
         return kind.equals("Integer") || kind.equals("True") || kind.equals("False");
     }
 
     private String dealWithDefault(JmmNode node, String s) {
-        for (JmmNode child : node.getChildren())
+        for (JmmNode child : node.getChildren()) {
+            System.out.println("child kind: " + child.getKind());
             visit(child, "");
+        }
 
         return "";
     }
