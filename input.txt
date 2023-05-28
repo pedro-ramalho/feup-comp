@@ -1,30 +1,12 @@
-import ioPlus;
-class SimpleWhileStat {
+import Other;
+// import Person;
 
+class BasicMethods extends Other {
 
-    public int func(int a){
-        return this.getArray(2)[this.getNum(2)];
-    }
-
-    public int[] getArray(int b){
-        int[] t;
-        t= new int[3];
-        t[0] = 1;
-        return t;
-    }
-
-    public int getNum(int a){
-        return 3;
-    }
-    public int g(int b){
-        int c;
-        c = this.func((new SimpleWhileStat()).getNum(2));
-        return c;
-    }
-
-
-    public static void main(String[] args) {
-        int b;
+    public int[] func4(){
+        int[] k;
+        k = new int[1];
+        return k;
     }
 
 }
