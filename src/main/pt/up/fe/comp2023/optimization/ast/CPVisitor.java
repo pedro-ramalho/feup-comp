@@ -11,7 +11,6 @@ import java.util.Vector;
 public class CPVisitor extends AJmmVisitor<String, String> {
     private boolean transformed;
     private HashMap<String, JmmNode> constants;
-
     private Replacer replacer;
 
     public CPVisitor() {
@@ -31,10 +30,21 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         addVisit("While", this::dealWithWhile);
         addVisit("Parenthesis", this::dealWithParenthesis);
         addVisit("BinaryOp", this::dealWithBinaryOp);
+        addVisit("Conditional", this::dealWithConditional);
         addVisit("True", this::dealWithTrue);
         addVisit("False", this::dealWithFalse);
+
         /* add a default visitor so that we skip useless nodes */
         setDefaultVisit(this::dealWithDefault);
+    }
+
+    private String dealWithConditional(JmmNode jmmNode, String s) {
+        this.constants.clear();
+
+        for (JmmNode child : jmmNode.getChildren())
+            visit(child, "");
+
+        return null;
     }
 
     private String dealWithFalse(JmmNode jmmNode, String s) {
@@ -87,7 +97,6 @@ public class CPVisitor extends AJmmVisitor<String, String> {
 
     private String dealWithDefault(JmmNode node, String s) {
         for (JmmNode child : node.getChildren()) {
-            System.out.println("child kind: " + child.getKind());
             visit(child, "");
         }
 
@@ -97,7 +106,7 @@ public class CPVisitor extends AJmmVisitor<String, String> {
     private String dealWithAssignment(JmmNode node, String s) {
         /* lhs of the assignment, identifier */
         String identifier = node.get("var");
-        System.out.println("Identifier: " + identifier);
+
         /* rhs of the assignment, expression */
         JmmNode rhs = node.getJmmChild(0);
 
@@ -113,11 +122,9 @@ public class CPVisitor extends AJmmVisitor<String, String> {
     private String dealWithIdentifier(JmmNode node, String s) {
         String identifier = node.get("value");
 
-        System.out.println("identifier: " + identifier);
-
         if (this.constants.containsKey(identifier)) {
             JmmNode updated = this.constants.get(identifier);
-            System.out.println("updated kind: " + updated.getKind());
+
             this.replacer.exec(updated, node);
 
             this.transformed = true;

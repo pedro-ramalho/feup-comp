@@ -10,7 +10,7 @@ class A {
 
         x = 1;
 
-        if (true) {
+        if (true && false) {
             x = 1 + 2;
         }
         else {
