@@ -34,15 +34,16 @@ public class Optimizer implements JmmOptimization {
             cpv = new CPVisitor();
             cpv.visit(semanticsResult.getRootNode());
 
-            cfv = new CFVisitor();
-            cfv.visit(semanticsResult.getRootNode());
+            /* fold constants */
+            //cfv = new CFVisitor();
+            //cfv.visit(semanticsResult.getRootNode());
 
             System.out.println("- Optimization no. " + iter);
             System.out.println(semanticsResult.getRootNode().toTree());
 
             iter++;
 
-        } while (cpv.transformed() || cfv.folded());
+        } while (cpv.transformed());
 
         return semanticsResult;
     }

@@ -1,15 +1,15 @@
 class PropWithLoop {
     public int foo(){
-	  int a;
-	  int i;
-	  int res;
-	  a = 10;
-	  i = 0;
-	  while (i < a){
-	    i=i+1;
-	  }
-	  res = i*a;
-	  return res;
+        int a;
+        int b;
+        a = 1 + 2;
+        b = a;
+
+        while (true && false) {
+            a = 5 + 1;
+        }
+
+        return a;
 	}
 	public static void main(String[] args) {
 	}

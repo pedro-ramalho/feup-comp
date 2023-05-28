@@ -67,17 +67,19 @@ public class CFVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithBinaryOp(JmmNode node, String s) {
-        System.out.println("Parent kind: " + node.getJmmParent().getKind());
         String op = node.get("op");
         JmmNode lexpr = node.getJmmChild(0);
         JmmNode rexpr = node.getJmmChild(1);
 
 
+        System.out.println("lexpr kind: " + lexpr.getKind());
+        System.out.println("rexpr kind: " + rexpr.getKind());
+
         String lval = visit(lexpr, "");
         String rval = visit(rexpr, "");
 
-
         OpType type = this.getOpType(op);
+
 
         Result result = new Result(lval, rval, type, op);
         String resval = result.get();

@@ -5,17 +5,18 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2023.optimization.ast.utils.Replacer;
 
 import java.sql.SQLOutput;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.*;
 
 public class CPVisitor extends AJmmVisitor<String, String> {
     private boolean transformed;
     private HashMap<String, JmmNode> constants;
+    private HashMap<String, Boolean> propagate;
     private Replacer replacer;
 
     public CPVisitor() {
         this.transformed = false;
         this.constants = new HashMap<>();
+        this.propagate = new HashMap<>();
         this.replacer = new Replacer();
     }
 
@@ -27,6 +28,7 @@ public class CPVisitor extends AJmmVisitor<String, String> {
     protected void buildVisitor() {
         addVisit("Identifier", this::dealWithIdentifier);
         addVisit("Assignment", this::dealWithAssignment);
+        addVisit("CodeBlock", this::dealWithCodeBlock);
         addVisit("While", this::dealWithWhile);
         addVisit("Parenthesis", this::dealWithParenthesis);
         addVisit("BinaryOp", this::dealWithBinaryOp);
@@ -36,6 +38,13 @@ public class CPVisitor extends AJmmVisitor<String, String> {
 
         /* add a default visitor so that we skip useless nodes */
         setDefaultVisit(this::dealWithDefault);
+    }
+
+    private String dealWithCodeBlock(JmmNode jmmNode, String s) {
+        if (jmmNode.getJmmParent().getKind().equals("While"))
+            return null;
+
+        return null;
     }
 
     private String dealWithConditional(JmmNode jmmNode, String s) {
@@ -66,7 +75,7 @@ public class CPVisitor extends AJmmVisitor<String, String> {
             CFVisitor visitor = new CFVisitor();
             visitor.visit(jmmNode, "");
 
-            this.transformed = this.transformed || visitor.folded();
+            this.transformed = true;
         }
 
         return null;
@@ -76,15 +85,25 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         return visit(jmmNode.getJmmChild(0), "");
     }
 
+    private void updateScope(List<String> identifiers) {
+        System.out.println("Identifiers: ");
+
+        for (String identifier : identifiers) {
+            System.out.println(">> " + identifier);
+            this.propagate.put(identifier, false);
+        }
+
+        for (Map.Entry<String, Boolean> entry : this.propagate.entrySet()) {
+            System.out.println("K: " + entry.getKey() + ", V: " + entry.getValue());
+        }
+    }
+
     private String dealWithWhile(JmmNode node, String s) {
-        WhileVisitor visitor = new WhileVisitor(this.constants);
+        WhileVisitor visitor = new WhileVisitor();
+        visitor.visit(node);
 
-        System.out.println("[DEBUG] - Before visiting while");
-        visitor.visit(node, "");
-        System.out.println("[DEBUG] - After visiting while");
-
-        for (JmmNode child : node.getChildren())
-            visit(child, " ");
+        List<String> identifiers = visitor.getIdentifiers();
+        this.updateScope(identifiers);
 
         return null;
     }
@@ -108,8 +127,10 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         /* rhs of the assignment, expression */
         JmmNode rhs = node.getJmmChild(0);
 
-        if (this.isLiteral(rhs.getKind()))
+        if (this.isLiteral(rhs.getKind())) {
             this.constants.put(identifier, rhs);
+            this.propagate.put(identifier, true);
+        }
         else {
             visit(rhs, "");
         }
@@ -121,11 +142,14 @@ public class CPVisitor extends AJmmVisitor<String, String> {
         String identifier = node.get("value");
 
         if (this.constants.containsKey(identifier)) {
-            JmmNode updated = this.constants.get(identifier);
+            /* we can propagate the identifier */
+            if (this.propagate.get(identifier)) {
+                JmmNode updated = this.constants.get(identifier);
 
-            this.replacer.exec(updated, node);
+                this.replacer.exec(updated, node);
 
-            this.transformed = true;
+                this.transformed = true;
+            }
         }
 
         return null;
