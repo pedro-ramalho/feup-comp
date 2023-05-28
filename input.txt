@@ -2,10 +2,10 @@ import ioPlus;
 class SimpleWhileStat {
 
 
-    public int func(int a){
-        int g;
-        g = this.getArray(2)[this.getNum()];
-        return g;
+    public SimpleWhileStat func(int b){
+        SimpleWhileStat a;
+        a = new SimpleWhileStat();
+        return this;
     }
 
     public int[] getArray(int b){

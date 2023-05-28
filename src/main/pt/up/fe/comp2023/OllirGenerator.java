@@ -238,7 +238,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 JmmNode varType = child.getChildren().get(0);
                 if (varType.getKind().equals("Literal")) {
                     returnType = typeString.get(varType.get("keyword"));
-                } else {
+                } else{
                     returnType = "." + varType.get("name");
                 }
             }
@@ -246,9 +246,15 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 declarations+= "";//visit(child,"").value() + '\n';
             }
             if(child.getKind().equals("ReturnStatement")){
-                ExprCodeResult childVal = visit(child.getChildren().get(0),"");
+                JmmNode realChild = child.getChildren().get(0);
+                if (realChild.getKind().equals("This")){
+                    returnStatement += "ret" + returnType+" " + "this." + symbolTable.getClassName() +";";
+                }else{
+                    ExprCodeResult childVal = visit(realChild,"");
 
-                returnStatement+= childVal.prefixCode() +'\n' + "ret"+returnType+ " "+ childVal.value()+";";
+                    returnStatement+= childVal.prefixCode() +'\n' + "ret"+returnType+ " "+ childVal.value()+";";
+                }
+
             }
             if(child.getKind().equals("MethodStatement")){
                 statements = visit(child.getChildren().get(0),"");
