@@ -1,22 +1,16 @@
-class A {
-    public int foo() {
-        int x;
-        int y;
-        boolean a;
-        boolean b;
-        boolean c;
-
-        a = (true || false) && false;
-
-        x = 1;
-
-        if (true && false) {
-            x = 1 + 2;
-        }
-        else {
-            y = 2 * 3;
-        }
-
-        return x;
-    }
+class PropWithLoop {
+    public int foo(){
+	  int a;
+	  int i;
+	  int res;
+	  a = 10;
+	  i = 0;
+	  while (i < a){
+	    i=i+1;
+	  }
+	  res = i*a;
+	  return res;
+	}
+	public static void main(String[] args) {
+	}
 }

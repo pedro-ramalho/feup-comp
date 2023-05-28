@@ -77,13 +77,11 @@ public class CPVisitor extends AJmmVisitor<String, String> {
     }
 
     private String dealWithWhile(JmmNode node, String s) {
-        /*
         WhileVisitor visitor = new WhileVisitor(this.constants);
 
         System.out.println("[DEBUG] - Before visiting while");
         visitor.visit(node, "");
         System.out.println("[DEBUG] - After visiting while");
-         */
 
         for (JmmNode child : node.getChildren())
             visit(child, " ");
