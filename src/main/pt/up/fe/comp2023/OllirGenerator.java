@@ -42,13 +42,13 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
     private int temporaryLabelNumber = 0;
 
 
-    private boolean isArray(String literal) {
+    /*private boolean isArray(String literal) {
         return literal.contains("[]");
     }
 
     private String parseType(String type) {
         return isArray(type) ? type.substring(0, type.length() - 2) : type;
-    }
+    }*/
 
     @Override
     protected void buildVisitor() {
@@ -568,6 +568,9 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
             Type tempType = symbolTable.getReturnType(methodName);
             if (tempType != null){
                 returnType = getType(tempType.getName());
+                if(tempType.isArray()){
+                    returnType = ".array"+returnType;
+                }
             }
         }
         System.out.println(midType);

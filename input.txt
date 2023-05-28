@@ -3,22 +3,22 @@ class SimpleWhileStat {
 
 
     public int func(int a){
-        int c;
-        int i;
-        i = 0;
-
-        while ((0-1) < a) {
-            i = i + 1;
-        }
-
-        return i;
+        int g;
+        g = this.getArray(2)[this.getNum()];
+        return g;
     }
 
-    public int funcb(int b){
-        int t;
-        t=this.func(2);
-        return this.func(2);
+    public int[] getArray(int b){
+        int[] t;
+        t= new int[3];
+        t[0] = 1;
+        return t;
     }
+
+    public int getNum(){
+        return 3;
+    }
+
 
     public static void main(String[] args) {
         int b;
