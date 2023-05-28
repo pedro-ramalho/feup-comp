@@ -2,10 +2,8 @@ import ioPlus;
 class SimpleWhileStat {
 
 
-    public SimpleWhileStat func(int b){
-        SimpleWhileStat a;
-        a = new SimpleWhileStat();
-        return this;
+    public int func(int a){
+        return this.getArray(2)[this.getNum(2)];
     }
 
     public int[] getArray(int b){
@@ -15,8 +13,13 @@ class SimpleWhileStat {
         return t;
     }
 
-    public int getNum(){
+    public int getNum(int a){
         return 3;
+    }
+    public int g(int b){
+        int c;
+        c = this.func((new SimpleWhileStat()).getNum(2));
+        return c;
     }
 
 

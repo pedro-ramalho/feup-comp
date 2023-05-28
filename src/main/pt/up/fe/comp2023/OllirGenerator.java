@@ -535,21 +535,25 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
 
 
     private ExprCodeResult dealWithMethodInvocation(JmmNode jmmNode, String s) {
-        String lpsKind = jmmNode.getChildren().get(0).getKind();
         String lps;
         String midType="";
         String expressions = "";
         String methodName = jmmNode.get("method");
         String methodAbove = getMethodName(jmmNode);
         String returnType="";
+        JmmNode nodeToGetKind = jmmNode;
+        while (nodeToGetKind.getChildren().get(0).getKind().equals("Parenthesis")){
+            nodeToGetKind = nodeToGetKind.getChildren().get(0);
+        }
+        String lpsKind = nodeToGetKind.getChildren().get(0).getKind();
         if (lpsKind.equals("This")){
             lps = "this";
         }else if(lpsKind.equals("MethodInvocation") || lpsKind.equals("CustomInstantiation")){
-            ExprCodeResult templps = visit(jmmNode.getChildren().get(0),"");
+            ExprCodeResult templps = visit(nodeToGetKind.getChildren().get(0),"");
             expressions += templps.prefixCode();
             lps = templps.value();
         }else{
-            lps = jmmNode.getChildren().get(0).get("value");
+            lps = nodeToGetKind.getChildren().get(0).get("value");
             String type = "";
             try{
                type += getType((symbolTable.findVariable(methodAbove,lps).getType()).getName());
@@ -579,7 +583,6 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 }
             }
         }
-        System.out.println(midType);
         if (returnType == ""){
             returnType = ".V";
         }
