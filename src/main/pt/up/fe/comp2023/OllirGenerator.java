@@ -488,7 +488,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
 
     private ExprCodeResult dealWithParenthesis(JmmNode jmmNode, String s) {
         ExprCodeResult child = visit(jmmNode.getChildren().get(0),"");
-        return new ExprCodeResult(child.prefixCode(), child.value());
+        return child;
     }
 
     private ExprCodeResult dealWithCustomInstantiation(JmmNode jmmNode, String s) {
@@ -570,6 +570,7 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
                 returnType = getType(tempType.getName());
             }
         }
+        System.out.println(midType);
         if (returnType == ""){
             returnType = ".V";
         }
@@ -582,10 +583,14 @@ public class OllirGenerator extends AJmmVisitor<String, ExprCodeResult> {
         }
         String invokeType = getInvoke(lps,methodAbove);
         String ret =expressions;
+        String lpsType = "";
+        if(lps == "this"){
+            lpsType = "." + midType;
+        }
         if(returnType != ".V"){
             var value = "t" + temporaryVariableNumber+returnType;
             temporaryVariableNumber++;
-            ret += value +" :=" + returnType + " "+ invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
+            ret += value +" :=" + returnType + " "+ invokeType + "(" + lps + lpsType + ", \"" + methodName + "\"" + para + ")"+ returnType +";\n";
             return new ExprCodeResult(ret, value);
         }else{
             ret += invokeType + "(" + lps + ", \"" + methodName + "\"" + para + ")"+ returnType;
